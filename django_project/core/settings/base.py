@@ -53,6 +53,7 @@ STATICFILES_DIRS = (
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
     absolute_path('core', 'static'),
+    absolute_path('geohosting', 'static'),
 )
 
 # Every cache key will get prefixed with this value - here we set it to
@@ -84,7 +85,8 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             # Put Templates
-            absolute_path('core', 'templates')
+            absolute_path('core', 'templates'),
+            absolute_path('geohosting', 'templates')
         ],
         'OPTIONS': {
             'loaders': [

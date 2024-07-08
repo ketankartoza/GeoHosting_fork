@@ -6,49 +6,49 @@ build:
 	@echo "------------------------------------------------------------------"
 	@echo "Building in production mode"
 	@echo "------------------------------------------------------------------"
-	@docker-compose build
+	@docker compose build
 
 up:
 	@echo
 	@echo "------------------------------------------------------------------"
 	@echo "Running in production mode"
 	@echo "------------------------------------------------------------------"
-	@docker-compose ${ARGS} up -d nginx django
+	@docker compose ${ARGS} up -d nginx django
 
 dev:
 	@echo
 	@echo "------------------------------------------------------------------"
 	@echo "Running in dev mode"
 	@echo "------------------------------------------------------------------"
-	@docker-compose ${ARGS} up -d dev
+	@docker compose ${ARGS} up -d dev
 
 shell:
 	@echo
 	@echo "------------------------------------------------------------------"
 	@echo "Shelling in in production mode"
 	@echo "------------------------------------------------------------------"
-	@docker-compose exec django /bin/bash
+	@docker compose exec django /bin/bash
 
 dev-entrypoint:
 	@echo
 	@echo "------------------------------------------------------------------"
 	@echo "Running in DEVELOPMENT mode"
 	@echo "------------------------------------------------------------------"
-	@docker-compose ${ARGS} exec -T dev "/home/web/django_project/entrypoint.sh"
+	@docker compose ${ARGS} exec -T dev "/home/web/django_project/entrypoint.sh"
 
 dev-runserver:
 	@echo
 	@echo "------------------------------------------------------------------"
 	@echo "Start django runserver in dev container"
 	@echo "------------------------------------------------------------------"
-	@docker-compose $(ARGS) exec -T dev bash -c "nohup python manage.py runserver 0.0.0.0:5000 &"
+	@docker compose $(ARGS) exec -T dev bash -c "nohup python manage.py runserver 0.0.0.0:5000 &"
 
 load-initiate-data:
 	@echo
 	@echo "------------------------------------------------------------------"
 	@echo "Load initiate data"
 	@echo "------------------------------------------------------------------"
-	@docker-compose $(ARGS) exec -T dev bash -c "python manage.py loaddata geohosting_controller/fixtures/01.initiate.json"
+	@docker compose $(ARGS) exec -T dev bash -c "python manage.py loaddata geohosting_controller/fixtures/01.initiate.json"
 
 
 dev-test:
@@ -56,15 +56,15 @@ dev-test:
 	@echo "------------------------------------------------------------------"
 	@echo "Run tests"
 	@echo "------------------------------------------------------------------"
-	@docker-compose exec -T dev python manage.py collectstatic --noinput
-	@docker-compose exec -T dev python manage.py test --keepdb --noinput
+	@docker compose exec -T dev python manage.py collectstatic --noinput
+	@docker compose exec -T dev python manage.py test --keepdb --noinput
 
 down:
 	@echo
 	@echo "------------------------------------------------------------------"
 	@echo "Removing production instance!!! "
 	@echo "------------------------------------------------------------------"
-	@docker-compose down
+	@docker compose down
 
 test-flake:
 	@echo
@@ -80,7 +80,7 @@ wait-db:
 	@echo "------------------------------------------------------------------"
 	@echo "Check database is ready or not"
 	@echo "------------------------------------------------------------------"
-	@docker-compose ${ARGS} exec -T db su - postgres -c "until pg_isready; do sleep 5; done"
+	@docker compose ${ARGS} exec -T db su - postgres -c "until pg_isready; do sleep 5; done"
 
 sleep:
 	@echo

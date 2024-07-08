@@ -12,7 +12,7 @@ from django.test.testcases import TestCase
 from knox.models import AuthToken
 from mock import patch
 
-from geohosting_controller.models import Activity, Instance
+from geohosting.models import Activity, Instance
 from geohosting_controller_client.activity import (
     create, get_activity_detail
 )

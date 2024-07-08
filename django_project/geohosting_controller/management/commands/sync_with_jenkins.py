@@ -7,7 +7,7 @@ GeoHosting Controller.
 
 from django.core.management.base import BaseCommand
 
-from geohosting_controller.models import Activity, ActivityStatus
+from geohosting.models import Activity, ActivityStatus
 
 
 class Command(BaseCommand):

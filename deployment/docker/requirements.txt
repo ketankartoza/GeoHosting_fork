@@ -30,3 +30,5 @@ django-celery-results==2.5.0
 
 # Python client for Redis database and key-value store
 redis==4.3.4
+
+pillow==10.4.0

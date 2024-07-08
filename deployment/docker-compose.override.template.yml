@@ -2,7 +2,7 @@ version: '3.9'
 services:
   db:
     volumes:
-      - ./volumes/database:/opt/postgres/data
+      - ./pg/postgres_data:/var/lib/postgresql
 
   django:
     build:

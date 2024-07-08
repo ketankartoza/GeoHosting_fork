@@ -7,7 +7,7 @@ GeoHosting Controller.
 
 from rest_framework import serializers
 
-from geohosting_controller.models import Activity, ActivityType
+from geohosting.models import Activity, ActivityType
 
 
 class ActivitySerializer(serializers.ModelSerializer):

@@ -14,7 +14,7 @@ ALLOWED_HOSTS = ['*']
 ADMINS = ()
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': os.environ['DATABASE_NAME'],
         'USER': os.environ['DATABASE_USERNAME'],
         'PASSWORD': os.environ['DATABASE_PASSWORD'],
@@ -30,6 +30,7 @@ DEBUG = TEMPLATE_DEBUG = False
 # Extra installed apps
 INSTALLED_APPS = INSTALLED_APPS + (
     'core',
+    'geohosting',
     'geohosting_controller'
 )
 

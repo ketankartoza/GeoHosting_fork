@@ -1,7 +1,6 @@
 # coding=utf-8
 """GeoHosting Controller."""
 from django.urls import include, path
-from django.views.generic.base import RedirectView
 from rest_framework.routers import DefaultRouter
 
 from geohosting_controller.api.activity import (
@@ -29,5 +28,4 @@ api += router.urls
 
 urlpatterns = [
     path('api/', include(api)),
-    path('', RedirectView.as_view(url='/admin'), name='index')
 ]

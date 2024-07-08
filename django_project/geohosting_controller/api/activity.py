@@ -7,7 +7,7 @@ GeoHosting Controller.
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.viewsets import mixins, GenericViewSet
 
-from geohosting_controller.models import Activity, ActivityType
+from geohosting.models import Activity, ActivityType
 from geohosting_controller.serializer.activity import (
     ActivitySerializer, ActivityTypeSerializer
 )

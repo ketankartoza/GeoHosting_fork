@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from geohosting_controller.exceptions import NoClusterException
-from geohosting_controller.models import (
+from geohosting.models import (
     Activity, ActivityType, ActivityStatus, Cluster, Product, Instance
 )
 from geohosting_controller.serializer.activity import ActivitySerializer

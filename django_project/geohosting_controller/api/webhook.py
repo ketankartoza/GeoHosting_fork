@@ -10,7 +10,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from geohosting_controller.models import (
+from geohosting.models import (
     Activity, ActivityStatus, Instance, Cluster, Product
 )
 from geohosting_controller_client.variables import ActivityType

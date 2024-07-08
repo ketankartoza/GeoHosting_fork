@@ -19,12 +19,12 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD:-redis_password}
 
   db:
-    image: postgres
+    image: kartoza/postgis:16-3.4
     volumes:
       - database:/opt/postgres/data
     environment:
       - PGDATA=/opt/postgres/data
-      - POSTGRES_DB=${DATABASE_NAME:-django}
+      - POSTGRES_DBNAME=${DATABASE_NAME:-django}
       - POSTGRES_USER=${DATABASE_USERNAME:-docker}
       - POSTGRES_PASSWORD=${DATABASE_PASSWORD:-docker}
 
