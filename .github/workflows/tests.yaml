@@ -1,0 +1,74 @@
+# GeoHosting Controller.
+name: Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  flake8_py3:
+    name: Python Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+          architecture: x64
+      - name: Checkout PyTorch
+        uses: actions/checkout@master
+      - name: Install flake8
+        run: pip install flake8
+      - name: Install flake8-docstrings
+        run: pip install flake8-docstrings
+      - name: Run flake8
+        uses: suo/flake8-github-action@releases/v1
+        with:
+          checkName: 'Python Lint'   # NOTE: this needs to be the same as the job name
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  django_app_test:
+    needs: flake8_py3
+    name: 'Django App'
+    runs-on: ubuntu-latest
+    env:
+      APP_IMAGE: kartoza/geohosting_controller
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build test image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: deployment/docker/Dockerfile
+          push: false
+          load: true
+          target: dev
+          tags: ${{ env.APP_IMAGE }}:dev
+          cache-from: |
+            type=gha,scope=test
+            type=gha,scope=prod
+          cache-to: type=gha,scope=test
+
+      - name: Run docker-compose services
+        working-directory: deployment
+        run: |
+          echo "Override docker-compose for testing purposes"
+          cp docker-compose.test.yml docker-compose.override.yml
+          cp .template.env .env
+          cd ../
+          make dev
+          make wait-db
+          make dev-entrypoint
+          make dev-runserver
+          make load-initiate-data
+          make sleep
+
+      - name: Test backend
+        run: make dev-test

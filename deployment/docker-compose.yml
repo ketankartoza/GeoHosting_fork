@@ -1,0 +1,59 @@
+version: '3.9'
+
+volumes:
+  database:
+
+x-common-django:
+  &default-common-django
+  image: kartoza/${COMPOSE_PROJECT_NAME:-django_project}:${DJANGO_TAG:-1.0.0}
+  env_file:
+    - .env
+  volumes:
+    - static-data:/home/web/static
+  restart: on-failure
+
+services:
+  redis:
+    image: bitnami/redis:7.0.2
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-redis_password}
+
+  db:
+    image: postgres
+    volumes:
+      - database:/opt/postgres/data
+    environment:
+      - PGDATA=/opt/postgres/data
+      - POSTGRES_DB=${DATABASE_NAME:-django}
+      - POSTGRES_USER=${DATABASE_USERNAME:-docker}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD:-docker}
+
+  django:
+    <<: *default-common-django
+    command: 'uwsgi --ini /uwsgi.conf'
+    links:
+      - db
+      - worker
+
+  worker:
+    <<: *default-common-django
+    entrypoint: [ ]
+    command: 'celery -A core worker -l info'
+    links:
+      - db
+      - redis
+      - celery_beat
+
+  celery_beat:
+    <<: *default-common-django
+    entrypoint: [ ]
+    command: 'celery -A core beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler'
+    links:
+      - db
+      - redis
+
+  nginx:
+    image: nginx
+    hostname: nginx
+    links:
+      - django

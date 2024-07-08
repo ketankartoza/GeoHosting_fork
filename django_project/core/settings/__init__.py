@@ -1,0 +1,1 @@
+"""GeoHosting Controller."""
