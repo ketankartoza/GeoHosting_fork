@@ -27,12 +27,6 @@ class Product(models.Model):
     description = models.TextField(
         blank=True
     )
-    cluster = models.ForeignKey(
-        Cluster,
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True
-    )
     image = SVGAndImageField(
         upload_to='product_images/',
         null=True,
@@ -48,6 +42,20 @@ class Product(models.Model):
     def __str__(self):
         """Return product name."""
         return self.name
+
+
+class ProductCluster(models.Model):
+    """Product x cluster model."""
+
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE
+    )
+    cluster = models.ForeignKey(
+        Cluster, on_delete=models.CASCADE
+    )
+
+    class Meta:
+        unique_together = ['product', 'cluster']
 
 
 class ProductMedia(models.Model):

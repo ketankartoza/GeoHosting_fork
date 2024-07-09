@@ -1,0 +1,1 @@
+from geohosting.forms.activity.create_instance import CreateInstanceForm

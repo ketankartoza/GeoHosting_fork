@@ -10,10 +10,10 @@ from django.test.client import Client
 from django.test.testcases import TestCase
 from knox.models import AuthToken
 
+from geohosting.forms.activity import CreateInstanceForm
 from geohosting.models import (
-    Activity, Instance, Product, Package, WebhookEvent
+    Activity, Instance, Package, Region, WebhookEvent
 )
-from geohosting_controller.activity import create
 from geohosting_controller.exceptions import (
     ConnectionErrorException, NoJenkinsUserException, NoJenkinsTokenException,
     ActivityException
@@ -27,7 +27,7 @@ class ControllerTest(TestCase):
     """Test all activity functions."""
 
     user_email = 'test@example.com'
-    sub_domain = 'server-test'
+    app_name = 'server-test'
 
     def setUp(self):
         """To setup test."""
@@ -50,13 +50,21 @@ class ControllerTest(TestCase):
             user=self.admin
         )
 
-    def create_function(self, sub_domain) -> Activity:
+    def create_function(self, app_name) -> Activity:
         """Create function."""
-        return create(
-            Product.objects.get(name='Geonode'),
-            Package.objects.get(package_code='dev-1'),
-            sub_domain, self.admin
+        form = CreateInstanceForm(
+            {
+                'app_name': app_name,
+                'package': Package.objects.get(package_code='dev-1'),
+                'region': Region.objects.get(code='global')
+            }
         )
+        form.user = self.admin
+        if form.is_valid():
+            form.save()
+        else:
+            raise ActivityException(f'{form.errors}')
+        return form.instance
 
     def test_create(self):
         """Test create."""
@@ -104,14 +112,14 @@ class ControllerTest(TestCase):
             )
 
             try:
-                self.create_function(self.sub_domain)
+                self.create_function(self.app_name)
                 self.fail('Should have raised ConnectionErrorException')
             except NoJenkinsUserException:
                 pass
 
             try:
                 os.environ['JENKINS_USER'] = 'user@example.com'
-                self.create_function(self.sub_domain)
+                self.create_function(self.app_name)
                 self.fail('Should have raised ConnectionErrorException')
             except NoJenkinsTokenException:
                 pass
@@ -127,7 +135,7 @@ class ControllerTest(TestCase):
                     self.create_function('server.com')
 
                 # Run create function, it will return create function
-                activity = self.create_function(self.sub_domain)
+                activity = self.create_function(self.app_name)
 
                 # This is emulate when pooling build from jenkins
                 activity_obj = Activity.objects.get(id=activity.id)
@@ -141,12 +149,12 @@ class ControllerTest(TestCase):
                 # Create another activity
                 # Should be error because another one is already running
                 with self.assertRaises(ActivityException):
-                    self.create_function(self.sub_domain)
+                    self.create_function(self.app_name)
 
                 # Run webhook, should be run by Argo CD
                 client = Client()
                 webhook_data = {
-                    'app_name': self.sub_domain,
+                    'app_name': self.app_name,
                     'state': 'successful'
                 }
                 # If not admin
@@ -174,10 +182,7 @@ class ControllerTest(TestCase):
                     ActivityTypeTerm.CREATE_INSTANCE.value
                 )
                 self.assertEqual(
-                    activity.client_data['app_name'], self.sub_domain
-                )
-                self.assertEqual(
-                    activity.client_data['subdomain'], self.sub_domain
+                    activity.client_data['app_name'], self.app_name
                 )
                 self.assertEqual(
                     activity.client_data['package_code'], 'dev-1'
@@ -189,10 +194,10 @@ class ControllerTest(TestCase):
                     activity.post_data['k8s_cluster'], 'ktz-dev-ks-gn-01'
                 )
                 self.assertEqual(
-                    activity.post_data['subdomain'], self.sub_domain
+                    activity.post_data['subdomain'], self.app_name
                 )
                 self.assertEqual(
-                    activity.post_data['geonode_name'], self.sub_domain
+                    activity.post_data['geonode_name'], self.app_name
                 )
                 self.assertEqual(
                     activity.post_data['geonode_size'], 'dev-1'
@@ -201,13 +206,13 @@ class ControllerTest(TestCase):
                 # Create another activity
                 # Should be error because the instance is already created
                 with self.assertRaises(ActivityException):
-                    self.create_function(self.sub_domain)
+                    self.create_function(self.app_name)
                 instance = Instance.objects.first()
                 self.assertEqual(
                     instance.cluster.code, 'ktz-dev-ks-gn-01'
                 )
                 self.assertEqual(
-                    instance.name, self.sub_domain
+                    instance.name, self.app_name
                 )
                 self.assertEqual(
                     instance.price.package_code, 'dev-1'

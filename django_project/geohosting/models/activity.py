@@ -8,6 +8,7 @@ GeoHosting.
 import re
 
 from django.contrib.auth import get_user_model
+from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
 
@@ -53,6 +54,11 @@ class ActivityStatus:
     BUILD_ARGO = 'BUILD_ARGO'
     SUCCESS = 'SUCCESS'
     ERROR = 'ERROR'
+
+
+regex_name = r'^[a-zA-Z0-9-]*$'
+regex_name_error = 'Instance name just contains letter, number and dash'
+name_validator = RegexValidator(regex_name, regex_name_error)
 
 
 class Activity(models.Model):
@@ -191,7 +197,5 @@ class Activity(models.Model):
     @staticmethod
     def test_name(name):
         """Validate name."""
-        if not re.match(r'^[a-zA-Z0-9-]*$', name):
-            raise ActivityException(
-                'App name just contains letter, number and dash'
-            )
+        if not re.match(regex_name, name):
+            raise ActivityException(regex_name_error)
