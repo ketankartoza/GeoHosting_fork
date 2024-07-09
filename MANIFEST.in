@@ -1,4 +1,0 @@
-include django_project/LICENSE
-include README.md
-recursive-include django_project/geohosting_controller_client/static *
-recursive-include django_project/geohosting_controller_client/templates *

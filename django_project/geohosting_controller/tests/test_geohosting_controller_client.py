@@ -2,7 +2,6 @@
 """GeoHosting Controller."""
 
 import os
-from urllib.parse import urlparse
 
 import requests_mock
 from django.contrib.auth import get_user_model
@@ -10,40 +9,18 @@ from django.core.management import call_command
 from django.test.client import Client
 from django.test.testcases import TestCase
 from knox.models import AuthToken
-from mock import patch
 
-from geohosting.models import Activity, Instance
-from geohosting_controller_client.activity import (
-    create, get_activity_detail
+from geohosting.models import (
+    Activity, Instance, Product, Package, WebhookEvent
 )
-from geohosting_controller_client.exceptions import (
-    NoUrlException, NoTokenException, ConnectionErrorException
+from geohosting_controller.activity import create
+from geohosting_controller.exceptions import (
+    ConnectionErrorException, NoJenkinsUserException, NoJenkinsTokenException,
+    ActivityException
 )
-from geohosting_controller_client.variables import ActivityType
+from geohosting_controller.variables import ActivityTypeTerm
 
 User = get_user_model()
-
-
-def mock__request_post(url: str, data: dict, token: str):
-    """Mock connection."""
-    parsed_url = urlparse(url)
-    url = parsed_url.path
-    client = Client()
-    response = client.post(
-        url, data=data, headers={'Authorization': f'Token {token}'}
-    )
-    return response
-
-
-def mock__request_get(url: str, token: str):
-    """Mock connection."""
-    parsed_url = urlparse(url)
-    url = parsed_url.path
-    client = Client()
-    response = client.get(
-        url, headers={'Authorization': f'Token {token}'}
-    )
-    return response
 
 
 class ControllerTest(TestCase):
@@ -73,21 +50,15 @@ class ControllerTest(TestCase):
             user=self.admin
         )
 
-    def create_function(self, sub_domain):
+    def create_function(self, sub_domain) -> Activity:
         """Create function."""
         return create(
-            'geonode', 'package-1', sub_domain, self.user_email
+            Product.objects.get(name='Geonode'),
+            Package.objects.get(package_code='dev-1'),
+            sub_domain, self.admin
         )
 
-    @patch(
-        'geohosting_controller_client.connection._request_post',
-        side_effect=mock__request_post
-    )
-    @patch(
-        'geohosting_controller_client.connection._request_get',
-        side_effect=mock__request_get
-    )
-    def test_create(self, request_post, request_get):
+    def test_create(self):
         """Test create."""
         with requests_mock.Mocker() as requests_mocker:
             # Mock requests
@@ -132,36 +103,17 @@ class ControllerTest(TestCase):
                 }
             )
 
-            # Check if no url
-            with self.assertRaises(NoUrlException):
-                self.create_function(self.sub_domain)
-            os.environ[
-                'GEOHOSTING_CONTROLLER_SERVER_URL'
-            ] = 'http://server.com'
-
-            # Check if no token
-            with self.assertRaises(NoTokenException):
-                self.create_function(self.sub_domain)
-
-            # If not admin
-            os.environ['GEOHOSTING_CONTROLLER_SERVER_TOKEN'] = self.user_token
-            with self.assertRaises(ConnectionErrorException):
-                self.create_function(self.sub_domain)
-
-            os.environ['GEOHOSTING_CONTROLLER_SERVER_TOKEN'] = self.admin_token
-
             try:
                 self.create_function(self.sub_domain)
                 self.fail('Should have raised ConnectionErrorException')
-            except ConnectionErrorException:
+            except NoJenkinsUserException:
                 pass
 
             try:
                 os.environ['JENKINS_USER'] = 'user@example.com'
-                os.environ['JENKINS_URL'] = 'http://jenkins.com'
                 self.create_function(self.sub_domain)
                 self.fail('Should have raised ConnectionErrorException')
-            except ConnectionErrorException:
+            except NoJenkinsTokenException:
                 pass
 
             # ---------------------------------------------
@@ -171,7 +123,7 @@ class ControllerTest(TestCase):
                 os.environ['JENKINS_TOKEN'] = 'Token'
 
                 # If the name is not correct
-                with self.assertRaises(ConnectionErrorException):
+                with self.assertRaises(ActivityException):
                     self.create_function('server.com')
 
                 # Run create function, it will return create function
@@ -188,33 +140,49 @@ class ControllerTest(TestCase):
 
                 # Create another activity
                 # Should be error because another one is already running
-                with self.assertRaises(ConnectionErrorException):
+                with self.assertRaises(ActivityException):
                     self.create_function(self.sub_domain)
 
                 # Run webhook, should be run by Argo CD
                 client = Client()
+                webhook_data = {
+                    'app_name': self.sub_domain,
+                    'state': 'successful'
+                }
+                # If not admin
                 response = client.post(
-                    '/api/webhook/', data={
-                        'app_name': self.sub_domain,
-                        'state': 'successful'
-                    },
+                    '/api/webhook/', data=webhook_data,
+                    headers={'Authorization': f'Token {self.user_token}'}
+                )
+                self.assertEqual(response.status_code, 403)
+
+                # Success if admin
+                response = client.post(
+                    '/api/webhook/', data=webhook_data,
                     headers={'Authorization': f'Token {self.admin_token}'}
                 )
                 self.assertEqual(response.status_code, 200)
+                self.assertEqual(
+                    WebhookEvent.objects.all().first().data, webhook_data
+                )
 
                 # Get the activity status from server
-                activity = get_activity_detail(activity.id)
+                activity = Activity.objects.get(id=activity.id)
                 self.assertEqual(activity.status, 'SUCCESS')
                 self.assertEqual(
-                    activity.activity_type, ActivityType.CREATE_INSTANCE.value
+                    activity.activity_type.identifier,
+                    ActivityTypeTerm.CREATE_INSTANCE.value
                 )
-                self.assertEqual(activity.product, 'Geonode')
-                self.assertEqual(activity.data['app_name'], self.sub_domain)
-                self.assertEqual(activity.data['subdomain'], self.sub_domain)
-                self.assertEqual(activity.data['package_id'], 'package-1')
                 self.assertEqual(
-                    activity.data['user_email'], self.user_email
+                    activity.client_data['app_name'], self.sub_domain
                 )
+                self.assertEqual(
+                    activity.client_data['subdomain'], self.sub_domain
+                )
+                self.assertEqual(
+                    activity.client_data['package_code'], 'dev-1'
+                )
+                self.assertEqual(activity.triggered_by, self.admin)
 
                 # For data to jenkins
                 self.assertEqual(
@@ -227,15 +195,14 @@ class ControllerTest(TestCase):
                     activity.post_data['geonode_name'], self.sub_domain
                 )
                 self.assertEqual(
-                    activity.post_data['geonode_size'], 'package-1'
+                    activity.post_data['geonode_size'], 'dev-1'
                 )
 
                 # Create another activity
                 # Should be error because the instance is already created
-                with self.assertRaises(ConnectionErrorException):
+                with self.assertRaises(ActivityException):
                     self.create_function(self.sub_domain)
                 instance = Instance.objects.first()
-
                 self.assertEqual(
                     instance.cluster.code, 'ktz-dev-ks-gn-01'
                 )
@@ -243,10 +210,10 @@ class ControllerTest(TestCase):
                     instance.name, self.sub_domain
                 )
                 self.assertEqual(
-                    instance.package_id, 'package-1'
+                    instance.price.package_code, 'dev-1'
                 )
                 self.assertEqual(
-                    instance.owner_email, self.user_email
+                    instance.owner, self.admin
                 )
             except ConnectionErrorException:
                 self.fail("create() raised ExceptionType unexpectedly!")

@@ -1,3 +1,10 @@
+# coding=utf-8
+"""
+GeoHosting.
+
+.. note:: Region model.
+"""
+
 from django.db import models
 
 

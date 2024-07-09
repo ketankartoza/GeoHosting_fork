@@ -50,7 +50,6 @@ load-initiate-data:
 	@echo "------------------------------------------------------------------"
 	@docker compose $(ARGS) exec -T dev bash -c "python manage.py loaddata geohosting_controller/fixtures/01.initiate.json"
 
-
 dev-test:
 	@echo
 	@echo "------------------------------------------------------------------"

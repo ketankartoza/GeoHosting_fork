@@ -1,9 +1,15 @@
+# coding=utf-8
+"""
+GeoHosting.
+
+.. note:: Fields model.
+"""
+
 import os
 
 from PIL.Image import Image
-from django.db.models import ImageField
-
 from django.core.exceptions import ValidationError
+from django.db.models import ImageField
 from django.utils.deconstruct import deconstructible
 
 

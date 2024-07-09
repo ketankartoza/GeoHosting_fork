@@ -10,7 +10,9 @@ from urllib.parse import urlparse
 import requests
 from django.conf import settings
 
-from geohosting_controller.exceptions import NoTokenException, NoUserException
+from geohosting_controller.exceptions import (
+    NoJenkinsTokenException, NoJenkinsUserException
+)
 
 
 def return_user_token():
@@ -20,14 +22,14 @@ def return_user_token():
     except AttributeError:
         user = os.environ.get('JENKINS_USER', None)
     if not user:
-        raise NoUserException()
+        raise NoJenkinsUserException()
 
     try:
         token = settings.JENKINS_TOKEN
     except AttributeError:
         token = os.environ.get('JENKINS_TOKEN', None)
     if not token:
-        raise NoTokenException()
+        raise NoJenkinsTokenException()
     return user, token
 
 

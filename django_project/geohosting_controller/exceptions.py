@@ -7,24 +7,31 @@ GeoHosting Controller.
 
 
 class NoClusterException(Exception):
-    """No Cluster eexception."""
+    """No Cluster exception."""
 
     def __init__(self):  # noqa
         super().__init__('No cluster found.')
 
 
-class NoUserException(Exception):
+class NoJenkinsUserException(Exception):
     """No User exception."""
 
     def __init__(self):  # noqa
         super().__init__('JENKINS_USER is required.')
 
 
-class NoTokenException(Exception):
+class NoJenkinsTokenException(Exception):
     """No token exception."""
 
     def __init__(self):  # noqa
         super().__init__('JENKINS_TOKEN is required.')
+
+
+class ActivityException(Exception):
+    """Activity exception."""
+
+    def __init__(self, message):  # noqa
+        super().__init__(message)
 
 
 class ConnectionErrorException(Exception):

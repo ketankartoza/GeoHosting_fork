@@ -1,3 +1,10 @@
+# coding=utf-8
+"""
+GeoHosting.
+
+.. note:: Product model.
+"""
+
 from django.db import models
 from django.db.models import JSONField
 
@@ -9,11 +16,17 @@ class Product(models.Model):
     """Product model."""
 
     name = models.CharField(
-        max_length=256)
-    order = models.PositiveIntegerField(default=0)
+        max_length=256
+    )
+    order = models.PositiveIntegerField(
+        default=0
+    )
     upstream_id = models.CharField(
-        max_length=256)
-    description = models.TextField(blank=True)
+        max_length=256
+    )
+    description = models.TextField(
+        blank=True
+    )
     cluster = models.ForeignKey(
         Cluster,
         on_delete=models.CASCADE,
@@ -44,9 +57,15 @@ class ProductMedia(models.Model):
         Product,
         on_delete=models.CASCADE,
         related_name='images')
-    image = models.ImageField(upload_to='product_media/')
-    description = models.TextField(blank=True)
-    order = models.PositiveIntegerField(default=0)
+    image = models.ImageField(
+        upload_to='product_media/'
+    )
+    description = models.TextField(
+        blank=True
+    )
+    order = models.PositiveIntegerField(
+        default=0
+    )
 
     def __str__(self):
         """Return image file name."""
@@ -56,24 +75,42 @@ class ProductMedia(models.Model):
         ordering = ['product__order', 'order']
 
 
-class Pricing(models.Model):
-    """Pricing model for products."""
+class Package(models.Model):
+    """Package model for products."""
 
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
-        related_name='pricings'
+        related_name='packages'
     )
-    name = models.CharField(max_length=256)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    feature_list = JSONField(blank=True, null=True)
-    order = models.PositiveIntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    name = models.CharField(
+        max_length=256
+    )
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2
+    )
+    feature_list = JSONField(
+        blank=True,
+        null=True
+    )
+    order = models.PositiveIntegerField(
+        default=0
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+    package_code = models.CharField(
+        max_length=256,
+        help_text='This is the package code of the product on jenkins.'
+    )
 
     class Meta:
         ordering = ['product__order', 'order']
 
     def __str__(self):
-        """Return pricing name and price."""
+        """Return package name and price."""
         return f"{self.name} - {self.price}"
