@@ -70,6 +70,8 @@ services:
       - "9200:8080"
       # for ssh
       - "9201:22"
+      # for react
+      - "9000:9000"
     links:
       - db
       - redis
