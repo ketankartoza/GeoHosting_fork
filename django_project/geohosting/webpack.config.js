@@ -14,7 +14,7 @@ const statsFilename = 'webpack-stats.json';
 let conf = {
   context: __dirname,
   entry: {
-      Home: ['./src/index.tsx'],
+      App: ['./src/index.tsx'],
   },
   output: {
     path: path.resolve('./assets/webpack_bundles/'),
