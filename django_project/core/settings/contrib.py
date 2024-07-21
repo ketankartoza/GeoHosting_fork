@@ -9,6 +9,7 @@ from .base import *  # noqa
 # Extra installed apps
 INSTALLED_APPS = INSTALLED_APPS + (
     'rest_framework',
+    'rest_framework.authtoken',
     'django_celery_beat',
     'django_celery_results',
     'knox',
@@ -29,7 +30,7 @@ REST_FRAMEWORK = {
 }
 
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
+    'geohosting.auth_backend.EmailBackend',
 )
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 CELERY_RESULT_BACKEND = 'django-db'

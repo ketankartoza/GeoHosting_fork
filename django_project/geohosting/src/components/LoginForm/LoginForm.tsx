@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -14,6 +14,10 @@ import {
   Link,
   VStack, InputGroup, InputRightElement,
 } from '@chakra-ui/react';
+import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
+import {RootState} from "../../redux/store";
+import {login} from "../../redux/reducers/authSlice";
 
 interface LoginFormProps {
   isOpen: boolean;
@@ -21,16 +25,31 @@ interface LoginFormProps {
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
-  const [show, setShow] = React.useState(false)
-  const handleClick = () => setShow(!show)
+  const dispatch = useDispatch();
+  const { token, loading, error } = useSelector((state: RootState) => state.auth);
+  const [show, setShow] = useState(false);
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
 
-  const handleChange = (event) => setEmail(event.target.value)
+  const handleClick = () => setShow(!show);
 
   const handleLogin = () => {
-    onClose();
-  }
+    // @ts-ignore
+    dispatch(login({ email, password })).then((result: any) => {
+     if (result.meta.requestStatus === 'fulfilled') {
+        onClose();
+     } else if (result.meta.requestStatus === 'rejected') {
+        if (result.payload) {
+          const errorMessages = Object.entries(result.payload)
+            .map(([key, value]) => `${value}`)
+            .join('\n');
+          toast.error(errorMessages);
+        } else {
+          toast.error('Login failed. Please try again.');
+        }
+     }
+    });
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} blockScrollOnMount={true} preserveScrollBarGap={true}  >
@@ -39,13 +58,16 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
         <ModalHeader>Log in</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
+          {token ? (
+            <p>You are already logged in.</p>
+          ) : null }
           <VStack spacing={4}>
             <FormControl id="email" isRequired>
               <FormLabel>Email</FormLabel>
               <Input type="email"
                      placeholder='Enter email'
                      value={email}
-                     autoFocus={true} onChange={handleChange}/>
+                     autoFocus={true} onChange={(e) => setEmail(e.target.value)}/>
             </FormControl>
             <FormControl id="password" isRequired >
               <FormLabel>Password</FormLabel>
@@ -70,7 +92,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
           </VStack>
         </ModalBody>
         <ModalFooter justifyContent="center">
-          <Button colorScheme="purple" onClick={handleLogin}>
+          <Button colorScheme="purple" onClick={handleLogin} isLoading={loading}>
             Login
           </Button>
         </ModalFooter>
