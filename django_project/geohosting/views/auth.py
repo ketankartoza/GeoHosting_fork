@@ -3,7 +3,9 @@ from rest_framework.authtoken.models import Token
 from rest_framework import status
 
 from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from geohosting.serializer.email_auth_token import EmailAuthTokenSerializer
 
@@ -33,3 +35,12 @@ def logout(request):
     except Exception as e:  # noqa
         pass
     return Response(status=status.HTTP_200_OK)
+
+
+class ValidateTokenView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response(
+            {'detail': 'Token is valid.'},
+            status=status.HTTP_200_OK)

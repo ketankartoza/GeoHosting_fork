@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.test.client import Client
 from django.test.testcases import TestCase
-from knox.models import AuthToken
+from rest_framework.authtoken.models import Token
 
 from geohosting.forms.activity import CreateInstanceForm
 from geohosting.models import (
@@ -37,18 +37,14 @@ class ControllerTest(TestCase):
         self.user = User.objects.create(
             username='user', password='password'
         )
-        auth_token, self.user_token = AuthToken.objects.create(
-            user=self.user
-        )
+        self.user_token = Token.objects.create(user=self.user)
 
         self.admin = User.objects.create(
             username='admin', password='password',
             is_superuser=True,
             is_staff=True
         )
-        auth_token, self.admin_token = AuthToken.objects.create(
-            user=self.admin
-        )
+        self.admin_token = Token.objects.create(user=self.admin)
 
     def create_function(self, app_name) -> Activity:
         """Create function."""

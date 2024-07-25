@@ -8,7 +8,7 @@ from geohosting.api.activity import (
 )
 from geohosting.api.token import CreateToken
 from geohosting.api.webhook import WebhookView
-from geohosting.views.auth import CustomAuthToken, logout
+from geohosting.views.auth import CustomAuthToken, logout, ValidateTokenView
 from geohosting.views.home import HomeView
 
 router = DefaultRouter()
@@ -25,6 +25,8 @@ api = [
     path('token/create', CreateToken.as_view(), name='create-token'),
     path('auth/login/', CustomAuthToken.as_view(), name='api_login'),
     path('auth/logout/', logout, name='api_logout'),
+    path('auth/validate-token/',
+         ValidateTokenView.as_view(), name='validate-token'),
 ]
 api += router.urls
 

@@ -29,13 +29,35 @@ export const login = createAsyncThunk(
   }
 );
 
+// Async thunk for logout
+export const logout = createAsyncThunk(
+  'auth/logout',
+  async (_, thunkAPI) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        await axios.post('/api/auth/logout/', {}, {
+          headers: { Authorization: `Token ${token}` }
+        });
+        localStorage.removeItem('token');
+        return true;
+      } catch (error: any) {
+        const errorData = error.response.data;
+        localStorage.removeItem('token');
+        return thunkAPI.rejectWithValue(errorData);
+      }
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
-  reducers: {
-    logout: (state) => {
+   reducers: {
+    clearAuthState: (state) => {
       state.token = null;
-      localStorage.removeItem('token');
+      state.loading = false;
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
@@ -51,9 +73,15 @@ const authSlice = createSlice({
       state.loading = false;
       state.error = action.payload as string;
     });
+    builder.addCase(logout.fulfilled, (state) => {
+      state.token = null;
+    });
+    builder.addCase(logout.rejected, (state, action) => {
+      state.error = action.payload as string;
+    });
   },
 });
 
-export const { logout } = authSlice.actions;
+export const { clearAuthState } = authSlice.actions;
 
 export default authSlice.reducer;
