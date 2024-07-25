@@ -6,6 +6,7 @@ from rest_framework.routers import DefaultRouter
 from geohosting.api.activity import (
     ActivityViewSet, ActivityTypeViewSet
 )
+from geohosting.api.product import ProductViewSet
 from geohosting.api.token import CreateToken
 from geohosting.api.webhook import WebhookView
 from geohosting.views.auth import CustomAuthToken, logout, ValidateTokenView
@@ -15,6 +16,8 @@ router = DefaultRouter()
 router.register(
     r'activities', ActivityViewSet, basename='activities'
 )
+router.register(r'products', ProductViewSet)
+
 
 router.register(
     r'activity_types', ActivityTypeViewSet, basename='activity_types'
