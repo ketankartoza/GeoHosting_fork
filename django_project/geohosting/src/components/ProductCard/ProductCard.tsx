@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {MouseEventHandler, useState} from 'react';
 import { Box, Heading, Text, Button, Badge } from '@chakra-ui/react';
 
 interface CardProps {
@@ -6,9 +6,11 @@ interface CardProps {
   title: string;
   description: string;
   comingSoon?: boolean;
+  onClick: MouseEventHandler;
+  selected: boolean
 }
 
-const ProductCard: React.FC<CardProps> = ({ image, title, description, comingSoon }) => {
+const ProductCard: React.FC<CardProps> = ({ image, title, description, comingSoon, onClick, selected }) => {
   return (
     <Box
       borderWidth="1px"
@@ -18,9 +20,19 @@ const ProductCard: React.FC<CardProps> = ({ image, title, description, comingSoo
       paddingTop={5}
       paddingBottom={5}
       position="relative"
-      backgroundColor={"gray.200"}
+      height={350}
+      backgroundColor={selected ? "blue.100" : "gray.200"}
       borderColor={"gray.200"}
       width={["500px", "350px", "320px", "320px"]}
+      transition="background-color 0.5s ease"
+      _hover={{
+        backgroundColor: "gray.300",
+        transition: "background-color 0.25s ease",
+        _after: {
+          backgroundColor: "gray.200",
+          transition: "background-color 0.25s ease",
+        },
+      }}
     >
       {comingSoon && (
         <Badge
@@ -42,7 +54,7 @@ const ProductCard: React.FC<CardProps> = ({ image, title, description, comingSoo
             maxW={["500px", "350px", "320px", "320px"]} padding={5} height={75}>
         {description}
       </Text>
-      <Button colorScheme="orange">Learn More</Button>
+      <Button colorScheme="orange" onClick={onClick}>Learn More</Button>
     </Box>
   );
 };

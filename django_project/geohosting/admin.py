@@ -9,7 +9,7 @@ from django.contrib import admin
 from geohosting.forms.activity import CreateInstanceForm
 from geohosting.models import (
     Activity, ActivityType, Region, Product, Cluster, ProductCluster,
-    Instance, Package, WebhookEvent
+    Instance, Package, WebhookEvent, ProductMedia
 )
 
 
@@ -81,11 +81,16 @@ class PackageInline(admin.TabularInline):
     extra = 1
 
 
+class ProductMediaInline(admin.TabularInline):
+    model = ProductMedia
+    extra = 1
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'upstream_id', 'available')
     search_fields = ('name', 'upstream_id')
-    inlines = [PackageInline]
+    inlines = [PackageInline, ProductMediaInline]
 
 
 @admin.register(ProductCluster)

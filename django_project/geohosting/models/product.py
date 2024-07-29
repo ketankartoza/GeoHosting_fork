@@ -68,6 +68,9 @@ class ProductMedia(models.Model):
     image = models.ImageField(
         upload_to='product_media/'
     )
+    title = models.TextField(
+        blank=True
+    )
     description = models.TextField(
         blank=True
     )

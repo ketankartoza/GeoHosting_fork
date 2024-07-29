@@ -1,10 +1,10 @@
-import time
-
 from rest_framework import mixins, viewsets
 
 from geohosting.models import Product
 from geohosting.permissions import IsAdminOrReadOnly
-from geohosting.serializer.product import ProductSerializer
+from geohosting.serializer.product import (
+    ProductDetailSerializer, ProductListSerializer
+)
 
 
 class ProductViewSet(mixins.CreateModelMixin,
@@ -14,5 +14,9 @@ class ProductViewSet(mixins.CreateModelMixin,
                      mixins.ListModelMixin,
                      viewsets.GenericViewSet):
     queryset = Product.objects.all()
-    serializer_class = ProductSerializer
     permission_classes = [IsAdminOrReadOnly]
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return ProductDetailSerializer
+        return ProductListSerializer

@@ -14,6 +14,7 @@ import {
   Link,
   VStack, InputGroup, InputRightElement,
 } from '@chakra-ui/react';
+import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import {AppDispatch, RootState} from '../../redux/store';
@@ -26,6 +27,7 @@ interface LoginFormProps {
 
 const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
   const dispatch: AppDispatch = useDispatch();
+  const navigate = useNavigate();
   const { token, loading, error } = useSelector((state: RootState) => state.auth);
   const [show, setShow] = useState(false);
   const [email, setEmail] = useState<string>('');
@@ -37,6 +39,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
     dispatch(login({ email, password })).then((result: any) => {
       if (result.meta.requestStatus === 'fulfilled') {
         onClose();
+        navigate('/dashboard');
       } else if (result.meta.requestStatus === 'rejected') {
         if (result.payload) {
           const errorMessages = Object.entries(result.payload)
@@ -103,11 +106,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
         </ModalBody>
         <ModalFooter justifyContent="center">
           {token ? (
-            <Button colorScheme="purple" onClick={handleLogout} isLoading={loading}>
+            <Button colorScheme="blue" onClick={handleLogout} isLoading={loading}>
               Logout
             </Button>
           ) : (
-            <Button colorScheme="purple" onClick={handleLogin} isLoading={loading}>
+            <Button colorScheme="blue" onClick={handleLogin} isLoading={loading}>
               Login
             </Button>
           )}
