@@ -11,3 +11,4 @@ from geohosting.models.instance import *
 from geohosting.models.product import *
 from geohosting.models.region import *
 from geohosting.models.webhook import *
+from geohosting.models.sales_order import *

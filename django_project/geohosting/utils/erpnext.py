@@ -1,18 +1,27 @@
+import json
+
 import requests
 
 from django.conf import settings
 
 
-def fetch_erpnext_data(doctype):
+def fetch_erpnext_data(doctype, filters = None):
     url = f"{settings.ERPNEXT_BASE_URL}/api/resource/{doctype}"
+    params = {}
 
     headers = {
         'Authorization': f'token {settings.ERPNEXT_API_KEY}:'
                          f'{settings.ERPNEXT_API_SECRET}'
     }
 
+    if filters:
+        params = {
+            'filters': json.dumps(filters),
+            'fields': '["*"]'
+        }
+
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, params=params)
 
         if response.status_code == 200:
             data = response.json()
