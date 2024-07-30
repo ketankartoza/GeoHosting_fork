@@ -1,0 +1,4 @@
+images:
+  - name: geohosting
+    dockerfile: deployment/docker/Dockerfile
+    buildPath: .
