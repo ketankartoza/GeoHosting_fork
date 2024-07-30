@@ -112,13 +112,14 @@ class FetchProductsTestCase(TestCase):
     @patch('geohosting.views.erpnext.requests.get')
     def test_fetch_products_success(self, mock_get, mock_fetch_erpnext_data):
         # Mocking the ERPNext data fetch
-        mock_fetch_erpnext_data.side_effect = [
-            [{'name': 'product1'}, {'name': 'product2'}],  # First call returns the list of products
-            {'product_name': 'Product 1', 'idx': 1, 'name': 'product1', 'product_description': 'Description 1',
-             'product_image': '/path/to/image1.jpg', 'docstatus': 1},  # Details for product1
-            {'product_name': 'Product 2', 'idx': 2, 'name': 'product2', 'product_description': 'Description 2',
-             'product_image': '/path/to/image2.jpg', 'docstatus': 0}  # Details for product2
-        ]
+        mock_fetch_erpnext_data.side_effect = [[
+            {'name': 'product_1', 'item_name': 'Product 1',
+             'description': '<div><p><strong>short description</strong></p><p>Biodiversity Information Management System.</p><p><br>',
+             'image': '/path/to/image1.jpg', 'published_in_website': 1},
+            {'name': 'product_2', 'item_name': 'Product 2',
+             'description': '<div><p><strong>short description</strong></p><p>Biodiversity Information Management System.</p><p><br>',
+             'image': '/path/to/image2.jpg', 'published_in_website': 0}
+        ]]
 
         # Mocking the image download
         mock_response = MagicMock()
@@ -134,12 +135,12 @@ class FetchProductsTestCase(TestCase):
 
         # Ensure products were created
         self.assertEqual(Product.objects.count(), 2)
-        product1 = Product.objects.get(upstream_id='product1')
+        product1 = Product.objects.get(upstream_id='product_1')
         self.assertEqual(product1.name, 'Product 1')
         self.assertTrue(product1.available)
         self.assertIsNotNone(product1.image.name)
 
-        product2 = Product.objects.get(upstream_id='product2')
+        product2 = Product.objects.get(upstream_id='product_2')
         self.assertEqual(product2.name, 'Product 2')
         self.assertFalse(product2.available)
 
@@ -147,11 +148,11 @@ class FetchProductsTestCase(TestCase):
     @patch('geohosting.views.erpnext.requests.get')
     def test_fetch_products_image_download_fail(self, mock_get, mock_fetch_erpnext_data):
         # Mocking the ERPNext data fetch
-        mock_fetch_erpnext_data.side_effect = [
-            [{'name': 'product1'}],
-            {'product_name': 'Product 1', 'idx': 1, 'name': 'product1', 'product_description': 'Description 1',
-             'product_image': '', 'docstatus': 1}
-        ]
+        mock_fetch_erpnext_data.side_effect = [[
+            {'name': 'product_2', 'item_name': 'Product 2',
+             'description': '<div><p><strong>short description</strong></p><p>Biodiversity Information Management System.</p><p><br>',
+             'image': ''}
+        ]]
 
         # Mocking the image download failure
         mock_response = MagicMock()
@@ -165,5 +166,5 @@ class FetchProductsTestCase(TestCase):
         self.assertEqual(response.data['status'], 'success')
 
         # Ensure product was created without image
-        product1 = Product.objects.get(upstream_id='product1')
+        product1 = Product.objects.get(upstream_id='product_2')
         self.assertEqual(product1.image.name, '')

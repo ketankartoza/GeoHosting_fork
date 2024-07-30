@@ -94,6 +94,18 @@ class Package(models.Model):
         on_delete=models.CASCADE,
         related_name='packages'
     )
+    erpnext_code = models.CharField(
+        default='',
+        blank=True
+    )
+    erpnext_item_code = models.CharField(
+        default='',
+        blank=True
+    )
+    currency = models.CharField(
+        default='',
+        blank=True
+    )
     name = models.CharField(
         max_length=256
     )
