@@ -88,6 +88,7 @@ class ProductMediaInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
+    change_list_template = 'admin/change_list.html'
     list_display = ('name', 'upstream_id', 'available')
     search_fields = ('name', 'upstream_id')
     inlines = [PackageInline, ProductMediaInline]

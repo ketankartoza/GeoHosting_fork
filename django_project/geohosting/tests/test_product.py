@@ -1,3 +1,7 @@
+from unittest import TestCase
+from unittest.mock import patch, MagicMock
+
+from django.test import RequestFactory
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -91,3 +95,75 @@ class ProductViewSetTest(APITestCase):
         self.client.login(username='user', password='password')
         response = self.client.delete(self.product_url)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class FetchProductsTestCase(TestCase):
+
+    def setUp(self):
+        User.objects.all().delete()
+        Product.objects.all().delete()
+        self.client = APIClient()
+        self.factory = RequestFactory()
+        self.user = User.objects.create_user(
+            username='admin', password='password', is_staff=True)
+        self.url = reverse('fetch_products')
+
+    @patch('geohosting.views.erpnext.fetch_erpnext_data')
+    @patch('geohosting.views.erpnext.requests.get')
+    def test_fetch_products_success(self, mock_get, mock_fetch_erpnext_data):
+        # Mocking the ERPNext data fetch
+        mock_fetch_erpnext_data.side_effect = [
+            [{'name': 'product1'}, {'name': 'product2'}],  # First call returns the list of products
+            {'product_name': 'Product 1', 'idx': 1, 'name': 'product1', 'product_description': 'Description 1',
+             'product_image': '/path/to/image1.jpg', 'docstatus': 1},  # Details for product1
+            {'product_name': 'Product 2', 'idx': 2, 'name': 'product2', 'product_description': 'Description 2',
+             'product_image': '/path/to/image2.jpg', 'docstatus': 0}  # Details for product2
+        ]
+
+        # Mocking the image download
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.content = b'fake image content'
+        mock_get.return_value = mock_response
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['status'], 'success')
+
+        # Ensure products were created
+        self.assertEqual(Product.objects.count(), 2)
+        product1 = Product.objects.get(upstream_id='product1')
+        self.assertEqual(product1.name, 'Product 1')
+        self.assertTrue(product1.available)
+        self.assertIsNotNone(product1.image.name)
+
+        product2 = Product.objects.get(upstream_id='product2')
+        self.assertEqual(product2.name, 'Product 2')
+        self.assertFalse(product2.available)
+
+    @patch('geohosting.views.erpnext.fetch_erpnext_data')
+    @patch('geohosting.views.erpnext.requests.get')
+    def test_fetch_products_image_download_fail(self, mock_get, mock_fetch_erpnext_data):
+        # Mocking the ERPNext data fetch
+        mock_fetch_erpnext_data.side_effect = [
+            [{'name': 'product1'}],
+            {'product_name': 'Product 1', 'idx': 1, 'name': 'product1', 'product_description': 'Description 1',
+             'product_image': '', 'docstatus': 1}
+        ]
+
+        # Mocking the image download failure
+        mock_response = MagicMock()
+        mock_response.status_code = 404
+        mock_get.return_value = mock_response
+
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['status'], 'success')
+
+        # Ensure product was created without image
+        product1 = Product.objects.get(upstream_id='product1')
+        self.assertEqual(product1.image.name, '')

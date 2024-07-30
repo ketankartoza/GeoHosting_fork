@@ -42,3 +42,7 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 FIXTURE_DIRS = ['geohosting_controller/fixtures']
+
+ERPNEXT_API_KEY = os.environ.get('ERPNEXT_API_KEY', '')
+ERPNEXT_API_SECRET = os.environ.get('ERPNEXT_API_SECRET', '')
+ERPNEXT_BASE_URL = os.environ.get('ERPNEXT_BASE_URL', '')

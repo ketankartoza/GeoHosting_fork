@@ -109,7 +109,7 @@ const HomePage: React.FC = () => {
                     image={product.image ? product.image : GeonodeIcon}
                     title={product.name}
                     description={product.description}
-                    comingSoon={product.available}
+                    comingSoon={!product.available}
                     onClick={() => handleProductClick(product)}
                     selected={selectedProduct ? (selectedProduct.id == product.id) : false}
                   />

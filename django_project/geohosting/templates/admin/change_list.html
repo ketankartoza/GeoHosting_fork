@@ -1,0 +1,14 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<script src="{% static 'admin_fetch_products.js' %}"></script>
+{% endblock %}
+
+{% block object-tools %}
+    {{ block.super }}
+    <div class="button-group" style="width: 100%; text-align: right">
+        <button id="fetch-data-button" class="button" style="right: 0;">Fetch Products from ERPNext</button>
+    </div>
+{% endblock %}
