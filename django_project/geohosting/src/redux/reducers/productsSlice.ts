@@ -30,6 +30,7 @@ export interface Package {
   updated_at: string;
   package_code: string;
   product: number;
+  currency: string
 }
 
 interface ProductsState {

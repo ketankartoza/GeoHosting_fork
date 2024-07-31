@@ -16,9 +16,6 @@ const TokenValidator: React.FC = () => {
           const response = await axios.get('/api/auth/validate-token/', {
             headers: { Authorization: `Token ${token}` }
           });
-          if (response.status === 200) {
-            toast.success("Token is valid.");
-          }
         } catch (error) {
           dispatch(logout());
           toast.error("Token is invalid or has expired. Please log in again.");

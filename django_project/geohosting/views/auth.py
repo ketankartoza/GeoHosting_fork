@@ -1,3 +1,5 @@
+import threading
+
 from django.contrib.auth.hashers import make_password
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
@@ -10,6 +12,7 @@ from rest_framework.views import APIView
 
 from django.contrib.auth import get_user_model
 
+from geohosting.models import UserProfile
 from geohosting.serializer.email_auth_token import EmailAuthTokenSerializer
 from geohosting.serializer.register import RegisterSerializer
 
@@ -61,6 +64,10 @@ class RegisterView(APIView):
             )
             token, created = Token.objects.get_or_create(
                 user=user)
+            user_profile, _ = UserProfile.objects.get_or_create(
+                user=user
+            )
+            threading.Thread(target=user_profile.post_to_erpnext).start()
             return Response({
                 'token': token.key,
                 'user_id': user.pk,

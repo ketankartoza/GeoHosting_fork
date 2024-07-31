@@ -147,7 +147,7 @@ const HomePage: React.FC = () => {
                           />
                         </Box>
                         {productDetail.packages.map((pkg: Package) => (
-                          <ProductPricing key={pkg.id} {...pkg} />
+                          <ProductPricing key={pkg.id} productName={selectedProduct.name} pkg={pkg}/>
                         ))}
                       </SimpleGrid>
                     </TabPanel>
