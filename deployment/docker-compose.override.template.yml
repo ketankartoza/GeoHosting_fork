@@ -40,6 +40,21 @@ services:
     links:
       - django
 
+  webpack:
+    build:
+      context: ../
+      dockerfile: deployment/docker/Dockerfile
+      target: dev
+    image: kartoza/${COMPOSE_PROJECT_NAME:-django_project}_dev
+    volumes:
+      - ../django_project:/home/web/django_project
+      - ./volumes/media:/home/web/media
+    working_dir: /home/web/django_project/geohosting
+    command: sh -c "npm install && npm run serve"
+    entrypoint: [ ]
+    ports:
+      - "9000:9000"
+
   dev:
     build:
       context: ../
