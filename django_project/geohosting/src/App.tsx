@@ -4,10 +4,11 @@ import { Provider } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
 import HomePage from './pages/HomePage/HomePage';
 import DashboardPage from './pages/DashboardPage/DashboardPage';
+import CheckoutPage from './pages/CheckoutPage/CheckoutPage';
 import { store } from './redux/store';
 import './assets/styles/index.css';
-import TokenValidator from "./components/TokenValidator/TokenValidator";
-import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
+import TokenValidator from './components/TokenValidator/TokenValidator';
+import PrivateRoute from './components/PrivateRoute/PrivateRoute';
 
 const App: React.FC = () => {
   return (
@@ -18,6 +19,11 @@ const App: React.FC = () => {
           <Route path="/dashboard" element={
             <PrivateRoute>
               <DashboardPage />
+            </PrivateRoute>
+          } />
+          <Route path="/checkout" element={
+            <PrivateRoute>
+              <CheckoutPage />
             </PrivateRoute>
           } />
         </Routes>

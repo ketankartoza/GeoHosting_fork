@@ -17,6 +17,8 @@ const Navbar: React.FC = () => {
         <HStack spacing="24px">
           <Image src='/static/images/kartoza-logo-only.png'
                  alt='Kartoza Logo'
+                 style={{'cursor': 'pointer'}}
+                 onClick={() => navigate('/')}
                  width={8}
           />
           <ChakraLink as={RouterLink} to="/about" fontSize="md">About us</ChakraLink>

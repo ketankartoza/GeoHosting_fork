@@ -37,6 +37,7 @@ import {fetchProducts, Product, fetchProductDetail, Package} from "../../redux/r
 import { CheckIcon } from "@chakra-ui/icons";
 import ProductPricing from "../../components/ProductPricing/ProductPricing";
 import ProductOverview from "../../components/ProductOverview/ProductOverview";
+import Background from "../../components/Background/Background";
 
 const HomePage: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -66,30 +67,7 @@ const HomePage: React.FC = () => {
       <Flex direction="column" minHeight="100vh">
         <Box flex="1">
           <Navbar />
-          <Box
-            position="absolute"
-            left="0"
-            top="0"
-            width={{ base: '20vw', md: '14vw', xl: '10vw' }}
-            height={{ base: '100vh', md: '100vh', xl: '100%' }}
-            background="url('/static/images/right.svg')"
-            backgroundSize="cover"
-            backgroundRepeat="repeat-y"
-            backgroundAttachment="scroll, local;"
-            zIndex="-1"
-          />
-          <Box
-            position="absolute"
-            right="0"
-            top="0"
-            width={{ base: '20vw', md: '14vw', xl: '10vw' }}
-            height={{ base: '100vh', md: '100vh', xl: '100%' }}
-            background="url('/static/images/left.svg')"
-            backgroundSize="cover"
-            backgroundRepeat="repeat-y"
-            backgroundAttachment="scroll, local;"
-            zIndex="-1"
-          />
+          <Background />
           <Container maxW='container.xl' textAlign="center" mt="80px" mb="80px" bg="transparent">
             <Heading as="h1" fontSize={{ base: '5xl', md: '6xl', xl: '7xl' }} fontWeight="thin" color="blue.500" mt="20px">
               GeoSpatialHosting
@@ -122,6 +100,7 @@ const HomePage: React.FC = () => {
               <Box ref={detailsRef} bg="white" p="4" mt="10">
                 <Tabs>
                   <TabList>
+                    <Tab>Pricing</Tab>
                     <Tab>
                       <Image
                         src={selectedProduct.image ? selectedProduct.image : GeonodeIcon}
@@ -130,12 +109,8 @@ const HomePage: React.FC = () => {
                         mr="2"
                       />
                       Overview</Tab>
-                    <Tab>Pricing</Tab>
                   </TabList>
                   <TabPanels>
-                    <TabPanel>
-                        <ProductOverview {...productDetail.images} />
-                    </TabPanel>
                     <TabPanel>
                       <Heading as="h3" size="lg">{selectedProduct.name} Pricing</Heading>
                       <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacingX='15px' spacingY={{ base: 10, md: 10, lg: 0 }} mt={10}>
@@ -147,9 +122,12 @@ const HomePage: React.FC = () => {
                           />
                         </Box>
                         {productDetail.packages.map((pkg: Package) => (
-                          <ProductPricing key={pkg.id} productName={selectedProduct.name} pkg={pkg}/>
+                          <ProductPricing key={pkg.id} product={selectedProduct} pkg={pkg}/>
                         ))}
                       </SimpleGrid>
+                    </TabPanel>
+                    <TabPanel>
+                        <ProductOverview {...productDetail.images} />
                     </TabPanel>
                   </TabPanels>
                 </Tabs>
