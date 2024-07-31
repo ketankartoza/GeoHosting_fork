@@ -75,6 +75,11 @@ services:
       - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
       - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@example.com}
+      -
+      - ERPNEXT_API_KEY=${ERPNEXT_API_KEY:-erpnext_api_key}
+      - ERPNEXT_API_SECRET=${ERPNEXT_API_SECRET:-erpnext_api_secret}
+      - ERPNEXT_BASE_URL=${ERPNEXT_BASE_URL:-erpnext_base_url}
+      -
       - SECRET_KEY=SECRET_KEY
 
       # REDIS CONFIG
@@ -85,11 +90,10 @@ services:
       - "9200:8080"
       # for ssh
       - "9201:22"
-      # for react
-      - "9000:9000"
     links:
       - db
       - redis
       - worker
       - celery_beat
+      - webpack
     entrypoint: [ ]
