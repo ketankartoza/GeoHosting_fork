@@ -30,6 +30,10 @@ const customTheme = extendTheme({
     Button: {
       baseStyle: {
         fontWeight: 'bold',
+        _disabled: {
+          bg: 'blue.300',
+          cursor: 'not-allowed',
+        },
       },
       sizes: {
         xl: {
@@ -44,6 +48,9 @@ const customTheme = extendTheme({
           color: "white",
           _hover: {
             bg: props.colorScheme === "orange" ? "customOrange.600" : undefined,
+          },
+          _disabled: {
+            bg: 'blue.300',
           },
         }),
       },

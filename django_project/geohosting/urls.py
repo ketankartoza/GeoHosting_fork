@@ -9,7 +9,9 @@ from geohosting.api.activity import (
 from geohosting.api.product import ProductViewSet
 from geohosting.api.token import CreateToken
 from geohosting.api.webhook import WebhookView
-from geohosting.views.auth import CustomAuthToken, logout, ValidateTokenView
+from geohosting.views.auth import (
+    CustomAuthToken, logout, ValidateTokenView, RegisterView
+)
 from geohosting.views.products import fetch_products
 from geohosting.views.home import HomeView
 
@@ -29,8 +31,12 @@ api = [
     path('fetch-products/',
          fetch_products,
          name='fetch_products'),
-    path('token/create', CreateToken.as_view(), name='create-token'),
-    path('auth/login/', CustomAuthToken.as_view(), name='api_login'),
+    path('token/create',
+         CreateToken.as_view(), name='create-token'),
+    path('auth/login/',
+         CustomAuthToken.as_view(), name='api_login'),
+    path('auth/register/',
+         RegisterView.as_view(), name='register'),
     path('auth/logout/', logout, name='api_logout'),
     path('auth/validate-token/',
          ValidateTokenView.as_view(), name='validate-token'),

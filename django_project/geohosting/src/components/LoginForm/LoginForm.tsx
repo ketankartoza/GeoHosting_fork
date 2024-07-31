@@ -12,13 +12,16 @@ import {
   FormLabel,
   Input,
   Link,
-  VStack, InputGroup, InputRightElement,
+  VStack,
+  InputGroup,
+  InputRightElement,
+  Text,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import {AppDispatch, RootState} from '../../redux/store';
-import { login, logout } from '../../redux/reducers/authSlice';
+import { AppDispatch, RootState } from '../../redux/store';
+import { login, logout, register } from '../../redux/reducers/authSlice';
 
 interface LoginFormProps {
   isOpen: boolean;
@@ -32,6 +35,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
   const [show, setShow] = useState(false);
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [firstName, setFirstName] = useState<string>('');
+  const [lastName, setLastName] = useState<string>('');
+  const [isSignUp, setIsSignUp] = useState<boolean>(false);
 
   const handleClick = () => setShow(!show);
 
@@ -53,24 +59,83 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
     });
   };
 
-   const handleLogout = () => {
+  const handleSignUp = () => {
+    dispatch(register({ email, password, firstName, lastName })).then((result: any) => {
+      if (result.meta.requestStatus === 'fulfilled') {
+        onClose();
+        navigate('/dashboard');
+      } else if (result.meta.requestStatus === 'rejected') {
+        if (result.payload) {
+          const errorMessages = Object.entries(result.payload)
+            .map(([key, value]) => `${value}`)
+            .join('\n');
+          toast.error(errorMessages);
+        } else {
+          toast.error('Sign up failed. Please try again.');
+        }
+      }
+    });
+  };
+
+  const handleLogout = () => {
     dispatch(logout()).then(() => {
       toast.success('Successfully logged out.');
       onClose();
     });
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      if (isSignUp) {
+        handleSignUp();
+      } else {
+        handleLogin();
+      }
+    }
+  };
+
+  const isFormValid = () => {
+    if (isSignUp) {
+      return email && password && firstName && lastName;
+    }
+    return email && password;
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} blockScrollOnMount={true} preserveScrollBarGap={true}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>{token ? 'Welcome' : 'Log in'}</ModalHeader>
+        <ModalHeader>{token ? 'Welcome' : isSignUp ? 'Sign Up' : 'Log in'}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           {token ? (
-            <p>You are already logged in.</p>
+            <Text>You are already logged in.</Text>
           ) : (
             <VStack spacing={4}>
+              {isSignUp && (
+                <>
+                  <FormControl id="first-name" isRequired>
+                    <FormLabel>First Name</FormLabel>
+                    <Input
+                      type="text"
+                      placeholder="Enter first name"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      onKeyUp={handleKeyPress}
+                    />
+                  </FormControl>
+                  <FormControl id="last-name" isRequired>
+                    <FormLabel>Last Name</FormLabel>
+                    <Input
+                      type="text"
+                      placeholder="Enter last name"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      onKeyUp={handleKeyPress}
+                    />
+                  </FormControl>
+                </>
+              )}
               <FormControl id="email" isRequired>
                 <FormLabel>Email</FormLabel>
                 <Input
@@ -79,6 +144,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
                   value={email}
                   autoFocus={true}
                   onChange={(e) => setEmail(e.target.value)}
+                  onKeyUp={handleKeyPress}
                 />
               </FormControl>
               <FormControl id="password" isRequired>
@@ -90,6 +156,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
                     placeholder="Enter password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    onKeyUp={handleKeyPress}
                   />
                   <InputRightElement width="4.5rem">
                     <Button h="1.75rem" size="sm" onClick={handleClick}>
@@ -97,22 +164,34 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
                     </Button>
                   </InputRightElement>
                 </InputGroup>
+                {isSignUp && (
+                  <Text fontSize="sm" color="gray.500">
+                    Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a digit, and a special character.
+                  </Text>
+                )}
               </FormControl>
-              <Link href="#" fontSize="sm" color="purple.500" display="block" alignSelf="flex-end">
-                Forgot your password?
-              </Link>
+              {!isSignUp && (
+                <Link href="#" fontSize="sm" color="purple.500" display="block" alignSelf="flex-end">
+                  Forgot your password?
+                </Link>
+              )}
             </VStack>
           )}
         </ModalBody>
-        <ModalFooter justifyContent="center">
+        <ModalFooter justifyContent="center" flexDirection="column">
           {token ? (
             <Button colorScheme="blue" onClick={handleLogout} isLoading={loading}>
               Logout
             </Button>
           ) : (
-            <Button colorScheme="blue" onClick={handleLogin} isLoading={loading}>
-              Login
-            </Button>
+            <>
+              <Button colorScheme="blue" onClick={isSignUp ? handleSignUp : handleLogin} isLoading={loading} isDisabled={!isFormValid()}>
+                {isSignUp ? 'Sign Up' : 'Login'}
+              </Button>
+              <Button variant="ghost" size="sm" mt={2} onClick={() => setIsSignUp(!isSignUp)}>
+                {isSignUp ? 'Have an account? Log in' : 'Need an account? Sign up'}
+              </Button>
+            </>
           )}
         </ModalFooter>
       </ModalContent>

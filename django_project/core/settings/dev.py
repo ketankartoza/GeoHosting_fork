@@ -5,6 +5,8 @@ GeoHosting Controller.
 .. note:: Settings for development mode.
 """
 from .project import *  # noqa
+import ast
+
 
 # Set debug to True for development
 DEBUG = True
@@ -67,3 +69,6 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 
 
 WEBPACK_LOADER['DEFAULT']['CACHE'] = False
+
+CSRF_TRUSTED_ORIGINS = ast.literal_eval(
+    os.environ.get('CSRF_TRUSTED_ORIGINS', '[]'))

@@ -49,3 +49,33 @@ FIXTURE_DIRS = ['geohosting_controller/fixtures']
 ERPNEXT_API_KEY = os.environ.get('ERPNEXT_API_KEY', '')
 ERPNEXT_API_SECRET = os.environ.get('ERPNEXT_API_SECRET', '')
 ERPNEXT_BASE_URL = os.environ.get('ERPNEXT_BASE_URL', '')
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'UserAttributeSimilarityValidator',
+        )
+    },
+    {
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'MinimumLengthValidator'
+        ),
+        'OPTIONS': {
+            'min_length': 8,
+        }
+    },
+    {
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'CommonPasswordValidator'
+        ),
+    },
+    {
+        'NAME': (
+            'django.contrib.auth.password_validation.'
+            'NumericPasswordValidator'
+        ),
+    },
+]

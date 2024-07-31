@@ -50,10 +50,26 @@ export const logout = createAsyncThunk(
   }
 );
 
+// Async thunk for register
+export const register = createAsyncThunk(
+  'auth/register',
+  async ({ email, password, firstName, lastName }: { email: string; password: string; firstName: string; lastName: string }, thunkAPI) => {
+    try {
+      const response = await axios.post('/api/auth/register/', { email, password, first_name: firstName, last_name: lastName });
+      const token = response.data.token;
+      localStorage.setItem('token', token);
+      return token;
+    } catch (error: any) {
+      const errorData = error.response.data;
+      return thunkAPI.rejectWithValue(errorData);
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
-   reducers: {
+  reducers: {
     clearAuthState: (state) => {
       state.token = null;
       state.loading = false;
@@ -77,6 +93,18 @@ const authSlice = createSlice({
       state.token = null;
     });
     builder.addCase(logout.rejected, (state, action) => {
+      state.error = action.payload as string;
+    });
+    builder.addCase(register.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(register.fulfilled, (state, action) => {
+      state.loading = false;
+      state.token = action.payload;
+    });
+    builder.addCase(register.rejected, (state, action) => {
+      state.loading = false;
       state.error = action.payload as string;
     });
   },
