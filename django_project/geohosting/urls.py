@@ -10,7 +10,7 @@ from geohosting.api.product import ProductViewSet
 from geohosting.api.token import CreateToken
 from geohosting.api.webhook import WebhookView
 from geohosting.views.auth import CustomAuthToken, logout, ValidateTokenView
-from geohosting.views.erpnext import fetch_products
+from geohosting.views.products import fetch_products
 from geohosting.views.home import HomeView
 
 router = DefaultRouter()

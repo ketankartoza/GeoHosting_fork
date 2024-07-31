@@ -108,8 +108,8 @@ class FetchProductsTestCase(TestCase):
             username='admin', password='password', is_staff=True)
         self.url = reverse('fetch_products')
 
-    @patch('geohosting.views.erpnext.fetch_erpnext_data')
-    @patch('geohosting.views.erpnext.requests.get')
+    @patch('geohosting.views.products.fetch_erpnext_data')
+    @patch('geohosting.views.products.requests.get')
     def test_fetch_products_success(self, mock_get, mock_fetch_erpnext_data):
         # Mocking the ERPNext data fetch
         mock_fetch_erpnext_data.side_effect = [[
@@ -144,8 +144,8 @@ class FetchProductsTestCase(TestCase):
         self.assertEqual(product2.name, 'Product 2')
         self.assertFalse(product2.available)
 
-    @patch('geohosting.views.erpnext.fetch_erpnext_data')
-    @patch('geohosting.views.erpnext.requests.get')
+    @patch('geohosting.views.products.fetch_erpnext_data')
+    @patch('geohosting.views.products.requests.get')
     def test_fetch_products_image_download_fail(self, mock_get, mock_fetch_erpnext_data):
         # Mocking the ERPNext data fetch
         mock_fetch_erpnext_data.side_effect = [[

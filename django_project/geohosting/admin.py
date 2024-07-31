@@ -4,12 +4,15 @@ GeoHosting Controller.
 
 .. note:: Admins
 """
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.contrib.auth.models import User
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from geohosting.utils.erpnext import post_to_erpnext
 
 from geohosting.forms.activity import CreateInstanceForm
 from geohosting.models import (
     Activity, ActivityType, Region, Product, Cluster, ProductCluster,
-    Instance, Package, WebhookEvent, ProductMedia, SalesOrder
+    Instance, Package, WebhookEvent, ProductMedia, SalesOrder, UserProfile
 )
 
 
@@ -94,9 +97,28 @@ class ProductAdmin(admin.ModelAdmin):
     inlines = [PackageInline, ProductMediaInline]
 
 
+@admin.action(description="Publish sales order")
+def publish_sales_order(modeladmin, request, queryset):
+    for sales_order in queryset:
+        result = sales_order.post_to_erpnext()
+        if result['status'] == 'success':
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Published')
+
+        else:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                result['message']
+            )
+
+
 @admin.register(SalesOrder)
 class SalesOrderAdmin(admin.ModelAdmin):
     list_display = ('date', 'package', 'customer')
+    actions = [publish_sales_order]
 
 
 @admin.register(ProductCluster)
@@ -116,6 +138,60 @@ class PackageAdmin(admin.ModelAdmin):
 
 admin.site.register(Region)
 admin.site.register(WebhookEvent)
+
+
+@admin.action(description="Push to erpnext")
+def push_user_to_erpnext(modeladmin, request, queryset):
+    for user in queryset:
+        data = {
+            "doctype": "Customer",
+            "customer_name": user.get_full_name(),
+            "customer_type": "Individual",
+            "customer_group": "Commercial",
+            "territory": "All Territories",
+            "tax_category": "VAT"
+        }
+        result = post_to_erpnext(
+            data,
+            'Customer'
+        )
+        if result['status'] == 'success':
+            user_profile, created = (
+                UserProfile.objects.get_or_create(user=user)
+            )
+            user_profile.erpnext_code = result['id']
+            user_profile.save()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                'Published')
+        else:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                result['message']
+            )
+
+
+class UserProfileInline(admin.StackedInline):
+    model = UserProfile
+    can_delete = False
+    verbose_name_plural = 'user profiles'
+    fields = ('erpnext_code',)
+
+
+class UserAdmin(BaseUserAdmin):
+    inlines = (UserProfileInline,)
+    actions = [push_user_to_erpnext]
+
+    def get_inline_instances(self, request, obj=None):
+        if not obj:
+            return []
+        return super(UserAdmin, self).get_inline_instances(request, obj)
+
+
+admin.site.unregister(User)
+admin.site.register(User, UserAdmin)
 
 
 # --------------------------------------
