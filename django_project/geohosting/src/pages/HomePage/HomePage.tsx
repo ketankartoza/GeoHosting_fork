@@ -70,9 +70,11 @@ const HomePage: React.FC = () => {
             <Text fontSize="lg" marginTop="20px">
               YOUR ONLINE GEOSPATIAL WORKSPACE
             </Text>
-            <Text color="gray.700" fontSize={{ base: '2xl', md: '3xl', xl: '4xl' }} marginTop="30px" fontWeight="bold" paddingLeft={50} paddingRight={50}>
-              Professional GeoSpatial hosting for open-source GIS web applications.
-            </Text>
+            <Container maxW='container.lg'>
+              <Text color="gray.700" fontSize={{ base: '2xl', md: '3xl', xl: '4xl' }} marginTop="30px" fontWeight="bold" paddingLeft={50} paddingRight={50}>
+                Professional GeoSpatial hosting for open-source GIS web applications.
+              </Text>
+            </Container>
             <Wrap spacing="30px" marginTop="50px" justify="center">
               {loading && <Spinner size='xl' />}
               {error && <Text color="red.500">{error}</Text>}
