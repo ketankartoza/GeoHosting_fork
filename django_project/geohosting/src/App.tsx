@@ -9,6 +9,7 @@ import { store } from './redux/store';
 import './assets/styles/index.css';
 import TokenValidator from './components/TokenValidator/TokenValidator';
 import PrivateRoute from './components/PrivateRoute/PrivateRoute';
+import OverviewPage from "./pages/OverviewPage/OverviewPage";
 
 const App: React.FC = () => {
   return (
@@ -26,6 +27,7 @@ const App: React.FC = () => {
               <CheckoutPage />
             </PrivateRoute>
           } />
+          <Route path="/app/:appName" element={<OverviewPage />} />
         </Routes>
         <ToastContainer hideProgressBar={true} newestOnTop={true} />
         <TokenValidator />

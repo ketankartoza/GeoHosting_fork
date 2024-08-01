@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
 import axios from 'axios';
 
 export interface Product {
@@ -79,39 +79,73 @@ export const fetchProductDetail = createAsyncThunk(
   }
 );
 
+export const fetchProductDetailByName = createAsyncThunk(
+  'products/fetchProductDetailByName',
+  async (productName: string, thunkAPI) => {
+    try {
+      const response = await axios.get(`/api/products/${productName}/`);
+      return response.data;
+    } catch (error: any) {
+      const errorData = error.response.data;
+      return thunkAPI.rejectWithValue(errorData);
+    }
+  }
+);
+
+const handlePending = (state: ProductsState, action: PayloadAction<any>) => {
+  if (action.type === fetchProducts.pending.type) {
+    state.loading = true;
+    state.error = null;
+  } else {
+    state.detailLoading = true;
+    state.detailError = null;
+  }
+};
+
+const handleFulfilled = (state: ProductsState, action: PayloadAction<any>) => {
+  if (action.type === fetchProducts.fulfilled.type) {
+    state.loading = false;
+    state.products = action.payload;
+  } else {
+    state.detailLoading = false;
+    state.productDetail = action.payload;
+  }
+};
+
+const handleRejected = (state: ProductsState, action: PayloadAction<any>) => {
+  if (action.type === fetchProducts.rejected.type) {
+    state.loading = false;
+    state.error = action.payload as string;
+  } else {
+    state.detailLoading = false;
+    state.detailError = action.payload as string;
+  }
+};
+
+
 const productsSlice = createSlice({
   name: 'products',
   initialState,
-  reducers: {},
-  extraReducers: (builder) => {
-    // Handle fetchProducts actions
-    builder.addCase(fetchProducts.pending, (state) => {
-      state.loading = true;
-      state.error = null;
-    });
-    builder.addCase(fetchProducts.fulfilled, (state, action) => {
-      state.loading = false;
-      state.products = action.payload;
-    });
-    builder.addCase(fetchProducts.rejected, (state, action) => {
-      state.loading = false;
-      state.error = action.payload as string;
-    });
-
-    // Handle fetchProductDetail actions
-    builder.addCase(fetchProductDetail.pending, (state) => {
-      state.detailLoading = true;
+  reducers: {
+    clearProductDetail: (state) => {
+      state.productDetail = null;
       state.detailError = null;
-    });
-    builder.addCase(fetchProductDetail.fulfilled, (state, action) => {
-      state.detailLoading = false;
-      state.productDetail = action.payload;
-    });
-    builder.addCase(fetchProductDetail.rejected, (state, action) => {
-      state.detailLoading = false;
-      state.detailError = action.payload as string;
+    },
+  },
+  extraReducers: (builder) => {
+    const actions = [
+      fetchProducts,
+      fetchProductDetail,
+      fetchProductDetailByName
+    ];
+
+    actions.forEach(action => {
+      builder.addCase(action.pending, handlePending);
+      builder.addCase(action.fulfilled, handleFulfilled);
+      builder.addCase(action.rejected, handleRejected);
     });
   },
 });
 
+export const { clearProductDetail } = productsSlice.actions;
 export default productsSlice.reducer;
