@@ -22,15 +22,6 @@ services:
       - ./volumes/static:/home/web/static
       - ./volumes/media:/home/web/media
 
-  celery_beat:
-    build:
-      context: ../
-      dockerfile: deployment/docker/Dockerfile
-    volumes:
-      - ../django_project:/home/web/django_project
-      - ./volumes/static:/home/web/static
-      - ./volumes/media:/home/web/media
-
   nginx:
     volumes:
       - ./nginx/sites-enabled:/etc/nginx/conf.d:ro
@@ -94,6 +85,5 @@ services:
       - db
       - redis
       - worker
-      - celery_beat
       - webpack
     entrypoint: [ ]
