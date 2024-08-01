@@ -76,7 +76,7 @@ const HomePage: React.FC = () => {
               YOUR ONLINE GEOSPATIAL WORKSPACE
             </Text>
             <Text color="gray.700" fontSize={{ base: '2xl', md: '3xl', xl: '4xl' }} marginTop="30px" fontWeight="bold" paddingLeft={50} paddingRight={50}>
-              Welcome to a better GIS platform where privacy and freedom come first.
+              Professional GeoSpatial hosting for open-source GIS web applications.
             </Text>
             <Wrap spacing="30px" marginTop="50px" justify="center">
               {loading && <Spinner size='xl' />}
