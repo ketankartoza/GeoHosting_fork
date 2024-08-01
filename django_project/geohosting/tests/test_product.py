@@ -112,14 +112,40 @@ class FetchProductsTestCase(TestCase):
     @patch('geohosting.views.products.requests.get')
     def test_fetch_products_success(self, mock_get, mock_fetch_erpnext_data):
         # Mocking the ERPNext data fetch
-        mock_fetch_erpnext_data.side_effect = [[
-            {'name': 'product_1', 'item_name': 'Product 1',
-             'description': '<div><p><strong>short description</strong></p><p>Biodiversity Information Management System.</p><p><br>',
-             'image': '/path/to/image1.jpg', 'published_in_website': 1},
-            {'name': 'product_2', 'item_name': 'Product 2',
-             'description': '<div><p><strong>short description</strong></p><p>Biodiversity Information Management System.</p><p><br>',
-             'image': '/path/to/image2.jpg', 'published_in_website': 0}
-        ]]
+        mock_fetch_erpnext_data.side_effect = [
+            [
+                {
+                    'name': 'product_1',
+                    'item_name': 'Product 1',
+                    'description': (
+                        '<div><p><strong>short description</strong></p>'
+                        '<p>Biodiversity Information Management System.</p>'
+                        '<p><br></p>'
+                        '<p><strong>overview header</strong></p>'
+                        '<p>Biodiversity Informatics</p>'
+                        '<p><br></p>'
+                        '<p><strong>overview description</strong></p>'
+                        '<p>A platform to curate biodiversity data. Discover and share biodiversity data. Built by biologists for scientists, natural resource managers and decision makers.</p>'
+                        '<p><br></p>'
+                        '<p><strong>overview continuation header</strong></p>'
+                        '<p>Dashboards and Taxonomy</p>'
+                        '<p><strong></strong></p>'
+                        '<p><strong>overview continuation</strong></p>'
+                        '<p>A comprehensive set of dashboards provide insights into the taxa that occur in your region. Manage taxonomy including synonyms, endemism, Red Data Book status, tags and more. </p>'
+                        '<p><br></p>'
+                    ),
+                    'image': '/path/to/image1.jpg',
+                    'published_in_website': 1
+                },
+                {
+                    'name': 'product_2',
+                    'item_name': 'Product 2',
+                    'description': '<div><p><strong>short description</strong></p><p>Biodiversity Information Management System.</p><p><br>',
+                    'image': '/path/to/image2.jpg',
+                    'published_in_website': 0
+                }
+            ]
+        ]
 
         # Mocking the image download
         mock_response = MagicMock()
@@ -139,6 +165,19 @@ class FetchProductsTestCase(TestCase):
         self.assertEqual(product1.name, 'Product 1')
         self.assertTrue(product1.available)
         self.assertIsNotNone(product1.image.name)
+
+        # Check the metadata
+        self.assertEqual(product1.productmetadata_set.count(), 5)
+        self.assertEqual(
+            product1.productmetadata_set.get(
+                key='overview_continuation'
+            ).value,
+            (
+                'A comprehensive set of dashboards provide insights into the '
+                'taxa that occur in your region. Manage taxonomy including '
+                'synonyms, endemism, Red Data Book status, tags and more.'
+            )
+        )
 
         product2 = Product.objects.get(upstream_id='product_2')
         self.assertEqual(product2.name, 'Product 2')

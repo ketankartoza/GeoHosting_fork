@@ -1,5 +1,5 @@
 import React, {MouseEventHandler, useState} from 'react';
-import { Box, Heading, Text, Button, Badge } from '@chakra-ui/react';
+import { Box, Heading, Text, Button, Badge, Image } from '@chakra-ui/react';
 
 interface CardProps {
   image?: string;
@@ -15,7 +15,6 @@ const ProductCard: React.FC<CardProps> = ({ image, title, description, comingSoo
     <Box
       borderWidth="1px"
       borderRadius="lg"
-      overflow="hidden"
       textAlign="center"
       paddingTop={5}
       paddingBottom={5}
@@ -34,16 +33,21 @@ const ProductCard: React.FC<CardProps> = ({ image, title, description, comingSoo
         },
       }}
     >
-      {comingSoon && (
-        <Badge
-          colorScheme="blue"
-          position="absolute"
-          top="10px"
-          right="10px"
-        >
-          Coming Soon
-        </Badge>
-      )}
+      {
+        comingSoon && (
+          <Box
+            position="absolute"
+            top="-35px"
+            right="-35px"
+          >
+            <Image
+              src='/static/images/Coming_Soon_Banner.png'
+              alt='Coming Soon'
+              width={180}
+            />
+          </Box>
+        )
+      }
       <Box justifyContent={'center'} display={'flex'}>
         <img src={image} width={115}/>
       </Box>

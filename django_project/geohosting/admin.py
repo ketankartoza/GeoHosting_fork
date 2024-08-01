@@ -5,13 +5,14 @@ GeoHosting Controller.
 .. note:: Admins
 """
 from django.contrib import admin, messages
-from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.models import User
 
 from geohosting.forms.activity import CreateInstanceForm
 from geohosting.models import (
-    Activity, ActivityType, Region, Product, Cluster, ProductCluster,
-    Instance, Package, WebhookEvent, ProductMedia, SalesOrder, UserProfile
+    Activity, ActivityType, Region, Product, ProductMetadata,
+    Cluster, ProductCluster, Instance, Package, WebhookEvent, ProductMedia,
+    SalesOrder, UserProfile
 )
 
 
@@ -88,12 +89,17 @@ class ProductMediaInline(admin.TabularInline):
     extra = 1
 
 
+class ProductMetadataInline(admin.TabularInline):
+    model = ProductMetadata
+    extra = 1
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     change_list_template = 'admin/product_change_list.html'
     list_display = ('name', 'upstream_id', 'available')
     search_fields = ('name', 'upstream_id')
-    inlines = [PackageInline, ProductMediaInline]
+    inlines = [PackageInline, ProductMediaInline, ProductMetadataInline]
 
 
 @admin.action(description="Publish sales order")

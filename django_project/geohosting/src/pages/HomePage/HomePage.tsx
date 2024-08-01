@@ -100,7 +100,6 @@ const HomePage: React.FC = () => {
               <Box ref={detailsRef} bg="white" p="4" mt="10">
                 <Tabs>
                   <TabList>
-                    <Tab>Pricing</Tab>
                     <Tab>
                       <Image
                         src={selectedProduct.image ? selectedProduct.image : GeonodeIcon}
@@ -108,9 +107,14 @@ const HomePage: React.FC = () => {
                         boxSize="30px"
                         mr="2"
                       />
-                      Overview</Tab>
+                      Overview
+                    </Tab>
+                    <Tab>Pricing</Tab>
                   </TabList>
                   <TabPanels>
+                    <TabPanel>
+                        <ProductOverview {...productDetail.images} />
+                    </TabPanel>
                     <TabPanel>
                       <Heading as="h3" size="lg">{selectedProduct.name} Pricing</Heading>
                       <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacingX='15px' spacingY={{ base: 10, md: 10, lg: 0 }} mt={10}>
@@ -125,9 +129,6 @@ const HomePage: React.FC = () => {
                           <ProductPricing key={pkg.id} product={selectedProduct} pkg={pkg}/>
                         ))}
                       </SimpleGrid>
-                    </TabPanel>
-                    <TabPanel>
-                        <ProductOverview {...productDetail.images} />
                     </TabPanel>
                   </TabPanels>
                 </Tabs>

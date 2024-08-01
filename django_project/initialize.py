@@ -62,6 +62,7 @@ try:
     superuser = get_user_model().objects.get(username=admin_username)
     superuser.set_password(admin_password)
     superuser.is_active = True
+    superuser.is_superuser = True
     superuser.email = admin_email
     superuser.save()
     print('superuser successfully updated')

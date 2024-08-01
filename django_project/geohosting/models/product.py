@@ -44,6 +44,24 @@ class Product(models.Model):
         return self.name
 
 
+class ProductMetadata(models.Model):
+    """Product metadata."""
+
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE
+    )
+    key = models.CharField(
+        max_length=256,
+        help_text='The key of metadata of product.'
+    )
+    value = models.TextField(
+        help_text='Metadata value for the product'
+    )
+
+    class Meta:
+        unique_together = ['product', 'key']
+
+
 class ProductCluster(models.Model):
     """Product x cluster model."""
 
