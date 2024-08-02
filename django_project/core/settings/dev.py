@@ -4,9 +4,9 @@ GeoHosting Controller.
 
 .. note:: Settings for development mode.
 """
-from .project import *  # noqa
 import ast
 
+from .project import *  # noqa
 
 # Set debug to True for development
 DEBUG = True
@@ -67,8 +67,18 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^http:\/\/127.0.0.1:*([0-9]+)?$",
 ]
 
-
 WEBPACK_LOADER['DEFAULT']['CACHE'] = False
+WEBPACK_LOADER['DEFAULT']['STATS_FILE'] = os.path.join(
+    WEBPACK_BASE_DIR,
+    'geohosting',
+    'assets',
+    'webpack_bundles_dev',
+    'webpack-stats.json'
+)
 
 CSRF_TRUSTED_ORIGINS = ast.literal_eval(
     os.environ.get('CSRF_TRUSTED_ORIGINS', '[]'))
+
+STATICFILES_DIRS += (
+    absolute_path('geohosting', 'assets', 'webpack_bundles_dev'),
+)

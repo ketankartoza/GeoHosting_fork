@@ -7,9 +7,10 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 require('dotenv').config(); // Load environment variables from .env file
 
 const mode = process.env.npm_lifecycle_script;
-const isDev = true;
+const isDev = mode.includes('development');
 const filename = isDev ? "[name]" : "[name].[chunkhash]";
 const statsFilename = 'webpack-stats.json';
+const output = isDev ? './assets/webpack_bundles_dev/' : './assets/webpack_bundles/';
 
 let conf = {
   context: __dirname,
@@ -17,7 +18,7 @@ let conf = {
       App: ['./src/index.tsx'],
   },
   output: {
-    path: path.resolve('./assets/webpack_bundles/'),
+    path: path.resolve(output),
     filename: filename + ".js",
     publicPath: isDev ? `http://${process.env.DEV_SERVER_HOST}:${process.env.DEV_SERVER_PORT}/static/` : '/static/',
   },

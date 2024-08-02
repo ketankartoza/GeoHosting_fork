@@ -52,6 +52,9 @@ REST_KNOX = {
     'AUTO_REFRESH': False,
 }
 
+# --------------------------------------
+# WEBPACK
+# --------------------------------------
 WEBPACK_BASE_DIR = os.path.dirname(
     os.path.dirname(
         os.path.dirname(os.path.abspath(__file__))))
@@ -70,3 +73,6 @@ WEBPACK_LOADER = {
         'LOADER_CLASS': 'webpack_loader.loader.WebpackLoader',
     }
 }
+STATICFILES_DIRS += (
+    absolute_path('geohosting', 'assets', 'webpack_bundles'),
+)
