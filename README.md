@@ -1,7 +1,9 @@
-# GeoHosting Controller
+# GeoHosting
 
-GeoHosting Controller is the server side. It is the middleware between client
-and jenkins.
+![image](https://github.com/user-attachments/assets/ad257a1d-ade0-4f60-a65f-dcbd6f166e2b)
+
+
+GeoHosting website. 
 
 Environment:</br>
 
