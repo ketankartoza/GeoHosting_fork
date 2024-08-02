@@ -6,7 +6,6 @@ GeoHosting.
 """
 
 from django.db import models
-from django.db.models import JSONField
 
 from geohosting.models.cluster import Cluster
 from geohosting.models.fields import SVGAndImageField
@@ -102,56 +101,3 @@ class ProductMedia(models.Model):
 
     class Meta:
         ordering = ['product__order', 'order']
-
-
-class Package(models.Model):
-    """Package model for products."""
-
-    product = models.ForeignKey(
-        Product,
-        on_delete=models.CASCADE,
-        related_name='packages'
-    )
-    erpnext_code = models.CharField(
-        default='',
-        blank=True
-    )
-    erpnext_item_code = models.CharField(
-        default='',
-        blank=True
-    )
-    currency = models.CharField(
-        default='',
-        blank=True
-    )
-    name = models.CharField(
-        max_length=256
-    )
-    price = models.DecimalField(
-        max_digits=10,
-        decimal_places=2
-    )
-    feature_list = JSONField(
-        blank=True,
-        null=True
-    )
-    order = models.PositiveIntegerField(
-        default=0
-    )
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
-    updated_at = models.DateTimeField(
-        auto_now=True
-    )
-    package_code = models.CharField(
-        max_length=256,
-        help_text='This is the package code of the product on jenkins.'
-    )
-
-    class Meta:
-        ordering = ['product__order', 'order']
-
-    def __str__(self):
-        """Return package name and price."""
-        return f"{self.name} - {self.price}"

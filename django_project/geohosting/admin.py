@@ -120,10 +120,16 @@ def publish_sales_order(modeladmin, request, queryset):
             )
 
 
+def update_stripe_status(modeladmin, request, queryset):
+    """Update order status."""
+    for order in queryset.filter():
+        order.update_stripe_status()
+
+
 @admin.register(SalesOrder)
 class SalesOrderAdmin(admin.ModelAdmin):
-    list_display = ('date', 'package', 'customer')
-    actions = [publish_sales_order]
+    list_display = ('date', 'package', 'customer', 'order_status')
+    actions = [publish_sales_order, update_stripe_status]
 
 
 @admin.register(ProductCluster)
@@ -132,13 +138,21 @@ class ProductClusterAdmin(admin.ModelAdmin):
     list_filter = ('product', 'cluster')
 
 
+@admin.action(description="Create stripe price")
+def create_stripe_price(modeladmin, request, queryset):
+    for package in queryset:
+        package.create_stripe_price_id()
+
+
 @admin.register(Package)
 class PackageAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'price', 'product', 'created_at', 'updated_at', 'package_code'
+        'name', 'price', 'product', 'created_at', 'updated_at', 'package_code',
+        'stripe_id'
     )
     search_fields = ('name', 'product__name')
     list_filter = ('created_at', 'updated_at')
+    actions = [create_stripe_price]
 
 
 admin.site.register(Region)

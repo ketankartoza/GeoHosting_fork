@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 
 from geohosting.models.cluster import Cluster
-from geohosting.models.product import Package
+from geohosting.models.package import Package
 
 User = get_user_model()
 

@@ -46,7 +46,7 @@ const SidebarContent = ({ onClose, ...rest }) => {
           Home
         </Box>
         <Box px={4} py={2} color="white" _hover={{ bg: 'gray.700' }} w="full">
-          Invoices
+          Orders
         </Box>
         <Box px={4} py={2} color="white" _hover={{ bg: 'gray.700' }} w="full">
           Support
@@ -59,7 +59,7 @@ const SidebarContent = ({ onClose, ...rest }) => {
   );
 };
 
-const DashboardPage = () => {
+const DashboardPage = ({ title="Dashboard", children }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const toggleSidebar = () => setIsOpen(!isOpen);
 
@@ -85,12 +85,11 @@ const DashboardPage = () => {
               display={{ base: 'inline-flex', md: 'none' }}
               onClick={toggleSidebar}
             />
-            <Heading size="md" textAlign="center">Dashboard</Heading>
+            <Heading size="md" textAlign="center">{ title }</Heading>
           </Flex>
 
           <Box p={4}>
-            <Text>Welcome to the Dashboard!</Text>
-            {/* Add your dashboard content here */}
+            { children }
           </Box>
         </Box>
       </Box>

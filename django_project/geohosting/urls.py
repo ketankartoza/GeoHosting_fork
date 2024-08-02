@@ -6,22 +6,21 @@ from rest_framework.routers import DefaultRouter
 from geohosting.api.activity import (
     ActivityViewSet, ActivityTypeViewSet
 )
+from geohosting.api.checkout import CheckoutStripeSessionAPI
 from geohosting.api.product import ProductViewSet
+from geohosting.api.sales_order import SalesOrderSetView
 from geohosting.api.token import CreateToken
 from geohosting.api.webhook import WebhookView
 from geohosting.views.auth import (
     CustomAuthToken, logout, ValidateTokenView, RegisterView
 )
-from geohosting.views.products import fetch_products
 from geohosting.views.home import HomeView
+from geohosting.views.products import fetch_products
 
 router = DefaultRouter()
-router.register(
-    r'activities', ActivityViewSet, basename='activities'
-)
+router.register(r'activities', ActivityViewSet, basename='activities')
 router.register(r'products', ProductViewSet)
-
-
+router.register(r'orders', SalesOrderSetView, basename='orders')
 router.register(
     r'activity_types', ActivityTypeViewSet, basename='activity_types'
 )
@@ -40,6 +39,11 @@ api = [
     path('auth/logout/', logout, name='api_logout'),
     path('auth/validate-token/',
          ValidateTokenView.as_view(), name='validate-token'),
+    path(
+        'package/<pk>/checkout',
+        CheckoutStripeSessionAPI.as_view(),
+        name='checkout_session'
+    ),
 ]
 api += router.urls
 

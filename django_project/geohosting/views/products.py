@@ -11,8 +11,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
+from geohosting.models.package import Package
 from geohosting.models.product import (
-    Product, ProductMetadata, ProductMedia, Package
+    Product, ProductMetadata, ProductMedia
 )
 from geohosting.utils.erpnext import (
     fetch_erpnext_data,
