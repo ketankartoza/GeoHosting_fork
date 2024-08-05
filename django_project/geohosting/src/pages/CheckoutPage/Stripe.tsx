@@ -24,7 +24,8 @@ import { RootState } from "../../redux/store";
 import { toast } from "react-toastify";
 import axios from "axios";
 
-const stripePromise = loadStripe("pk_test_bMxlJY1TBqBhDj8XbE7NQle3");
+// @ts-ignore
+const stripePromise = loadStripe(stripePublishableKey);
 
 interface EmbeddedCheckoutProviderProps {
   clientSecret?: string | null;

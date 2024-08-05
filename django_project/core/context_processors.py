@@ -8,3 +8,10 @@ def sentry_dsn(request):
     return {
         'SENTRY_DSN': settings.SENTRY_DSN
     }
+
+
+def stripe(request):
+    """Return stripe keys for context processor."""
+    return {
+        'STRIPE_PUBLISHABLE_KEY': settings.STRIPE_PUBLISHABLE_KEY
+    }
