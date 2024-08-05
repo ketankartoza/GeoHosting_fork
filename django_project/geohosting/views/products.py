@@ -19,6 +19,9 @@ from geohosting.utils.erpnext import (
     fetch_erpnext_data,
     fetch_erpnext_detail_data
 )
+from geohosting.tasks.products import (
+    fetch_products_from_erpnext_task
+)
 
 
 def handle_image(image_path):
@@ -183,15 +186,15 @@ def fetch_products_from_erpnext():
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def fetch_products(request):
-    fetched_data = "Products fetched successfully!"
+    fetching_data = "Products fetch initiated in the background."
 
-    products = fetch_products_from_erpnext()
+    fetch_products_from_erpnext_task.delay()
 
     messages.add_message(
         request,
         messages.SUCCESS,
-        f'{fetched_data} {len(products)}')
+        f'{fetching_data}')
     return Response({
         'status': 'success',
-        'message': fetched_data
+        'message': fetching_data
     }, status=status.HTTP_200_OK)

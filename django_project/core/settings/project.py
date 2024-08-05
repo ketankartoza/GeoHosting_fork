@@ -78,6 +78,15 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # --------------------------------------
+# CELERY
+# --------------------------------------
+CELERY_BROKER_REDIS_URL = (
+    f'redis://:{os.environ.get("REDIS_PASSWORD", "")}'
+    f'@{os.environ.get("REDIS_HOST", "")}',
+)
+CELERY_BROKER_URL = CELERY_BROKER_REDIS_URL
+
+# --------------------------------------
 # STRIPE
 # --------------------------------------
 STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY', '')

@@ -1,0 +1,1 @@
+from geohosting.tasks.products import fetch_products_from_erpnext_task
