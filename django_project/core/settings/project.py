@@ -92,4 +92,3 @@ CELERY_BROKER_URL = CELERY_BROKER_REDIS_URL
 # --------------------------------------
 STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY', '')
 STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
-

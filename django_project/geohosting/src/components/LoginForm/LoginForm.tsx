@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -21,7 +21,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { AppDispatch, RootState } from '../../redux/store';
-import { login, logout, register } from '../../redux/reducers/authSlice';
+import { login, logout, register, resetPassword } from '../../redux/reducers/authSlice';
 
 interface LoginFormProps {
   isOpen: boolean;
@@ -34,12 +34,31 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
   const { token, loading, error } = useSelector((state: RootState) => state.auth);
   const [show, setShow] = useState(false);
   const [email, setEmail] = useState<string>('');
+  const [isEmailValid, setIsEmailValid] = useState<boolean>(true);
   const [password, setPassword] = useState<string>('');
   const [firstName, setFirstName] = useState<string>('');
   const [lastName, setLastName] = useState<string>('');
   const [isSignUp, setIsSignUp] = useState<boolean>(false);
+  const [isForgotPassword, setIsForgotPassword] = useState<boolean>(false);
+  const [isEmailTouched, setIsEmailTouched] = useState<boolean>(false);
 
   const handleClick = () => setShow(!show);
+
+  const validateEmail = (email: string): boolean => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const emailValue = e.target.value;
+    setEmail(emailValue);
+    setIsEmailTouched(true);
+    if (emailValue === '') {
+      setIsEmailValid(true);
+    } else {
+      setIsEmailValid(validateEmail(emailValue));
+    }
+  };
 
   const handleLogin = () => {
     dispatch(login({ email, password })).then((result: any) => {
@@ -86,7 +105,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      if (isSignUp) {
+      if (isForgotPassword) {
+        handlePasswordReset();
+      } else if (isSignUp) {
         handleSignUp();
       } else {
         handleLogin();
@@ -94,18 +115,46 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  const handlePasswordReset = () => {
+    dispatch(resetPassword(email)).then((result: any) => {
+      if (result.meta.requestStatus === 'fulfilled') {
+        toast.success('An email has been sent to reset your password.');
+        setIsForgotPassword(false);
+      } else if (result.meta.requestStatus === 'rejected') {
+        if (result.payload) {
+          const errorMessages = Object.entries(result.payload)
+            .map(([key, value]) => `${value}`)
+            .join('\n');
+          toast.error(errorMessages);
+        } else {
+          toast.error('Password reset failed. Please try again later.');
+        }
+      } else {
+        toast.error('Invalid email address. Please enter a valid email. ');
+      }
+    });
+  };
+
   const isFormValid = () => {
     if (isSignUp) {
-      return email && password && firstName && lastName;
+      return email && password && firstName && lastName && isEmailValid;
+    } else if (isForgotPassword) {
+      return email && isEmailValid;
     }
-    return email && password;
+    return email && password && isEmailValid;
+  };
+
+  const handleBackToLogin = () => {
+    setIsForgotPassword(false);
+    setIsEmailTouched(false);
+    setEmail('');
   };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} blockScrollOnMount={true} preserveScrollBarGap={true}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>{token ? 'Welcome' : isSignUp ? 'Sign Up' : 'Log in'}</ModalHeader>
+        <ModalHeader>{token ? 'Welcome' : isSignUp ? 'Sign Up' : isForgotPassword ? 'Reset Password' : 'Log in'}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           {token ? (
@@ -143,35 +192,40 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
                   placeholder="Enter email"
                   value={email}
                   autoFocus={true}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={handleEmailChange}
                   onKeyUp={handleKeyPress}
                 />
+                {isEmailTouched && !isEmailValid && <Text color="red.500">Invalid email address.</Text>}
               </FormControl>
-              <FormControl id="password" isRequired>
-                <FormLabel>Password</FormLabel>
-                <InputGroup size="md">
-                  <Input
-                    pr="4.5rem"
-                    type={show ? 'text' : 'password'}
-                    placeholder="Enter password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onKeyUp={handleKeyPress}
-                  />
-                  <InputRightElement width="4.5rem">
-                    <Button h="1.75rem" size="sm" onClick={handleClick}>
-                      {show ? 'Hide' : 'Show'}
-                    </Button>
-                  </InputRightElement>
-                </InputGroup>
-                {isSignUp && (
-                  <Text fontSize="sm" color="gray.500">
-                    Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a digit, and a special character.
-                  </Text>
-                )}
-              </FormControl>
-              {!isSignUp && (
-                <Link href="#" fontSize="sm" color="purple.500" display="block" alignSelf="flex-end">
+              {!isForgotPassword && (
+                <FormControl id="password" isRequired>
+                  <FormLabel>Password</FormLabel>
+                  <InputGroup size="md">
+                    <Input
+                      pr="4.5rem"
+                      type={show ? 'text' : 'password'}
+                      placeholder="Enter password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      onKeyUp={handleKeyPress}
+                    />
+                    <InputRightElement width="4.5rem">
+                      <Button h="1.75rem" size="sm" onClick={handleClick}>
+                        {show ? 'Hide' : 'Show'}
+                      </Button>
+                    </InputRightElement>
+                  </InputGroup>
+                </FormControl>
+              )}
+              {!isSignUp && !isForgotPassword && (
+                <Link
+                  href="#"
+                  fontSize="sm"
+                  color="purple.500"
+                  display="block"
+                  alignSelf="flex-end"
+                  onClick={() => setIsForgotPassword(true)}
+                >
                   Forgot your password?
                 </Link>
               )}
@@ -185,12 +239,24 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
             </Button>
           ) : (
             <>
-              <Button colorScheme="blue" onClick={isSignUp ? handleSignUp : handleLogin} isLoading={loading} isDisabled={!isFormValid()}>
-                {isSignUp ? 'Sign Up' : 'Login'}
+              <Button
+                colorScheme="blue"
+                onClick={isForgotPassword ? handlePasswordReset : isSignUp ? handleSignUp : handleLogin}
+                isLoading={loading}
+                isDisabled={!isFormValid()}
+              >
+                {isForgotPassword ? 'Reset Password' : isSignUp ? 'Sign Up' : 'Login'}
               </Button>
-              <Button variant="ghost" size="sm" mt={2} onClick={() => setIsSignUp(!isSignUp)}>
-                {isSignUp ? 'Have an account? Log in' : 'Need an account? Sign up'}
-              </Button>
+              {!isForgotPassword && (
+                <Button variant="ghost" size="sm" mt={2} onClick={() => setIsSignUp(!isSignUp)}>
+                  {isSignUp ? 'Have an account? Log in' : 'Need an account? Sign up'}
+                </Button>
+              )}
+              {isForgotPassword && (
+                <Button variant="ghost" size="sm" mt={2} onClick={handleBackToLogin}>
+                  Back to Login
+                </Button>
+              )}
             </>
           )}
         </ModalFooter>

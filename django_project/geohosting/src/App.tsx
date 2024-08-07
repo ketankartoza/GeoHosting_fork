@@ -5,6 +5,7 @@ import { ToastContainer } from 'react-toastify';
 import HomePage from './pages/HomePage/HomePage';
 import DashboardPage from './pages/DashboardPage/DashboardPage';
 import CheckoutPage from './pages/CheckoutPage/CheckoutPage';
+import ResetPasswordPage from './pages/ResetPasswordPage/ResetPasswordPage';
 import { store } from './redux/store';
 import './assets/styles/index.css';
 import TokenValidator from './components/TokenValidator/TokenValidator';
@@ -19,6 +20,7 @@ const App: React.FC = () => {
       <Router>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} /> 
           <Route path="/dashboard" element={
             <PrivateRoute>
               <DashboardPage>

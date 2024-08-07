@@ -7,6 +7,19 @@ interface AuthState {
   error: string | null;
 }
 
+interface ResetPasswordPayload {
+  token: string;
+  new_password: string;
+}
+
+interface ResetPasswordResponse {
+  message: string;
+}
+
+interface ResetPasswordError {
+  error: string;
+}
+
 const initialState: AuthState = {
   token: localStorage.getItem('token'),
   loading: false,
@@ -28,6 +41,40 @@ export const login = createAsyncThunk(
     }
   }
 );
+
+// Async thunk for password reset
+export const resetPassword = createAsyncThunk(
+  'auth/reset-password',
+  async (email: string, thunkAPI) => {
+    try {
+      await axios.post('/api/auth/reset-password/', { email });
+      return true;
+    } catch (error: any) {
+      const errorData = error.response?.data || { message: 'An unknown error occurred' };
+      return thunkAPI.rejectWithValue(errorData);
+    }
+  }
+);
+
+// Async thunk for confirm reset password
+export const confirmResetPassword = createAsyncThunk<
+  ResetPasswordResponse,
+  ResetPasswordPayload,
+  { rejectValue: ResetPasswordError }
+>(
+  'auth/password-reset-confirm',
+  async (payload, thunkAPI) => {
+    const { token, new_password } = payload;
+    try {
+      const response = await axios.post<ResetPasswordResponse>('/api/auth/password-reset-confirm/', { token, new_password });
+      return response.data;
+    } catch (error: any) {
+      const errorData: ResetPasswordError = error.response?.data || { error: 'An unknown error occurred' };
+      return thunkAPI.rejectWithValue(errorData);
+    }
+  }
+);
+
 
 // Async thunk for logout
 export const logout = createAsyncThunk(
