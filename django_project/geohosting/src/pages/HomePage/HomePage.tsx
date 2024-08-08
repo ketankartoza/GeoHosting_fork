@@ -1,29 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Box,
-  Button,
   ChakraProvider,
   Container,
   Flex,
   Heading,
-  Image,
-  List,
-  ListItem,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  SimpleGrid,
+  Img,
   Spinner,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
   Text,
-  useDisclosure,
   Wrap,
   WrapItem
 } from '@chakra-ui/react';
@@ -34,9 +18,6 @@ import customTheme from "../../theme/theme";
 import { AppDispatch, RootState } from "../../redux/store";
 import { useDispatch, useSelector } from "react-redux";
 import {fetchProducts, Product, fetchProductDetail, Package} from "../../redux/reducers/productsSlice";
-import { CheckIcon } from "@chakra-ui/icons";
-import ProductPricing from "../../components/ProductPricing/ProductPricing";
-import ProductOverview from "../../components/ProductOverview/ProductOverview";
 import Background from "../../components/Background/Background";
 import {useNavigate} from "react-router-dom";
 import Footer from "../../components/Footer/Footer";
@@ -64,14 +45,19 @@ const HomePage: React.FC = () => {
           <Navbar />
           <Background />
           <Container maxW='container.xl' textAlign="center" mt="80px" mb="80px" bg="transparent">
-            <Heading as="h1" fontSize={{ base: '5xl', md: '6xl', xl: '7xl' }} fontWeight="thin" color="blue.500" mt="20px">
-              GeoSpatialHosting
-            </Heading>
-            <Text fontSize="lg" marginTop="20px">
-              YOUR ONLINE GEOSPATIAL WORKSPACE
-            </Text>
+            <Flex justify="center" align="center" flexDirection={{ base: 'column', md: 'row' }}>
+              <Img src={'/static/images/logos/geohosting-logo.png'} width={{ base: '120px', md: '120px', xl: '240px' }} mb={{ base: 4, md: 0 }} mr={{ base: 0, md: 4 }}/>
+              <Box textAlign={{ base: 'center', md: 'left' }}>
+                <Heading as="h1" fontSize={{ base: '5xl', md: '6xl', xl: '7xl' }} fontWeight="500" color="blue.500">
+                  GeoSpatialHosting
+                </Heading>
+                <Text fontSize={{ base: '20px', md: '2xl', xl: '3xl' }} color="blue.500">
+                  YOUR ONLINE GEOSPATIAL WORKSPACE
+                </Text>
+              </Box>
+            </Flex>
             <Container maxW='container.lg'>
-              <Text color="gray.700" fontSize={{ base: '2xl', md: '3xl', xl: '4xl' }} marginTop="30px" fontWeight="bold" paddingLeft={50} paddingRight={50}>
+              <Text color="gray.700" fontSize={{ base: 'xl', md: '2xl', xl: '3xl' }} marginTop="20px" fontWeight="bold" paddingLeft={50} paddingRight={50}>
                 Professional GeoSpatial hosting for open-source GIS web applications.
               </Text>
             </Container>

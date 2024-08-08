@@ -24,8 +24,13 @@ import { RootState } from "../../redux/store";
 import { toast } from "react-toastify";
 import axios from "axios";
 
+let stripePromise = null;
+
 // @ts-ignore
-const stripePromise = loadStripe(stripePublishableKey);
+if (stripePublishableKey) {
+  // @ts-ignore
+  stripePromise = loadStripe(stripePublishableKey);
+}
 
 interface EmbeddedCheckoutProviderProps {
   clientSecret?: string | null;
@@ -80,7 +85,7 @@ export const StripePaymentModal = forwardRef(
         <ModalCloseButton/>
         <ModalBody padding='0'>
           {
-            stripeOptions ?
+            stripeOptions && stripePromise ?
               <EmbeddedCheckoutProvider
                 stripe={stripePromise}
                 options={stripeOptions}
