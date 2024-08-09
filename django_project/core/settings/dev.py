@@ -20,10 +20,6 @@ CRISPY_FAIL_SILENTLY = not DEBUG
 ALLOWED_HOSTS = ['*']
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-# Make sure static files storage is set to default
-STATIC_FILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

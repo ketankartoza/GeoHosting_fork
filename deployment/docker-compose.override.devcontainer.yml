@@ -2,7 +2,7 @@ version: '3.9'
 services:
   db:
     volumes:
-      - ./pg/postgres_data:/var/lib/postgresql
+      - ./volumes/pg/postgres_data:/var/lib/postgresql
 
   worker:
     build:
@@ -14,7 +14,6 @@ services:
     volumes:
       - ../:/home/web/project
       - ./volumes/static:/home/web/static
-      - ./volumes/media:/home/web/media
 
   django:
     build:
@@ -26,7 +25,6 @@ services:
     volumes:
       - ../:/home/web/project
       - ./volumes/static:/home/web/static
-      - ./volumes/media:/home/web/media
 
   dev:
     build:
@@ -57,4 +55,6 @@ services:
       - db
       - redis
       - worker
+      - minio
+      - minio-create-bucket
     entrypoint: [ ]

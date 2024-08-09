@@ -34,6 +34,8 @@ services:
     links:
       - db
       - worker
+      - minio
+      - minio-create-bucket
 
   worker:
     <<: *default-common-django
@@ -42,9 +44,37 @@ services:
     links:
       - db
       - redis
+      - minio
+      - minio-create-bucket
 
   nginx:
     image: nginx
     hostname: nginx
     links:
       - django
+
+  minio:
+    image: minio/minio
+    command: minio server /data --console-address ":9001"
+    ports:
+      - "9005:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${AWS_ACCESS_KEY:-minio_user}
+      MINIO_ROOT_PASSWORD: ${AWS_SECRET_KEY:-minio_pass}
+    volumes:
+      - ./volumes/minio:/data
+    restart: always
+
+  minio-create-bucket:
+    image: minio/mc
+    depends_on:
+      - minio
+    environment:
+      MINIO_ROOT_USER: ${AWS_ACCESS_KEY:-aws_access_key}
+      MINIO_ROOT_PASSWORD: ${AWS_SECRET_KEY:-aws_secret_key}
+      MINIO_HOST: ${AWS_HOST:-http://minio:9000/}
+      MINIO_BUCKET_NAME: ${AWS_BUCKET_NAME:-dev}
+    volumes:
+      - ./minio/entrypoint.sh:/entrypoint.sh
+    entrypoint: [ "/bin/sh", "/entrypoint.sh" ]

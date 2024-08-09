@@ -129,10 +129,6 @@ INSTALLED_APPS = (
 )
 
 SITE_ID = 1
-STATICFILES_STORAGE = (
-    'django.contrib.staticfiles.storage.StaticFilesStorage'
-)
-
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
@@ -152,8 +148,6 @@ try:
         raise Exception('SECRET_KEY is required in env.')
 except KeyError:
     raise Exception('SECRET_KEY is required in env.')
-
-
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.example.com')

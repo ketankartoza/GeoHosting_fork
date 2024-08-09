@@ -2,7 +2,7 @@ version: '3.9'
 services:
   db:
     volumes:
-      - ./pg/postgres_data:/var/lib/postgresql
+      - ./volumes/pg/postgres_data:/var/lib/postgresql
 
   django:
     build:
@@ -20,7 +20,6 @@ services:
     volumes:
       - ../django_project:/home/web/django_project
       - ./volumes/static:/home/web/static
-      - ./volumes/media:/home/web/media
 
   nginx:
     volumes:
@@ -39,7 +38,7 @@ services:
     image: kartoza/${COMPOSE_PROJECT_NAME:-django_project}_dev
     volumes:
       - ../django_project:/home/web/django_project
-      - ./volumes/media:/home/web/media
+      - ./volumes/static:/home/web/static
     working_dir: /home/web/django_project/geohosting
     command: sh -c "npm install && npm run serve"
     entrypoint: [ ]
@@ -54,6 +53,7 @@ services:
     image: kartoza/${COMPOSE_PROJECT_NAME:-django_project}_dev
     volumes:
       - ../django_project:/home/web/django_project
+      - ./volumes/static:/home/web/static
     environment:
       # editable in .env
       - DATABASE_NAME=${DATABASE_NAME:-django}
@@ -84,4 +84,6 @@ services:
       - redis
       - worker
       - webpack
+      - minio
+      - minio-create-bucket
     entrypoint: [ ]
