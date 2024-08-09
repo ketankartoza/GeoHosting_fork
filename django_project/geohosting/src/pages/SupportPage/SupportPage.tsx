@@ -17,8 +17,6 @@ import { useNavigate } from 'react-router-dom';
 import { logout } from '../../redux/reducers/authSlice';
 import customTheme from '../../theme/theme';
 import {AppDispatch} from "../../redux/store";
-import SupportTicketForm from '../../components/SupportTicketForm/SupportTicketForm';
-
 
 const SidebarContent = ({ onClose, ...rest }) => {
   const dispatch: AppDispatch = useDispatch();
@@ -63,14 +61,9 @@ const SidebarContent = ({ onClose, ...rest }) => {
   );
 };
 
-const DashboardPage = ({ title="Dashboard", children }) => {
+const SupportPage: React.FC = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const toggleSidebar = () => setIsOpen(!isOpen);
-  const [showSupportForm, setShowSupportForm] = useState(false);
-
-  const handleCreateIssue = () => {
-    setShowSupportForm(true);
-  };
 
   return (
     <ChakraProvider theme={customTheme}>
@@ -94,29 +87,15 @@ const DashboardPage = ({ title="Dashboard", children }) => {
               display={{ base: 'inline-flex', md: 'none' }}
               onClick={toggleSidebar}
             />
-            <Heading size="md" textAlign="center">{ title }</Heading>
+            <Heading size="md" textAlign="center">{ 'Support' }</Heading>
           </Flex>
           
 
-          <Box p={4}>
-            { children }
-            <Box mt={2}>
-              {!showSupportForm && (
-                <Button colorScheme="blue" onClick={handleCreateIssue}>
-                  Create Issue
-                </Button>
-              )}
-              {showSupportForm && (
-                <Flex justifyContent="center">
-                  <SupportTicketForm onClose={() => setShowSupportForm(false)} />
-                </Flex>
-              )}
-            </Box>
-          </Box>
+          
         </Box>
       </Box>
     </ChakraProvider>
   );
 };
 
-export default DashboardPage;
+export default SupportPage;

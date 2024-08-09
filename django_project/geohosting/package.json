@@ -5,6 +5,8 @@
   "dependencies": {
     "@chakra-ui/icons": "^2.1.1",
     "@chakra-ui/react": "^2.8.2",
+    "@ckeditor/ckeditor5-build-classic": "^43.0.0",
+    "@ckeditor/ckeditor5-react": "^8.0.0",
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
     "@reduxjs/toolkit": "^2.2.6",
@@ -13,7 +15,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.7.2",
     "dotenv": "^16.4.5",
-    "framer-motion": "^11.3.7",
+    "framer-motion": "^11.3.22",
     "nth-check": "^2.1.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

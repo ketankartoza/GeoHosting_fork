@@ -22,6 +22,7 @@ from geohosting.views.auth import (
 from geohosting.views.home import HomeView
 from geohosting.views.reset_password import ResetPasswordView
 from geohosting.views.products import fetch_products
+from geohosting.views.support import create_ticket, upload_attachments
 
 router = DefaultRouter()
 router.register(r'activities', ActivityViewSet, basename='activities')
@@ -56,6 +57,12 @@ api = [
         'package/<pk>/checkout',
         CheckoutStripeSessionAPI.as_view(),
         name='checkout_session'
+    ),
+    path('support/tickets/', create_ticket, name='create_ticket'),
+    path(
+        'support/tickets/<int:ticket_id>/attachments/',
+        upload_attachments,
+        name='upload_attachments'
     ),
 ]
 api += router.urls
