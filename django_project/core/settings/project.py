@@ -109,7 +109,8 @@ STORAGES = {
             "file_overwrite": False,
             "max_memory_size": 300 * MB,  # 300MB
             "transfer_config": TRANSFER_CONFIG,
-            "endpoint_url": os.environ.get("AWS_HOST")
+            "endpoint_url": os.environ.get("AWS_HOST"),
+            "location": os.environ.get("AWS_DIR_PREFIX", "")
         },
     },
     "staticfiles": {
