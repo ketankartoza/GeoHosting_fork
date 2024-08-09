@@ -1,6 +1,5 @@
 import os
 import re
-import threading
 
 import requests
 from django.conf import settings
@@ -15,6 +14,9 @@ from rest_framework.response import Response
 from geohosting.models.package import Package
 from geohosting.models.product import (
     Product, ProductMetadata, ProductMedia
+)
+from geohosting.tasks.products import (
+    fetch_products_from_erpnext_task
 )
 from geohosting.utils.erpnext import (
     fetch_erpnext_data,
@@ -186,10 +188,7 @@ def fetch_products_from_erpnext():
 def fetch_products(request):
     fetching_data = "Products fetch initiated in the background."
 
-    thread = threading.Thread(
-        target=fetch_products_from_erpnext
-    )
-    thread.start()
+    fetch_products_from_erpnext_task.delay()
 
     messages.add_message(
         request,
