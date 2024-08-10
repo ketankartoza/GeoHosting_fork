@@ -6,7 +6,6 @@ GeoHosting Controller.
 """
 import os  # noqa
 
-from boto3.s3.transfer import TransferConfig
 from celery.schedules import crontab
 
 from .contrib import *  # noqa
@@ -93,24 +92,11 @@ CELERY_BROKER_URL = CELERY_BROKER_REDIS_URL
 STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY', '')
 STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
 
-MB = 1024 ** 2
-TRANSFER_CONFIG = TransferConfig(
-    multipart_chunksize=512 * MB,
-    use_threads=True,
-    max_concurrency=10
-)
 STORAGES = {
     "default": {
-        "BACKEND": "storages.backends.s3.S3Storage",
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
         "OPTIONS": {
-            "access_key": os.environ.get("AWS_ACCESS_KEY"),
-            "secret_key": os.environ.get("AWS_SECRET_KEY"),
-            "bucket_name": os.environ.get("AWS_BUCKET_NAME"),
-            "file_overwrite": False,
-            "max_memory_size": 300 * MB,  # 300MB
-            "transfer_config": TRANSFER_CONFIG,
-            "endpoint_url": os.environ.get("AWS_HOST"),
-            "location": os.environ.get("AWS_DIR_PREFIX", "")
+            "location": MEDIA_ROOT,
         },
     },
     "staticfiles": {
@@ -119,10 +105,3 @@ STORAGES = {
         )
     },
 }
-
-# If it is using minio local, custom_domain should be 127.0.0.1
-if os.environ.get("AWS_HOST") == 'http://minio:9000/':
-    STORAGES['default']['OPTIONS']['url_protocol'] = "http:"
-    STORAGES['default']['OPTIONS']['custom_domain'] = (
-        f'127.0.0.1:9005/{os.environ.get("AWS_BUCKET_NAME")}'
-    )

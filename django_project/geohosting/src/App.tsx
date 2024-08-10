@@ -6,14 +6,11 @@ import HomePage from './pages/HomePage/HomePage';
 import DashboardPage from './pages/DashboardPage/DashboardPage';
 import CheckoutPage from './pages/CheckoutPage/CheckoutPage';
 import ResetPasswordPage from './pages/ResetPasswordPage/ResetPasswordPage';
-import SupportPage from './pages/SupportPage/SupportPage';
 import { store } from './redux/store';
 import './assets/styles/index.css';
 import TokenValidator from './components/TokenValidator/TokenValidator';
 import PrivateRoute from './components/PrivateRoute/PrivateRoute';
 import OverviewPage from "./pages/OverviewPage/OverviewPage";
-import { Text } from "@chakra-ui/react";
-import OrderDetail from "./pages/DashboardPage/Orders/OrderDetail";
 
 const App: React.FC = () => {
   return (
@@ -22,19 +19,9 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route path="/support" element={<SupportPage />} /> 
-          <Route path="/dashboard" element={
+          <Route path="/dashboard/*" element={
             <PrivateRoute>
-              <DashboardPage>
-                <Text>Welcome to the Dashboard!</Text>
-              </DashboardPage>
-            </PrivateRoute>
-          } />
-          <Route path="/dashboard/orders/:id" element={
-            <PrivateRoute>
-              <DashboardPage title='Order'>
-                <OrderDetail />
-              </DashboardPage>
+              <DashboardPage />
             </PrivateRoute>
           } />
           <Route path="/checkout" element={

@@ -3,79 +3,31 @@ import {
   ChakraProvider,
   Box,
   Flex,
-  Text,
   Heading,
   IconButton,
-  CloseButton,
-  VStack,
-  HStack,
   Button,
 } from '@chakra-ui/react';
 import { HamburgerIcon } from '@chakra-ui/icons';
-import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { logout } from '../../redux/reducers/authSlice';
 import customTheme from '../../theme/theme';
-import {AppDispatch} from "../../redux/store";
-import SupportTicketForm from '../../components/SupportTicketForm/SupportTicketForm';
+import DashboardSidePanel from "../../components/DashboardSidePanel/DashboardSidePanel";
+import {Route, Routes, useLocation} from "react-router-dom";
+import DashboardMainPage from "./DashboardMainPage";
+import SupportPage from "./Support/SupportPage";
+import OrderDetail from "./Orders/OrderDetail";
 
-
-const SidebarContent = ({ onClose, ...rest }) => {
-  const dispatch: AppDispatch = useDispatch();
-  const navigate = useNavigate();
-  
-
-  const handleLogout = () => {
-    dispatch(logout()).then(() => {
-      navigate('/');
-    });
-  };
-
-  return (
-    <Box
-      bg="blue.500"
-      w={{ base: 'full', md: 60 }}
-      pos="fixed"
-      h="full"
-      {...rest}
-    >
-      <Flex h="20" alignItems="center" mx="8" justifyContent="space-between">
-        <Text fontSize="2xl" fontFamily="monospace" fontWeight="bold" color="white">
-          Dashboard
-        </Text>
-        <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} color="white" />
-      </Flex>
-      <VStack spacing={4} align="start" mt={5}>
-        <Box px={4} py={2} color="white" _hover={{ bg: 'gray.700' }} w="full" onClick={() => navigate('/')}>
-          Home
-        </Box>
-        <Box px={4} py={2} color="white" _hover={{ bg: 'gray.700' }} w="full">
-          Orders
-        </Box>
-        <Box px={4} py={2} color="white" _hover={{ bg: 'gray.700' }} w="full" onClick={() => navigate('/support')}>
-          Support
-        </Box>
-        <Box px={4} py={2} color="white" _hover={{ bg: 'gray.700' }} w="full" onClick={handleLogout}>
-          Logout
-        </Box>
-      </VStack>
-    </Box>
-  );
-};
-
-const DashboardPage = ({ title="Dashboard", children }) => {
+const DashboardPage = ({ title="Dashboard" }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const toggleSidebar = () => setIsOpen(!isOpen);
-  const [showSupportForm, setShowSupportForm] = useState(false);
-
-  const handleCreateIssue = () => {
-    setShowSupportForm(true);
-  };
+  const location = useLocation();
 
   return (
     <ChakraProvider theme={customTheme}>
       <Box minH="100vh">
-        <SidebarContent onClose={toggleSidebar} display={{ base: isOpen ? 'block' : 'none', md: 'block' }} />
+        <DashboardSidePanel
+          selected={location.pathname.split('/').pop()}
+          onClose={toggleSidebar}
+          display={{ base: isOpen ? 'block' : 'none', md: 'block' }}
+        />
         <Box ml={{ base: 0, md: 60 }} transition="0.3s ease">
           <Flex
             as="header"
@@ -96,22 +48,14 @@ const DashboardPage = ({ title="Dashboard", children }) => {
             />
             <Heading size="md" textAlign="center">{ title }</Heading>
           </Flex>
-          
 
-          <Box p={4}>
-            { children }
-            <Box mt={2}>
-              {!showSupportForm && (
-                <Button colorScheme="blue" onClick={handleCreateIssue}>
-                  Create Issue
-                </Button>
-              )}
-              {showSupportForm && (
-                <Flex justifyContent="center">
-                  <SupportTicketForm onClose={() => setShowSupportForm(false)} />
-                </Flex>
-              )}
-            </Box>
+          {/* Main content area below the header */}
+          <Box p={4} pt={8}>
+           <Routes>
+              <Route path="/" element={<DashboardMainPage />} />
+              <Route path="/support" element={<SupportPage />} />
+              <Route path="/orders/:id" element={<OrderDetail />} />
+            </Routes>
           </Box>
         </Box>
       </Box>

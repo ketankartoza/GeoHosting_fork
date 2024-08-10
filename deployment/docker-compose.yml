@@ -2,6 +2,7 @@ version: '3.9'
 
 volumes:
   database:
+  static-data:
 
 x-common-django:
   &default-common-django

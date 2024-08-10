@@ -37,6 +37,7 @@ const OrderDetail: React.FC = () => {
             headers: { Authorization: `Token ${token}` }
           });
           setState({ data: response.data })
+        // @ts-ignore
         } catch ({ message }) {
           setState(
             {
