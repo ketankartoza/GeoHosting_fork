@@ -156,5 +156,8 @@ EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'your-email@example.com')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'your-password')
 DEFAULT_FROM_EMAIL = os.environ.get(
-    'DEFAULT_FROM_EMAIL', 'webmaster@example.com')
+    'DEFAULT_FROM_EMAIL', 'noreply@noreply.kartoza.com')
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:8000/#')
+RESEND_API_KEY = os.environ.get(
+    'RESEND_API_KEY', ''
+)

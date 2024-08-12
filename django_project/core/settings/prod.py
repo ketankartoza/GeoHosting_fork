@@ -17,7 +17,7 @@ USE_X_FORWARDED_HOST = True
 # ----------            EMAIL           ------------ #
 # -------------------------------------------------- #
 # See fig.yml file for postfix container definition#
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'geohosting.resend_email_backend.ResendBackend'
 # Host for sending e-mail.
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp')
 # Port for sending e-mail.
@@ -32,7 +32,8 @@ EMAIL_SUBJECT_PREFIX = os.environ.get('EMAIL_SUBJECT_PREFIX', '')
 
 SERVER_EMAIL = os.environ.get('ADMIN_EMAIL', 'noreply@kartoza.com')
 DEFAULT_FROM_EMAIL = os.environ.get(
-    'DEFAULT_FROM_EMAIL', 'noreply@kartoza.com')
+    'DEFAULT_FROM_EMAIL',
+    'noreply@noreply.kartoza.com')
 
 LOGGING = {
     'version': 1,
