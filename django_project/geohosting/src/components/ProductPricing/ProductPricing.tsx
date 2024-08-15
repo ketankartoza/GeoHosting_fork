@@ -21,7 +21,7 @@ const ProductPricing: React.FC<PackageProps> = ({ product, pkg }) => {
   return (
     <Box
       key={pkg.id}
-      height={400}
+      height={475}
       backgroundColor={'gray.200'}
       borderRadius={15}
       display={'flex'}
@@ -29,54 +29,62 @@ const ProductPricing: React.FC<PackageProps> = ({ product, pkg }) => {
       alignItems={'center'}
       flexDirection="column"
       width={'100%'}
+      boxShadow="0px 4px 6px rgba(0, 0, 0, 0.2)"
+
     >
       <Box
-        backgroundColor={packageName(pkg) === 'Gold' ? 'yellow.400' : 'blue.500'}
+        backgroundColor={packageName(pkg) === 'Gold' ? 'customOrange.500' : 'blue.500'}
         textColor={'white'}
         width={'100%'}
         borderTopRadius={15}
         position="sticky"
         top="0"
         zIndex="1"
+        pt={2}
+        pb={2}
       >
-        <Heading as="h4" fontSize={25} paddingTop={2} paddingBottom={2} textAlign="center">
+        <Heading as="h4" fontSize={25} paddingTop={2} paddingBottom={2} textAlign="center" fontWeight={500}>
           {product.name} {packageName(pkg)}
         </Heading>
       </Box>
-      <Box mt={4}>
+      <Box mt={10} mb={5}>
         <Box flexDirection={'row'} display={'flex'} alignItems={'end'}>
-          <Text fontSize={35} fontWeight={'bold'}>
+          <Text fontSize={{ base: '45', md: '32', xl: '45' }} fontWeight={'bold'} color={'gray.600'}>
             {formatPrice(pkg.price, pkg.currency)}
           </Text>
         </Box>
-        <Text fontSize={20}>/month</Text>
       </Box>
-      <Box mt={4}>
+      <Box mt={5} textAlign="center" width={{ base: "50%", md: '80%', xl: "50%" }} alignItems="center">
+        <Text fontWeight={'bold'} fontSize={18}>
+          {packageName(pkg)} Features
+        </Text>
+        <List spacing={2} mt={3} pl={5}>
+          {pkg.feature_list &&
+            pkg.feature_list['spec'] &&
+            Object.entries(pkg.feature_list['spec']).map(([key, value]: any) => (
+              <ListItem key={key} display="flex" alignItems="center">
+                <CheckIcon color="blue.500" mr={2} /> {value}
+              </ListItem>
+            ))}
+        </List>
+      </Box>
+      <Box mt={10} width="100%" pl={7} pr={7}>
         <Button
           size={'xl'}
-          backgroundColor={packageName(pkg) === 'Gold' ? 'yellow.400' : 'blue.500'}
+          width="100%"
+          backgroundColor={packageName(pkg) === 'Gold' ? 'customOrange.500' : 'blue.500'}
           color={'white'}
           fontWeight={'bold'}
           paddingTop={5}
           paddingBottom={5}
           onClick={handleCheckout}
+          _hover={{
+            filter: 'brightness(1.1)',
+          }}
+          transition="filter 0.3s ease"
         >
           {`Get ${product.name} ${packageName(pkg)}`}
         </Button>
-      </Box>
-      <Box mt={5} textAlign="center" width="80%" alignItems="center">
-        <Text fontWeight={'bold'} fontSize={18}>
-          Features
-        </Text>
-        <List spacing={2} mt={2}>
-          {pkg.feature_list &&
-            pkg.feature_list['spec'] &&
-            Object.entries(pkg.feature_list['spec']).map(([key, value]: any) => (
-              <ListItem key={key} display="flex" alignItems="center">
-                <CheckIcon color="green.500" mr={2} /> {value}
-              </ListItem>
-            ))}
-        </List>
       </Box>
     </Box>
   );

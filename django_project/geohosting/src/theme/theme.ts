@@ -11,6 +11,7 @@ const customTheme = extendTheme({
   config,
   colors: {
     blue: {
+      400: '#57A0C8',
       500: '#4F9AC0',
     },
     customOrange: {
@@ -19,12 +20,13 @@ const customTheme = extendTheme({
     },
     gray: {
       200: '#eaeaea',
-      500: '#414042'
+      500: '#414042',
+      600: '#3E3E3E'
     }
   },
   fonts: {
     body: 'Lato, sans-serif',
-    heading: 'Sen, sans-serif',
+    heading: 'Avenir, sans-serif',
   },
   components: {
     Button: {

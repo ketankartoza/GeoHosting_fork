@@ -3,18 +3,20 @@ import { ProductMedia } from "../../redux/reducers/productsSlice";
 import {
   Box,
   Heading,
-  Image, Modal, ModalBody, ModalCloseButton,
+  Image,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
   ModalContent,
   ModalHeader,
   ModalOverlay,
-  SimpleGrid,
+  Flex,
   Text,
-  useDisclosure
+  useDisclosure, Container,
 } from "@chakra-ui/react";
 import ImageWithSkeleton from "../ImageWithSkeleton/ImageWithSkeleton";
 
 const ProductOverview = (medias: ProductMedia[]) => {
-
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [popupImage, setPopupImage] = useState<string | null>(null);
 
@@ -25,75 +27,83 @@ const ProductOverview = (medias: ProductMedia[]) => {
 
   return (
     <>
-      {medias && Object.entries(medias).map(([index, image]) => (
-        <SimpleGrid
-          columns={{ base: 1, md: 2, lg: 2 }}
-          mb={4}
-          spacingX='40px'
-          spacingY={{ base: 10, md: 10, lg: 0 }}
-          backgroundColor={(parseInt(index) % 2) ? 'white' : 'blue.500'}
-          color={(parseInt(index) % 2) ? 'gray.500' : 'white'}
-          borderRadius={10}
-          key={index}
-          padding={10}
-        >
-          {parseInt(index) % 2 > 0 ? (
-            <>
-              <Box>
-                <ImageWithSkeleton
-                  key={image.id}
-                  src={image.image}
-                  alt={image.title}
-                  width="100%"
-                  height="100%"
-                  borderRadius="md"
-                  onClick={() => handleImageHover(image.image)}
-                  mb={5}
-                />
-              </Box>
-              <Box>
-                <Heading as="h3" size="lg" textAlign={'left'}>{image.title}</Heading>
-                <Text mt={5} textAlign={"left"} fontSize={20}>
-                  {image.description}
-                </Text>
-              </Box>
-            </>
-          ) : (
-            <>
-              <Box>
-                <Heading as="h3" size="lg" textAlign={'right'}>{image.title}</Heading>
-                <Text mt={5} textAlign={"right"} fontSize={20}>
-                  {image.description}
-                </Text>
-              </Box>
-              <Box>
-                <ImageWithSkeleton
-                  key={image.id}
-                  src={image.image}
-                  alt={image.title}
-                  width="100%"
-                  height="100%"
-                  borderRadius="md"
-                  onClick={() => handleImageHover(image.image)}
-                  mb={5}
-                />
-              </Box>
-            </>
-          )}
-        </SimpleGrid>
-      ))}
-      <Modal isOpen={isOpen} onClose={onClose} size={'full'}>
+      {medias &&
+        Object.entries(medias).map(([index, image]) => (
+          <Box
+            mb={4}
+            backgroundColor={parseInt(index) % 2 ? "transparent" : "blue.400"}
+            color={parseInt(index) % 2 ? "gray.500" : "white"}
+            key={index}
+            padding={10}
+          >
+            <Container maxW='container.xl'>
+              {parseInt(index) % 2 > 0 ? (
+                <Flex
+                  direction={{ base: 'column', md: 'row', xl: 'row' }}
+                  alignItems={{ md: 'center', xl: 'center' }}
+                >
+                  <Box flex="1">
+                    <ImageWithSkeleton
+                      key={image.id}
+                      src={image.image}
+                      alt={image.title}
+                      width="100%"
+                      height="100%"
+                      borderRadius="md"
+                      boxShadow="0px 4px 6px rgba(0, 0, 0, 0.2)"
+                      onClick={() => handleImageHover(image.image)}
+                      mb={5}
+                    />
+                  </Box>
+                  <Box flex="1" ml={5}>
+                    <Heading as="h3" size="lg" textAlign="left">
+                      {image.title}
+                    </Heading>
+                    <Text mt={10} textAlign="left" fontSize={20}>
+                      {image.description}
+                    </Text>
+                  </Box>
+                </Flex>
+              ) : (
+                <>
+                  <Heading as="h3" size="lg" textAlign="center" mb={4}>
+                    {image.title}
+                  </Heading>
+                  <ImageWithSkeleton
+                    key={image.id}
+                    src={image.image}
+                    alt={image.title}
+                    width="100%"
+                    height="auto"
+                    borderRadius="md"
+                    onClick={() => handleImageHover(image.image)}
+                    mb={5}
+                    boxShadow="0px 4px 6px rgba(0, 0, 0, 0.2)"
+                  />
+                  <Text mt={5} textAlign="center" fontSize={20}>
+                    {image.description}
+                  </Text>
+                </>
+              )}
+            </Container>
+          </Box>
+        ))}
+      <Modal isOpen={isOpen} onClose={onClose} size={"full"}>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader></ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Image src={popupImage ? popupImage : ''} alt="Product Image" width={'100%'} />
+            <Image
+              src={popupImage ? popupImage : ""}
+              alt="Product Image"
+              width={"100%"}
+            />
           </ModalBody>
         </ModalContent>
       </Modal>
     </>
   );
-}
+};
 
 export default ProductOverview;
