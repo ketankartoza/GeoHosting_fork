@@ -46,7 +46,7 @@ const HomePage: React.FC = () => {
           <Background />
           <Container maxW='container.xl' textAlign="center" mt="80px" mb="80px" bg="transparent">
             <Flex justify="center" align="center" flexDirection={{ base: 'column', md: 'row' }}>
-              <Img src={'/static/images/logos/geohosting-logo.png'} width={{ base: '120px', md: '120px', xl: '240px' }} mb={{ base: 4, md: 0 }} mr={{ base: 0, md: 4 }}/>
+              <Img src={'/static/images/logos/geohosting.svg'} width={{ base: '120px', md: '120px', xl: '200px' }} mb={{ base: 4, md: 0 }} mr={{ base: 0, md: 4 }}/>
               <Box textAlign={{ base: 'center', md: 'left' }}>
                 <Heading as="h1" fontSize={{ base: '5xl', md: '6xl', xl: '7xl' }} fontWeight="500" color="blue.500">
                   GeoSpatialHosting
