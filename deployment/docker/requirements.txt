@@ -11,7 +11,7 @@ requests==2.32.2
 uwsgi==2.0.23
 
 # Python client for Sentry (https://sentry.io)
-sentry-sdk==1.18.0
+sentry-sdk==2.8.0
 
 # psycopg2 - Python-PostgreSQL Database Adapter
 psycopg2-binary==2.9.9
