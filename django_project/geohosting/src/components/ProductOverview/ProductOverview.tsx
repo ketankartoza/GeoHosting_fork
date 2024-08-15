@@ -11,6 +11,7 @@ import {
   Text,
   useDisclosure
 } from "@chakra-ui/react";
+import ImageWithSkeleton from "../ImageWithSkeleton/ImageWithSkeleton";
 
 const ProductOverview = (medias: ProductMedia[]) => {
 
@@ -39,14 +40,14 @@ const ProductOverview = (medias: ProductMedia[]) => {
           {parseInt(index) % 2 > 0 ? (
             <>
               <Box>
-                <Image
+                <ImageWithSkeleton
                   key={image.id}
                   src={image.image}
                   alt={image.title}
+                  width="100%"
+                  height="100%"
+                  borderRadius="md"
                   onClick={() => handleImageHover(image.image)}
-                  style={{
-                    cursor: 'pointer'
-                  }}
                   mb={5}
                 />
               </Box>
@@ -66,14 +67,14 @@ const ProductOverview = (medias: ProductMedia[]) => {
                 </Text>
               </Box>
               <Box>
-                <Image
+                <ImageWithSkeleton
                   key={image.id}
                   src={image.image}
                   alt={image.title}
+                  width="100%"
+                  height="100%"
+                  borderRadius="md"
                   onClick={() => handleImageHover(image.image)}
-                  style={{
-                    cursor: 'pointer'
-                  }}
                   mb={5}
                 />
               </Box>

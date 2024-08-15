@@ -1,5 +1,6 @@
 import React, { MouseEventHandler, useState } from 'react';
-import { Box, Heading, Text, Button, Image } from '@chakra-ui/react';
+import { Box, Heading, Text, Button, Skeleton, Image } from '@chakra-ui/react';
+import ImageWithSkeleton from "../ImageWithSkeleton/ImageWithSkeleton";
 
 interface CardProps {
   image?: string;
@@ -79,7 +80,13 @@ const ProductCard: React.FC<CardProps> = ({ image, title, description, comingSoo
         </Box>
       )}
       <Box justifyContent={'center'} display={'flex'} zIndex={1}>
-        <img src={image} width={115} />
+        <ImageWithSkeleton
+          src={image || ''}
+          alt={title}
+          width={115}
+          height={115}
+          borderRadius="none"
+        />
       </Box>
       <Heading as="h3" size="md" marginBottom="10px" zIndex={1}>
         {title}
