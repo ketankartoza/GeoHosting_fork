@@ -97,11 +97,13 @@ export const uploadAttachments = createAsyncThunk(
   'support/uploadAttachments',
   async ({ ticketId, files }: { ticketId: number; files: File[] }, thunkAPI) => {
     const formData = new FormData();
+    const token = localStorage.getItem('token');
     files.forEach(file => formData.append('attachments', file));
 
     try {
       const response = await axios.post(`/api/support/tickets/${ticketId}/attachments/`, formData, {
         headers: {
+          'Authorization': `Token ${token}`,
           'Content-Type': 'multipart/form-data'
         }
       });
