@@ -13,6 +13,7 @@ interface DataProps {
     status: string,
     date: string,
     order_status: string,
+    payment_method: string,
     package: {
       name: string,
       feature_list: {
@@ -63,6 +64,7 @@ const OrderDetail: React.FC = () => {
           You ordered at : {state.data?.date}
           <div><b>Package</b> : {state.data?.package.name}</div>
           <div><b>Status</b> : {state.data?.order_status}</div>
+          <div><b>Payment method</b> : {state.data?.payment_method}</div>
           <div>
             <b>Spec</b> : {state.data?.package.feature_list.spec.join(', ')}
           </div>

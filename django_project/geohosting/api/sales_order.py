@@ -28,5 +28,5 @@ class SalesOrderSetView(
     def get_object(self):
         """Get object."""
         obj = super().get_object()
-        obj.update_stripe_status()
+        obj.update_payment_status()
         return obj

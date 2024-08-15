@@ -59,7 +59,7 @@ export const StripePaymentModal = forwardRef(
                 headers: { Authorization: `Token ${token}` }
               });
               setStripeOptions(
-                { clientSecret: response.data }
+                { clientSecret: response.data.key }
               )
             } catch (error) {
               toast.error("There is error on checkout, please try it again.");

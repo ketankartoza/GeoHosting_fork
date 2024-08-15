@@ -147,16 +147,19 @@ def publish_sales_order(modeladmin, request, queryset):
             )
 
 
-def update_stripe_status(modeladmin, request, queryset):
+def update_payment_status(modeladmin, request, queryset):
     """Update order status."""
     for order in queryset.filter():
-        order.update_stripe_status()
+        order.update_payment_status()
 
 
 @admin.register(SalesOrder)
 class SalesOrderAdmin(admin.ModelAdmin):
-    list_display = ('date', 'package', 'customer', 'order_status')
-    actions = [publish_sales_order, update_stripe_status]
+    list_display = (
+        'date', 'package', 'customer', 'order_status', 'payment_method'
+    )
+    list_filter = ('order_status', 'payment_method')
+    actions = [publish_sales_order, update_payment_status]
 
 
 @admin.register(ProductCluster)
@@ -168,18 +171,23 @@ class ProductClusterAdmin(admin.ModelAdmin):
 @admin.action(description="Create stripe price")
 def create_stripe_price(modeladmin, request, queryset):
     for package in queryset:
-        package.create_stripe_price_id()
+        package.get_stripe_price_id()
+
+
+@admin.action(description="Create paystack price")
+def create_paystack_price(modeladmin, request, queryset):
+    for package in queryset:
+        package.get_paystack_price_id()
 
 
 @admin.register(Package)
 class PackageAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'price', 'product', 'created_at', 'updated_at', 'package_code',
-        'stripe_id'
+        'name', 'price', 'product', 'package_code', 'stripe_id', 'paystack_id'
     )
     search_fields = ('name', 'product__name')
     list_filter = ('created_at', 'updated_at')
-    actions = [create_stripe_price]
+    actions = [create_stripe_price, create_paystack_price]
 
 
 admin.site.register(Region)

@@ -29,6 +29,7 @@ import { Package } from "../../redux/reducers/productsSlice";
 import GeonodeIcon from "../../assets/images/GeoNode.svg"
 import { FaCcStripe } from 'react-icons/fa6';
 import { StripePaymentModal } from "./Stripe";
+import { PaystackPaymentModal } from "./Paystack";
 
 
 interface LocationState {
@@ -37,7 +38,8 @@ interface LocationState {
 }
 
 const PaymentMethods = {
-  STRIPE: 'STRIPE'
+  STRIPE: 'STRIPE',
+  PAYSTACK: 'PAYSTACK',
 }
 
 const CheckoutPage: React.FC = () => {
@@ -50,6 +52,7 @@ const CheckoutPage: React.FC = () => {
   const selectedData = localStorageData ? JSON.parse(localStorageData) : state;
   const [paymentMethod, setPaymentMethod] = useState<string>(PaymentMethods.STRIPE);
   const stripePaymentModalRef = useRef(null);
+  const paystackPaymentModalRef = useRef(null);
 
   useEffect(() => {
     if (!selectedData) {
@@ -65,9 +68,21 @@ const CheckoutPage: React.FC = () => {
 
   // Checkout function
   async function checkout() {
-    if (stripePaymentModalRef?.current) {
-      // @ts-ignore
-      stripePaymentModalRef?.current?.open();
+    switch (paymentMethod) {
+      case PaymentMethods.STRIPE: {
+        if (stripePaymentModalRef?.current) {
+          // @ts-ignore
+          stripePaymentModalRef?.current?.open();
+        }
+        break
+      }
+      case PaymentMethods.PAYSTACK: {
+        if (paystackPaymentModalRef?.current) {
+          // @ts-ignore
+          paystackPaymentModalRef?.current?.open();
+        }
+        break
+      }
     }
   }
 
@@ -103,10 +118,20 @@ const CheckoutPage: React.FC = () => {
                         acknowledge the <Link href="#">privacy policy</Link>.
                       </Text>
                       <Button
-                        mt={4} leftIcon={<FaCcStripe/>}
+                        mt={4} leftIcon={<FaCcStripe/>} mr={1}
                         colorScheme={paymentMethod === PaymentMethods.STRIPE ? "blue" : "blackAlpha"}
-                        size="lg">
+                        size="lg"
+                        onClick={() => setPaymentMethod(PaymentMethods.STRIPE)}
+                      >
                         Pay with Stripe
+                      </Button>
+                      <Button
+                        mt={4}
+                        colorScheme={paymentMethod === PaymentMethods.PAYSTACK ? "blue" : "blackAlpha"}
+                        size="lg"
+                        onClick={() => setPaymentMethod(PaymentMethods.PAYSTACK)}
+                      >
+                        Pay with Paystack
                       </Button>
                       <Divider mt={4}/>
                       <Text mt={2} fontSize="sm">Payments are processed
@@ -161,7 +186,7 @@ const CheckoutPage: React.FC = () => {
                 colorScheme="orange"
                 onClick={checkout}
               >
-                Continue
+                Pay with {paymentMethod.toLowerCase()}
               </Button>
             </Box>
           </Container>
@@ -176,6 +201,10 @@ const CheckoutPage: React.FC = () => {
         </Box>
         <StripePaymentModal
           ref={stripePaymentModalRef}
+          packageId={pkg.id}
+        />
+        <PaystackPaymentModal
+          ref={paystackPaymentModalRef}
           packageId={pkg.id}
         />
       </Flex>

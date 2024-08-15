@@ -92,6 +92,12 @@ CELERY_BROKER_URL = CELERY_BROKER_REDIS_URL
 STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY', '')
 STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY', '')
 
+# --------------------------------------
+# PAYSTACK
+# --------------------------------------
+PAYSTACK_PUBLISHABLE_KEY = os.environ.get('PAYSTACK_PUBLISHABLE_KEY', '')
+PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', '')
+
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",

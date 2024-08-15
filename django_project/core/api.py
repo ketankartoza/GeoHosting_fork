@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 class DjangoSettingAPI(APIView):
     """API return django settings."""
 
-    KEYS = ['STRIPE_PUBLISHABLE_KEY']
+    KEYS = ['STRIPE_PUBLISHABLE_KEY', 'PAYSTACK_PUBLISHABLE_KEY']
     permission_classes = (IsAuthenticated,)
 
     def get(self, request):

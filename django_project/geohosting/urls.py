@@ -6,7 +6,9 @@ from rest_framework.routers import DefaultRouter
 from geohosting.api.activity import (
     ActivityViewSet, ActivityTypeViewSet
 )
-from geohosting.api.checkout import CheckoutStripeSessionAPI
+from geohosting.api.checkout import (
+    CheckoutStripeSessionAPI, CheckoutPaystackSessionAPI
+)
 from geohosting.api.product import ProductViewSet
 from geohosting.api.sales_order import SalesOrderSetView
 from geohosting.api.token import CreateToken
@@ -56,7 +58,12 @@ api = [
     path(
         'package/<pk>/checkout/stripe',
         CheckoutStripeSessionAPI.as_view(),
-        name='checkout_session'
+        name='checkout-stripe-session'
+    ),
+    path(
+        'package/<pk>/checkout/paystack',
+        CheckoutPaystackSessionAPI.as_view(),
+        name='checkout-paystack-session'
     ),
     path('support/tickets/', create_ticket, name='create_ticket'),
     path(

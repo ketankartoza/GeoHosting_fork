@@ -8,6 +8,7 @@ from django.utils.timezone import now
 
 from geohosting.models.user_profile import UserProfile
 from geohosting.utils.erpnext import post_to_erpnext
+from geohosting.utils.paystack import verify_paystack_payment
 from geohosting.utils.stripe import get_checkout_detail
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -24,6 +25,13 @@ class SalesOrderStatus:
 
     WAITING_PAYMENT = 'Waiting Payment'
     PAID = 'Paid'
+
+
+class SalesOrderPaymentMethod:
+    """Order payment method."""
+
+    STRIPE = 'Stripe'
+    PAYSTACK = 'Paystack'
 
 
 class SalesOrder(models.Model):
@@ -69,10 +77,26 @@ class SalesOrder(models.Model):
         max_length=256,
         help_text='The status of order.'
     )
-    stripe_id = models.CharField(
+
+    payment_method = models.CharField(
+        default=SalesOrderPaymentMethod.STRIPE,
+        choices=(
+            (
+                SalesOrderPaymentMethod.STRIPE,
+                SalesOrderPaymentMethod.STRIPE
+            ),
+            (
+                SalesOrderPaymentMethod.PAYSTACK,
+                SalesOrderPaymentMethod.PAYSTACK
+            )
+        ),
+        max_length=256,
+        help_text='The status of order.'
+    )
+    payment_id = models.CharField(
         blank=True,
         null=True,
-        help_text='Checkout id on the stripe.'
+        help_text='Checkout id on the payment gateway.'
     )
 
     class Meta:
@@ -114,11 +138,21 @@ class SalesOrder(models.Model):
 
         return result
 
-    def update_stripe_status(self):
+    def update_payment_status(self):
         """Get checkout status."""
-        if self.order_status == SalesOrderStatus.WAITING_PAYMENT:
-            detail = get_checkout_detail(self.stripe_id)
-            if detail.invoice:
-                self.order_status = SalesOrderStatus.PAID
-                self.post_to_erpnext()
-                self.save()
+        if (
+                self.order_status == SalesOrderStatus.WAITING_PAYMENT
+                and self.payment_id
+        ):
+            if self.payment_method == SalesOrderPaymentMethod.STRIPE:
+                detail = get_checkout_detail(self.payment_id)
+                if detail.invoice:
+                    self.order_status = SalesOrderStatus.PAID
+                    self.post_to_erpnext()
+                    self.save()
+            elif self.payment_method == SalesOrderPaymentMethod.PAYSTACK:
+                response = verify_paystack_payment(self.payment_id)
+                if response['data']['status'] == 'success':
+                    self.order_status = SalesOrderStatus.PAID
+                    self.post_to_erpnext()
+                    self.save()
