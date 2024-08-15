@@ -84,4 +84,6 @@ class ResendBackend(BaseEmailBackend):
         # Make the request to the Resend API
         resend_url = "https://api.resend.com/emails"
         response = requests.post(resend_url, json=payload, headers=headers)
+        if response.status_code != 200:
+            raise ConnectionError(response.text)
         return response

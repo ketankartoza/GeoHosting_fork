@@ -20,8 +20,8 @@ from geohosting.views.auth import (
     PasswordResetConfirmView
 )
 from geohosting.views.home import HomeView
-from geohosting.views.reset_password import ResetPasswordView
 from geohosting.views.products import fetch_products
+from geohosting.views.reset_password import ResetPasswordView
 from geohosting.views.support import create_ticket, upload_attachments
 
 router = DefaultRouter()
@@ -54,7 +54,7 @@ api = [
     path('auth/validate-token/',
          ValidateTokenView.as_view(), name='validate-token'),
     path(
-        'package/<pk>/checkout',
+        'package/<pk>/checkout/stripe',
         CheckoutStripeSessionAPI.as_view(),
         name='checkout_session'
     ),

@@ -14,7 +14,7 @@ import {
   Spinner,
   useDisclosure
 } from "@chakra-ui/react";
-import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe, Stripe } from '@stripe/stripe-js';
 import {
   EmbeddedCheckout,
   EmbeddedCheckoutProvider,
@@ -23,14 +23,6 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import { toast } from "react-toastify";
 import axios from "axios";
-
-let stripePromise = null;
-
-// @ts-ignore
-if (stripePublishableKey) {
-  // @ts-ignore
-  stripePromise = loadStripe(stripePublishableKey);
-}
 
 interface EmbeddedCheckoutProviderProps {
   clientSecret?: string | null;
@@ -48,6 +40,7 @@ export const StripePaymentModal = forwardRef(
     const { token } = useSelector((state: RootState) => state.auth);
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [stripeOptions, setStripeOptions] = useState<EmbeddedCheckoutProviderProps | null>(null);
+    const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
 
     useEffect(() => {
       setStripeOptions(null);
@@ -55,7 +48,14 @@ export const StripePaymentModal = forwardRef(
         (
           async () => {
             try {
-              const response = await axios.post(`/api/package/${props.packageId}/checkout`, {}, {
+              // Get the stripe key
+              if (!stripePromise) {
+                const setting = await axios.get(`/api/settings?key=STRIPE_PUBLISHABLE_KEY`, {
+                  headers: { Authorization: `Token ${token}` }
+                })
+                setStripePromise(loadStripe(setting.data))
+              }
+              const response = await axios.post(`/api/package/${props.packageId}/checkout/stripe`, {}, {
                 headers: { Authorization: `Token ${token}` }
               });
               setStripeOptions(
