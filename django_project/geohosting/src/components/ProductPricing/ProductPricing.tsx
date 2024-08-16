@@ -49,7 +49,7 @@ const ProductPricing: React.FC<PackageProps> = ({ product, pkg }) => {
       </Box>
       <Box mt={10} mb={5}>
         <Box flexDirection={'row'} display={'flex'} alignItems={'end'}>
-          <Text fontSize={{ base: '45', md: '32', xl: '45' }} fontWeight={'bold'} color={'gray.600'}>
+          <Text fontSize={{ base: '35', sm: '45', md: '32', xl: '45' }} fontWeight={'bold'} color={'gray.600'}>
             {formatPrice(pkg.price, pkg.currency)}
           </Text>
         </Box>

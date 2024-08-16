@@ -48,16 +48,16 @@ const HomePage: React.FC = () => {
             <Flex justify="center" align="center" flexDirection={{ base: 'column', md: 'row' }}>
               <Img src={'/static/images/logos/geohosting.svg'} width={{ base: '120px', md: '120px', xl: '200px' }} mb={{ base: 4, md: 0 }} mr={{ base: 0, md: 4 }}/>
               <Box textAlign={{ base: 'center', md: 'left' }}>
-                <Heading as="h1" fontSize={{ base: '5xl', md: '6xl', xl: '7xl' }} fontWeight="500" color="blue.500">
+                <Heading as="h1" fontSize={{  base: '4xl', sm: '5xl', md: '6xl', xl: '7xl' }} fontWeight="500" color="blue.500">
                   GeoSpatialHosting
                 </Heading>
-                <Text fontSize={{ base: '20px', md: '2xl', xl: '3xl' }} color="blue.500">
+                <Text fontSize={{ base: '15px', sm: '20px', md: '2xl', xl: '3xl' }} color="blue.500">
                   YOUR ONLINE GEOSPATIAL WORKSPACE
                 </Text>
               </Box>
             </Flex>
             <Container maxW='container.lg'>
-              <Text color="gray.700" fontSize={{ base: 'xl', md: '2xl', xl: '3xl' }} marginTop="20px" fontWeight="bold" paddingLeft={50} paddingRight={50}>
+              <Text color="gray.700" fontSize={{ base: 'lg', sm: 'xl', md: '2xl', xl: '3xl' }} marginTop="20px" fontWeight="bold" paddingLeft={50} paddingRight={50}>
                 Professional GeoSpatial hosting for open-source GIS web applications.
               </Text>
             </Container>
