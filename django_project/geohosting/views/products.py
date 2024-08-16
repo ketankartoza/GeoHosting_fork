@@ -106,7 +106,8 @@ def fetch_products_from_erpnext():
             upstream_id = product_detail.get('name', '')
             description = desc.get('short_description', '')
             image_path = product_detail.get('image', '')
-            available = product_detail.get('published_in_website', 0) == 1
+            available = product_detail.get(
+                'available_in_geohosting', 0) == 1
             image_file = None
 
             if image_path:
