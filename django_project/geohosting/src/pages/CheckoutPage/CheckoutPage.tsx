@@ -26,7 +26,6 @@ import Navbar from "../../components/Navbar/Navbar";
 import Background from "../../components/Background/Background";
 import { formatPrice, packageName } from "../../utils/helpers";
 import { Package } from "../../redux/reducers/productsSlice";
-import GeonodeIcon from "../../assets/images/GeoNode.svg"
 import { FaCcStripe } from 'react-icons/fa6';
 import { StripePaymentModal } from "./Stripe";
 import { PaystackPaymentModal } from "./Paystack";
@@ -152,7 +151,7 @@ const CheckoutPage: React.FC = () => {
                        p="4">
                     <Box display="flex" alignItems="center" pr={4} pb={4}>
                       <Image
-                        src={product.image ? product.image : GeonodeIcon}
+                        src={product.image}
                         alt={product.name}
                         boxSize="50px"
                       />

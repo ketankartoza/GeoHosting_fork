@@ -22,7 +22,7 @@ const Navbar: React.FC = () => {
                    onClick={() => navigate('/')}
                    width={8}
             />
-            <ChakraLink as={RouterLink} to="/about" fontSize="md">About us</ChakraLink>
+            <ChakraLink as={RouterLink} to="https://kartoza.com/about" fontSize="md">About us</ChakraLink>
           </HStack>
           <ChakraLink
             as="button"

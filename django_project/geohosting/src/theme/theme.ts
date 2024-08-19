@@ -26,7 +26,7 @@ const customTheme = extendTheme({
   },
   fonts: {
     body: 'Lato, sans-serif',
-    heading: 'Avenir, sans-serif',
+    heading: 'Avenir, Sen, sans-serif',
   },
   components: {
     Button: {

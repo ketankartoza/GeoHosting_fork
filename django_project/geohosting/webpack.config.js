@@ -3,6 +3,7 @@ const webpack = require('webpack');
 const BundleTracker = require('webpack-bundle-tracker');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 require('dotenv').config(); // Load environment variables from .env file
 
@@ -66,6 +67,24 @@ let conf = {
     modules: ['node_modules'],
     extensions: [".ts", ".tsx", ".js", ".css", ".scss", ".svg"]
   },
+optimization: {
+    splitChunks: {
+      chunks: 'all', // Apply splitting to both initial and dynamic chunks
+      maxInitialRequests: Infinity, // Allow as many parallel requests as possible
+      minSize: 20000, // Minimum size for a chunk to be generated
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name(module) {
+            // Get the name of the npm package being bundled
+            const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
+            return `npm.${packageName.replace('@', '')}`;
+          },
+        },
+      },
+    },
+  },
+
 }
 
 if (isDev) {
