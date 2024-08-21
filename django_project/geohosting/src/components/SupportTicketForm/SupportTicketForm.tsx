@@ -104,7 +104,8 @@ const SupportTicketForm: React.FC<SupportTicketFormProps> = ({ onClose }) => {
       subject,
       details: editorData,
       status: 'open',
-      customer
+      customer,
+      issue_type: issueType
     })).then((result: any) => {
       if (result.meta.requestStatus === 'fulfilled') {
         toast.success('Ticket created successfully.');

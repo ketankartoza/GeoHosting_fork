@@ -96,37 +96,47 @@ def fetch_erpnext_data(doctype, filters=None):
         return f"Exception occurred: {str(e)}"
 
 
-def post_to_erpnext(data, doctype):
+def post_to_erpnext(data, doctype, file=None):
     """
     Post data to ERPNext and handle conflict if the data already exists.
 
     Parameters:
         data (dict): The data to post.
         doctype (str): The document type to post the data to.
+        file (file, optional): The file to upload.
 
     Returns:
         result (dict): The result containing the status and message.
     """
     url = f"{settings.ERPNEXT_BASE_URL}/api/resource/{doctype}"
     headers = {
-        "Authorization": f"token {settings.ERPNEXT_API_KEY}:"
-                         f"{settings.ERPNEXT_API_SECRET}",
-        "Content-Type": "application/json"
+        "Authorization": (
+            f"token {settings.ERPNEXT_API_KEY}:"
+            f"{settings.ERPNEXT_API_SECRET}"
+        ),
     }
-    response = None
+
+
+    files = {'file': file} if file else None
+
     try:
-        response = requests.post(url, headers=headers, data=json.dumps(data))
+        if files:
+            response = requests.post(
+                url, headers=headers,
+                data=data, files=files)
+        else:
+            headers["Content-Type"] = "application/json"
+            response = requests.post(
+                url, headers=headers,
+                data=json.dumps(data))
+
         response.raise_for_status()
         response_data = response.json()
         record_id = response_data.get("data", {}).get("name")
         return {"status": "success", "id": record_id}
+
     except requests.exceptions.HTTPError as err:
         if response.status_code == 409:
-            return {
-                "status": "conflict",
-                "message": "Data already exists."}
+            return {"status": "conflict", "message": "Data already exists."}
         else:
-            return {
-                "status": "error",
-                "message": str(err)
-            }
+            return {"status": "error", "message": str(err)}

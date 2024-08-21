@@ -135,14 +135,14 @@ class FetchProductsTestCase(TestCase):
                         '<p><br></p>'
                     ),
                     'image': '/path/to/image1.jpg',
-                    'published_in_website': 1
+                    'available_in_geohosting': 1
                 },
                 {
                     'name': 'product_2',
                     'item_name': 'Product 2',
                     'description': '<div><p><strong>short description</strong></p><p>Biodiversity Information Management System.</p><p><br>',
                     'image': '/path/to/image2.jpg',
-                    'published_in_website': 0
+                    'available_in_geohosting': 0
                 }
             ]
         ]

@@ -36,6 +36,7 @@ interface CreateTicketData {
   details: string;
   status: string;
   customer: string;
+  issue_type: string;
 }
 
 // Async thunk for fetching tickets
