@@ -24,7 +24,11 @@ from geohosting.views.auth import (
 from geohosting.views.home import HomeView
 from geohosting.views.products import fetch_products
 from geohosting.views.reset_password import ResetPasswordView
-from geohosting.views.support import create_ticket, upload_attachments
+from geohosting.views.support import (
+    get_tickets,
+    create_ticket,
+    upload_attachments
+)
 
 router = DefaultRouter()
 router.register(r'activities', ActivityViewSet, basename='activities')
@@ -65,7 +69,12 @@ api = [
         CheckoutPaystackSessionAPI.as_view(),
         name='checkout-paystack-session'
     ),
-    path('support/tickets/', create_ticket, name='create_ticket'),
+    path('support/tickets/', get_tickets, name='get_tickets'),
+    path(
+        'support/tickets/create/',
+        create_ticket,
+        name='create_ticket'
+    ),
     path(
         'support/tickets/<int:ticket_id>/attachments/',
         upload_attachments,

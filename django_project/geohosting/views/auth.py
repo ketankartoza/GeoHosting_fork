@@ -97,7 +97,7 @@ class PasswordResetView(APIView):
         user_profile.reset_token = reset_token
         user_profile.save()
 
-        reset_link = f"{FRONTEND_URL}/reset-password?token={reset_token}"
+        reset_link = f"{FRONTEND_URL}/#/reset-password?token={reset_token}"
         message = (
             'Please use the following link to reset your password: '
             f'{reset_link}'

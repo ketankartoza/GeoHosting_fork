@@ -19,7 +19,7 @@ interface SupportState {
   selectedTicket: Ticket | null;
   attachments: AttachmentsState;
   loading: boolean;
-  error: string | null;
+  error: string | { detail?: string } | null;
 }
 
 // Initial state
@@ -44,13 +44,17 @@ export const fetchTickets = createAsyncThunk(
   'support/fetchTickets',
   async (_, thunkAPI) => {
     try {
-      const response = await axios.get('/api/support/tickets/');
+      const token = localStorage.getItem('token');
+      const response = await axios.get('/api/support/tickets/', {
+        headers: { Authorization: `Token ${token}` }
+      });
       return response.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(error.response?.data || 'An unknown error occurred');
     }
   }
 );
+
 
 // Async thunk for fetching a single ticket
 export const fetchTicket = createAsyncThunk(
@@ -71,7 +75,7 @@ export const createTicket = createAsyncThunk(
   async (ticketData: CreateTicketData, thunkAPI) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('/api/support/tickets/', ticketData, { headers: { Authorization: `Token ${token}` }});
+      const response = await axios.post('/api/support/tickets/create/', ticketData, { headers: { Authorization: `Token ${token}` }});
       return response.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(error.response?.data || 'An unknown error occurred');

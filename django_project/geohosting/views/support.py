@@ -16,6 +16,45 @@ from rest_framework.parsers import MultiPartParser
 from geohosting.models.support import Ticket
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
+from geohosting.utils.erpnext import fetch_erpnext_data
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_tickets(request):
+    user_email = request.user.email
+    filters = [["owner", "=", user_email]]
+
+    try:
+        erp_tickets = fetch_erpnext_data(doctype="Issue", filters=filters)
+
+        if not isinstance(erp_tickets, list):
+            raise ValueError("Failed to fetch data from ERPNext")
+
+        status_map = {
+            'Open': 'open',
+            'On Hold': 'pending',
+            'Replied': 'pending',
+            'Closed': 'closed',
+        }
+
+        for erp_ticket in erp_tickets:
+            django_status = status_map.get(erp_ticket.get('status'), 'open')
+
+            Ticket.objects.update_or_create(
+                customer=user_email,
+                defaults={
+                    'details': erp_ticket.get('description'),
+                    'status': django_status
+                }
+            )
+    except Exception as e:
+        print(f"Error fetching or updating tickets from ERPNext: {e}")
+
+    tickets = Ticket.objects.filter(customer=user_email)
+    ticket_serializer = TicketSerializer(tickets, many=True)
+
+    return Response(ticket_serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])

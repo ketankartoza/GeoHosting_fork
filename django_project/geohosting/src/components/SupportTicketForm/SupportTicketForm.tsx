@@ -23,7 +23,7 @@ import { DeleteIcon } from '@chakra-ui/icons';
 import styled from '@emotion/styled';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/store';
-import { createTicket, uploadAttachments } from '../../redux/reducers/supportSlice';
+import { createTicket, uploadAttachments, updateTicket } from '../../redux/reducers/supportSlice';
 import { toast } from 'react-toastify';
 
 const customEditorConfig = {
@@ -47,11 +47,6 @@ const customEditorConfig = {
   },
 };
 
-interface Attachment {
-  name: string;
-  file: File;
-}
-
 const EditorContainer = styled.div`
   .ck-editor__editable {
     height: 200px;
@@ -64,11 +59,25 @@ const FormContainer = styled(Box)`
   overflow-y: auto;
 `;
 
-interface SupportTicketFormProps {
-  onClose: () => void;
+interface Attachment {
+  name: string;
+  file: File;
 }
 
-const SupportTicketForm: React.FC<SupportTicketFormProps> = ({ onClose }) => {
+interface SupportTicketFormProps {
+  onClose: () => void;
+  ticket?: {
+    id: number;
+    customer: string;
+    subject: string;
+    details: string;
+    status: string;
+    issue_type: string;
+    attachments: Attachment[];
+  };
+}
+
+const SupportTicketForm: React.FC<SupportTicketFormProps> = ({ onClose, ticket }) => {
   const dispatch: AppDispatch = useDispatch();
   const { loading, error } = useSelector((state: RootState) => state.support);
   const [subject, setSubject] = useState<string>('');
@@ -76,12 +85,26 @@ const SupportTicketForm: React.FC<SupportTicketFormProps> = ({ onClose }) => {
   const [editorData, setEditorData] = useState<string>('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [customerEmail, setCustomerEmail] = useState<string>('');
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
 
   useEffect(() => {
     const email = localStorage.getItem('email') || '';
     setCustomerEmail(email);
-  }, []);
- 
+
+    if (ticket) {
+      setIsEditMode(true);
+      setSubject(ticket.subject);
+      setIssueType(ticket.issue_type);
+      setEditorData(ticket.details);
+      setAttachments(ticket.attachments);
+    }else {
+      setIsEditMode(false);
+      setSubject('');
+      setIssueType('');
+      setEditorData('');
+      setAttachments([]);
+    }
+  }, [ticket]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -99,38 +122,54 @@ const SupportTicketForm: React.FC<SupportTicketFormProps> = ({ onClose }) => {
 
   const handleSubmit = () => {
     const customer = customerEmail;
-
-    dispatch(createTicket({
+    const ticketData = {
       subject,
       details: editorData,
       status: 'open',
       customer,
       issue_type: issueType
-    })).then((result: any) => {
-      if (result.meta.requestStatus === 'fulfilled') {
-        toast.success('Ticket created successfully.');
-        onClose();
-        setSubject('');
-        setIssueType('');
-        setEditorData('');
-        setAttachments([]);
+    };
 
-        const ticketId = result.payload.id;
+    if (isEditMode && ticket) {
+      // TODO update tickets should also upload any new attachments added
+      dispatch(updateTicket({
+        id: ticket.id,
+        updateData: ticketData
+      })).then((result: any) => {
+        if (result.meta.requestStatus === 'fulfilled') {
+          toast.success('Ticket updated successfully.');
+          onClose();
+        } else {
+          toast.error('Failed to update ticket.');
+        }
+      });
+    } else {
+      dispatch(createTicket(ticketData)).then((result: any) => {
+        if (result.meta.requestStatus === 'fulfilled') {
+          toast.success('Ticket created successfully.');
+          onClose();
+          setSubject('');
+          setIssueType('');
+          setEditorData('');
+          setAttachments([]);
 
-        dispatch(uploadAttachments({
-          ticketId,
-          files: attachments.map(attachment => attachment.file)
-        })).then((result: any) => {
-          if (result.meta.requestStatus === 'fulfilled') {
-            toast.success('Attachment uploaded successfully.');
-          } else {
-            // toast.error('Failed to upload attachment.');
-          }
-        });
-      } else {
-        toast.error('Failed to create ticket.');
-      }
-    });
+          const ticketId = result.payload.id;
+
+          dispatch(uploadAttachments({
+            ticketId,
+            files: attachments.map(attachment => attachment.file)
+          })).then((result: any) => {
+            if (result.meta.requestStatus === 'fulfilled') {
+              toast.success('Attachment uploaded successfully.');
+            } else {
+              toast.error('Failed to upload attachment.');
+            }
+          });
+        } else {
+          toast.error('Failed to create ticket.');
+        }
+      });
+    }
   };
 
   return (
@@ -165,9 +204,9 @@ const SupportTicketForm: React.FC<SupportTicketFormProps> = ({ onClose }) => {
             value={issueType}
             onChange={(e) => setIssueType(e.target.value)}
           >
-            <option value="bug">Bug</option>
-            <option value="feature">Feature Request</option>
-            <option value="support">Support</option>
+            <option value="Bug">Bug</option>
+            <option value="Feature Request">Feature Request</option>
+            <option value="Support">Support</option>
           </Select>
         </FormControl>
 
@@ -243,7 +282,7 @@ const SupportTicketForm: React.FC<SupportTicketFormProps> = ({ onClose }) => {
             onClick={handleSubmit}
             isLoading={loading}
           >
-            Submit
+            {isEditMode ? 'Update' : 'Submit'}
           </Button>
           <Button 
             variant="outline" 
