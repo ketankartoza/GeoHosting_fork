@@ -210,8 +210,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
                       onKeyUp={handleKeyPress}
                     />
                     <InputRightElement width="4.5rem">
-                      <Button h="1.75rem" size="sm" onClick={handleClick}>
-                        {show ? 'Hide' : 'Show'}
+                      <Button 
+                        h="1.75rem" 
+                        size="sm" 
+                        onClick={handleClick} 
+                        colorScheme="blue"
+                      >
+                          {show ? 'Hide' : 'Show'}
                       </Button>
                     </InputRightElement>
                   </InputGroup>
