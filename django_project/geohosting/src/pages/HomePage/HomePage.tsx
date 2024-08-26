@@ -13,7 +13,7 @@ import {
 import customTheme from '../../theme/theme';
 import { AppDispatch, RootState } from '../../redux/store';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchProducts, Product } from '../../redux/reducers/productsSlice';
+import { Product } from '../../redux/reducers/productsSlice';
 import { useNavigate } from 'react-router-dom';
 
 import Background from '../../components/Background/Background';
@@ -31,10 +31,6 @@ const HomePage: React.FC = () => {
   );
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const detailsRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    dispatch(fetchProducts());
-  }, [dispatch]);
 
   const handleProductClick = (product: Product) => {
     setSelectedProduct(product);
