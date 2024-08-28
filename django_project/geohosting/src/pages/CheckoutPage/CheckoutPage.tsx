@@ -29,6 +29,7 @@ import { Package } from "../../redux/reducers/productsSlice";
 import { FaCcStripe } from 'react-icons/fa6';
 import { StripePaymentModal } from "./Stripe";
 import { PaystackPaymentModal } from "./Paystack";
+import ProgressTracker from "../../components/ProgressTracker/ProgressTracker";
 
 
 interface LocationState {
@@ -92,6 +93,9 @@ const CheckoutPage: React.FC = () => {
           <Navbar/>
           <Background/>
           <Container maxW='container.xl' mt="80px" mb="80px" bg="transparent">
+            <Box mb={10}>
+              <ProgressTracker activeStep={0}/>
+            </Box>
             <Grid gap={6} templateColumns={`repeat(${columns}, 1fr)`}>
               <GridItem>
                 <Box>
