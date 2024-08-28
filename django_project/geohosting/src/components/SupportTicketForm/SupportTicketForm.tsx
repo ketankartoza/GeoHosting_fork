@@ -17,35 +17,12 @@ import {
   IconButton,
   Textarea,
 } from '@chakra-ui/react';
-import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { DeleteIcon } from '@chakra-ui/icons';
 import styled from '@emotion/styled';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/store';
 import { createTicket, uploadAttachments, updateTicket } from '../../redux/reducers/supportSlice';
 import { toast } from 'react-toastify';
-
-const customEditorConfig = {
-  toolbar: {
-    items: [
-      'heading',
-      '|',
-      'bold',
-      'italic',
-      'link',
-      '|',
-      'bulletedList',
-      'numberedList',
-      '|',
-      'blockQuote',
-      'insertTable',
-      '|',
-      'undo',
-      'redo'
-    ]
-  },
-};
 
 const EditorContainer = styled.div`
   .ck-editor__editable {
@@ -213,14 +190,9 @@ const SupportTicketForm: React.FC<SupportTicketFormProps> = ({ onClose, ticket }
         <FormControl id="issueDetails" isRequired>
           <FormLabel>Issue Details</FormLabel>
           <EditorContainer>
-            <CKEditor
-              editor={ClassicEditor}
-              config={customEditorConfig}
-              data={editorData}
-              onChange={(event, editor) => {
-                const data = editor.getData();
-                setEditorData(data);
-              }}
+            <Textarea
+              value={editorData}
+              onChange={(event) => setEditorData(event.target.value)}
             />
           </EditorContainer>
         </FormControl>
@@ -230,7 +202,7 @@ const SupportTicketForm: React.FC<SupportTicketFormProps> = ({ onClose, ticket }
           <Input 
             type="file" 
             multiple 
-            onChange={handleFileChange} 
+            onChange={handleFileChange}
             sx={{
               '&::file-selector-button': {
                 border: 'none',
