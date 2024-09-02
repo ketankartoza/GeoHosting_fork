@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Modal,
   ModalOverlay,
@@ -26,9 +26,10 @@ import { login, logout, register, resetPassword } from '../../redux/reducers/aut
 interface LoginFormProps {
   isOpen: boolean;
   onClose: () => void;
+  formType?: 'login' | 'signup' | 'forgotPassword';
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
+const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose, formType = 'login' }) => {
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
   const { token, loading, error } = useSelector((state: RootState) => state.auth);
@@ -39,7 +40,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
   const [firstName, setFirstName] = useState<string>('');
   const [lastName, setLastName] = useState<string>('');
   const [isSignUp, setIsSignUp] = useState<boolean>(false);
-  const [isForgotPassword, setIsForgotPassword] = useState<boolean>(false);
+  const [isForgotPassword, setIsForgotPassword] = useState<boolean>(formType === 'forgotPassword');
   const [isEmailTouched, setIsEmailTouched] = useState<boolean>(false);
 
   const handleClick = () => setShow(!show);
@@ -53,11 +54,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
     const emailValue = e.target.value;
     setEmail(emailValue);
     setIsEmailTouched(true);
-    if (emailValue === '') {
-      setIsEmailValid(true);
-    } else {
-      setIsEmailValid(validateEmail(emailValue));
-    }
+    setIsEmailValid(emailValue === '' || validateEmail(emailValue));
   };
 
   const handleLogin = () => {
@@ -66,14 +63,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
         onClose();
         navigate('/dashboard');
       } else if (result.meta.requestStatus === 'rejected') {
-        if (result.payload) {
-          const errorMessages = Object.entries(result.payload)
-            .map(([key, value]) => `${value}`)
-            .join('\n');
-          toast.error(errorMessages);
-        } else {
-          toast.error('Login failed. Please try again.');
-        }
+        const errorMessages = result.payload
+          ? Object.entries(result.payload).map(([key, value]) => `${value}`).join('\n')
+          : 'Login failed. Please try again.';
+        toast.error(errorMessages);
       }
     });
   };
@@ -84,14 +77,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
         onClose();
         navigate('/dashboard');
       } else if (result.meta.requestStatus === 'rejected') {
-        if (result.payload) {
-          const errorMessages = Object.entries(result.payload)
-            .map(([key, value]) => `${value}`)
-            .join('\n');
-          toast.error(errorMessages);
-        } else {
-          toast.error('Sign up failed. Please try again.');
-        }
+        const errorMessages = result.payload
+          ? Object.entries(result.payload).map(([key, value]) => `${value}`).join('\n')
+          : 'Sign up failed. Please try again.';
+        toast.error(errorMessages);
       }
     });
   };
@@ -107,7 +96,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
     if (e.key === 'Enter') {
       if (isForgotPassword) {
         handlePasswordReset();
-      } else if (isSignUp) {
+      } else if (isSignUp || formType === 'signup') {
         handleSignUp();
       } else {
         handleLogin();
@@ -121,22 +110,16 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
         toast.success('An email has been sent to reset your password.');
         setIsForgotPassword(false);
       } else if (result.meta.requestStatus === 'rejected') {
-        if (result.payload) {
-          const errorMessages = Object.entries(result.payload)
-            .map(([key, value]) => `${value}`)
-            .join('\n');
-          toast.error(errorMessages);
-        } else {
-          toast.error('Password reset failed. Please try again later.');
-        }
-      } else {
-        toast.error('Invalid email address. Please enter a valid email. ');
+        const errorMessages = result.payload
+          ? Object.entries(result.payload).map(([key, value]) => `${value}`).join('\n')
+          : 'Password reset failed. Please try again later.';
+        toast.error(errorMessages);
       }
     });
   };
 
   const isFormValid = () => {
-    if (isSignUp) {
+    if (isSignUp || formType === 'signup') {
       return email && password && firstName && lastName && isEmailValid;
     } else if (isForgotPassword) {
       return email && isEmailValid;
@@ -154,14 +137,22 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
     <Modal isOpen={isOpen} onClose={onClose} blockScrollOnMount={true} preserveScrollBarGap={true}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>{token ? 'Welcome' : isSignUp ? 'Sign Up' : isForgotPassword ? 'Reset Password' : 'Log in'}</ModalHeader>
+        <ModalHeader>
+          {token
+            ? 'Welcome'
+            : isSignUp || formType === 'signup'
+            ? 'Sign Up'
+            : isForgotPassword
+            ? 'Reset Password'
+            : 'Log in'}
+        </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           {token ? (
             <Text>You are already logged in.</Text>
           ) : (
             <VStack spacing={4}>
-              {isSignUp && (
+              {(isSignUp || formType === 'signup') && (
                 <>
                   <FormControl id="first-name" isRequired>
                     <FormLabel>First Name</FormLabel>
@@ -216,20 +207,23 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
                         onClick={handleClick} 
                         colorScheme="blue"
                       >
-                          {show ? 'Hide' : 'Show'}
+                        {show ? 'Hide' : 'Show'}
                       </Button>
                     </InputRightElement>
                   </InputGroup>
                 </FormControl>
               )}
-              {!isSignUp && !isForgotPassword && (
+              {!isForgotPassword && formType !== 'signup' && (
                 <Link
                   href="#"
                   fontSize="sm"
                   color="purple.500"
                   display="block"
                   alignSelf="flex-end"
-                  onClick={() => setIsForgotPassword(true)}
+                  onClick={(e) => {
+                    e.preventDefault(); // Prevent page reload
+                    setIsForgotPassword(true);
+                  }}
                 >
                   Forgot your password?
                 </Link>
@@ -246,13 +240,13 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose }) => {
             <>
               <Button
                 colorScheme="blue"
-                onClick={isForgotPassword ? handlePasswordReset : isSignUp ? handleSignUp : handleLogin}
+                onClick={isForgotPassword ? handlePasswordReset : (isSignUp || formType === 'signup') ? handleSignUp : handleLogin}
                 isLoading={loading}
                 isDisabled={!isFormValid()}
               >
-                {isForgotPassword ? 'Reset Password' : isSignUp ? 'Sign Up' : 'Login'}
+                {isForgotPassword ? 'Reset Password' : (isSignUp || formType === 'signup') ? 'Sign Up' : 'Login'}
               </Button>
-              {!isForgotPassword && (
+              {!isForgotPassword && formType !== 'signup' && (
                 <Button variant="ghost" size="sm" mt={2} onClick={() => setIsSignUp(!isSignUp)}>
                   {isSignUp ? 'Have an account? Log in' : 'Need an account? Sign up'}
                 </Button>

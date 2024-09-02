@@ -12,11 +12,17 @@ import {
   ModalOverlay,
   Flex,
   Text,
-  useDisclosure, Container,
+  useDisclosure,
+  Container,
 } from "@chakra-ui/react";
 import ImageWithSkeleton from "../ImageWithSkeleton/ImageWithSkeleton";
 
-const ProductOverview = (medias: ProductMedia[]) => {
+
+interface ProductOverviewProps {
+  medias: ProductMedia[];
+}
+
+const ProductOverview: React.FC<ProductOverviewProps> = ({ medias }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [popupImage, setPopupImage] = useState<string | null>(null);
 
@@ -27,48 +33,56 @@ const ProductOverview = (medias: ProductMedia[]) => {
 
   return (
     <>
-      {medias &&
-        Object.entries(medias).map(([index, image]) => (
-          <Box
-            mb={4}
-            backgroundColor={parseInt(index) % 2 ? "transparent" : "blue.400"}
-            color={parseInt(index) % 2 ? "gray.500" : "white"}
-            key={index}
-            padding={10}
-          >
-            <Container maxW='container.xl'>
-              {parseInt(index) % 2 > 0 ? (
-                <Flex
-                  direction={{ base: 'column', md: 'row', xl: 'row' }}
-                  alignItems={{ md: 'center', xl: 'center' }}
+      {medias.map((image, index) => (
+        <Box
+          mb={4}
+          backgroundColor={index % 2 === 0 ? "blue.400" : "transparent"}
+          color={index % 2 === 0 ? "white" : "gray.500"}
+          key={index}
+          padding={10}
+        >
+          <Container maxW='container.xl'>
+            <Flex
+              direction={{ base: 'column', md: 'row', xl: 'row' }}
+              alignItems={{ md: 'center', xl: 'center' }}
+              justify="center"
+              gap={5}
+            >
+              {index % 2 === 0 && (
+                <Box flex="1">
+                  <ImageWithSkeleton
+                    key={image.id}
+                    src={image.image}
+                    alt={image.title}
+                    width="100%"
+                    height="100%"
+                    borderRadius="md"
+                    boxShadow="0px 4px 6px rgba(0, 0, 0, 0.2)"
+                    onClick={() => handleImageHover(image.image)}
+                    mb={5}
+                  />
+                </Box>
+              )}
+              <Box flex="1">
+                <Heading
+                  as="h3"
+                  size="lg"
+                  textAlign={index % 2 === 0 ? "center" : "left"}
+                  color={index % 2 === 0 ? "white" : "inherit"}
                 >
-                  <Box flex="1">
-                    <ImageWithSkeleton
-                      key={image.id}
-                      src={image.image}
-                      alt={image.title}
-                      width="100%"
-                      height="100%"
-                      borderRadius="md"
-                      boxShadow="0px 4px 6px rgba(0, 0, 0, 0.2)"
-                      onClick={() => handleImageHover(image.image)}
-                      mb={5}
-                    />
-                  </Box>
-                  <Box flex="1" ml={5}>
-                    <Heading as="h3" size="lg" textAlign="left">
-                      {image.title}
-                    </Heading>
-                    <Text mt={10} textAlign="left" fontSize={20}>
-                      {image.description}
-                    </Text>
-                  </Box>
-                </Flex>
-              ) : (
-                <>
-                  <Heading as="h3" size="lg" textAlign="center" mb={4}>
-                    {image.title}
-                  </Heading>
+                  {image.title}
+                </Heading>
+                <Text
+                  mt={5}
+                  textAlign={index % 2 === 0 ? "center" : "left"}
+                  fontSize={20}
+                  color={index % 2 === 0 ? "white" : "inherit"}
+                >
+                  {image.description}
+                </Text>
+              </Box>
+              {index % 2 > 0 && (
+                <Box flex="1">
                   <ImageWithSkeleton
                     key={image.id}
                     src={image.image}
@@ -80,14 +94,12 @@ const ProductOverview = (medias: ProductMedia[]) => {
                     mb={5}
                     boxShadow="0px 4px 6px rgba(0, 0, 0, 0.2)"
                   />
-                  <Text mt={5} textAlign="center" fontSize={20}>
-                    {image.description}
-                  </Text>
-                </>
+                </Box>
               )}
-            </Container>
-          </Box>
-        ))}
+            </Flex>
+          </Container>
+        </Box>
+      ))}
       <Modal isOpen={isOpen} onClose={onClose} size={"full"}>
         <ModalOverlay />
         <ModalContent>

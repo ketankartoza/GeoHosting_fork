@@ -26,6 +26,7 @@ import LoadingSpinner from "../../components/LoadingSpinner/LoadingSpinner";
 const ProductOverview = lazy(() => import('../../components/ProductOverview/ProductOverview'));
 const ProductPricing = lazy(() => import('../../components/ProductPricing/ProductPricing'));
 const ProductFeatureGrid = lazy(() => import('../../components/ProductFeatureGrid/ProductFeatureGrid'));
+const ProductSupportGrid = lazy(() => import('../../components/ProductSupportGrid/ProductSupportGrid'));
 
 const OverviewPage: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -65,7 +66,7 @@ const OverviewPage: React.FC = () => {
                       <Heading as="h3" fontSize={{ base: '20px', md: '2xl', xl: '3xl' }} pt={3} pb={3} fontWeight={'light'}>{productDetail.description}</Heading>
                     </Container>
                     <Container maxW='container.xl' mt={5} mb={5}>
-                      <Text color={'gray.700'} fontWeight="bold" fontSize={{ base: 'lg', sm: 'xl', md: '2xl', xl: '3xl' }} >
+                      <Text color={'gray.700'} fontWeight="bold" fontSize={{ base: 'lg', sm: 'xl', md: '5xl', xl: '5xl' }} >
                         Tailor Your Experience: Find the Right Plan for You
                       </Text>
                     </Container>
@@ -83,22 +84,50 @@ const OverviewPage: React.FC = () => {
                     </SimpleGrid>
 
                     <Container maxW='container.xl' mt={5} mb={5}>
-                      <Text color={'gray.700'} fontWeight="bold" fontSize={{ base: 'xl', md: '2xl', xl: '3xl' }}>
+                      <Text color={'gray.700'} fontWeight="bold" fontSize={{ base: 'xl', md: '5xl', xl: '5xl' }}>
                         What {productDetail.name} Can Do for You
                       </Text>
                     </Container>
                 </Container>
                 <Suspense fallback={<LoadingSpinner/>}>
-                  <ProductOverview {...productDetail.images} />
+                  <ProductOverview medias={[]} {...productDetail.images} />
                 </Suspense>
-                <Container maxW='container.xl' mt={5} mb={10} textAlign={"center"}>
-                  <Text color={'gray.700'} fontWeight="bold" fontSize={{ base: 'xl', md: '2xl', xl: '3xl' }}  mb={15}>
+                <Box 
+                  width={{ base: '100%', md: '90vw', xl: '100%' }} 
+                  maxW="1500px" 
+                  mt={5} 
+                  mb={10} 
+                  textAlign={"center"} 
+                  mx="auto"
+
+                >
+                  <Text color={'gray.700'} fontWeight="bold" fontSize={{ base: 'xl', md: '5xl', xl: '5xl' }}  mb={15}>
                     Why Choose {productDetail.name}?
                   </Text>
                   <Suspense fallback={<LoadingSpinner/>}>
                     <ProductFeatureGrid product={productDetail}/>
                   </Suspense>
-                </Container>
+                </Box>
+                <Box 
+                  width={{ base: '100%', md: '90vw', xl: '100%' }} 
+                  maxW="1500px"  
+                  mt={5} 
+                  mb={10} 
+                  textAlign={"center"} 
+                  mx="auto"
+                >
+                  <Text 
+                    color={'gray.700'} 
+                    fontWeight="bold" 
+                    fontSize={{ base: 'xl', md: '5xl', xl: '5xl' }}  
+                    mb={15}
+                  >
+                    Start Transforming your Data with {productDetail.name} Today
+                  </Text>
+                  <Suspense fallback={<LoadingSpinner/>}>
+                    <ProductSupportGrid product={productDetail}/>
+                  </Suspense>
+                </Box>
               </>
             )}
           </Container>
