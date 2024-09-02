@@ -10,7 +10,6 @@ import {
   StepStatus,
   StepTitle,
   useBreakpointValue,
-  Flex,
 } from "@chakra-ui/react";
 
 const steps = [
@@ -19,18 +18,20 @@ const steps = [
   { title: "Deployment", description: "Deploy your service" },
 ];
 
-function ProgressTracker({ activeStep }) {
+function ProgressTracker({ steps, activeStep }) {
   // Determine if the screen size is small
   const isVertical = useBreakpointValue({ base: true, md: false });
 
   return (
-    <Stepper index={activeStep} orientation={isVertical ? "vertical" : "horizontal"}>
+    <Stepper
+      index={activeStep}
+      orientation={isVertical ? "vertical" : "horizontal"}>
       {steps.map((step, index) => (
         <Step key={index}>
           <StepIndicator>
             <StepStatus
-              complete={<StepIcon color="green.500" />}
-              incomplete={<StepNumber />}
+              complete={<StepIcon color="green.500"/>}
+              incomplete={<StepNumber/>}
               // @ts-ignore
               active={<StepNumber/>}
             />
@@ -41,7 +42,7 @@ function ProgressTracker({ activeStep }) {
             </StepTitle>
             <StepDescription>{step.description}</StepDescription>
           </Box>
-          <StepSeparator />
+          <StepSeparator/>
         </Step>
       ))}
     </Stepper>

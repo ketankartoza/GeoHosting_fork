@@ -10,7 +10,10 @@ from geohosting.api.checkout import (
     CheckoutStripeSessionAPI, CheckoutPaystackSessionAPI
 )
 from geohosting.api.product import ProductViewSet
-from geohosting.api.sales_order import SalesOrderSetView
+from geohosting.api.sales_order import (
+    SalesOrderSetView, SalesOrderPaymentStripeSessionAPI,
+    SalesOrderPaymentPaystackSessionAPI
+)
 from geohosting.api.token import CreateToken
 from geohosting.api.webhook import WebhookView
 from geohosting.views.auth import (
@@ -38,6 +41,32 @@ router.register(
     r'activity_types', ActivityTypeViewSet, basename='activity_types'
 )
 
+package = [
+    path(
+        '<pk>/payment/stripe',
+        CheckoutStripeSessionAPI.as_view(),
+        name='checkout-stripe-session'
+    ),
+    path(
+        '<pk>/payment/paystack',
+        CheckoutPaystackSessionAPI.as_view(),
+        name='checkout-paystack-session'
+    ),
+]
+
+order_payment = [
+    path(
+        '<pk>/payment/stripe',
+        SalesOrderPaymentStripeSessionAPI.as_view(),
+        name='orders-payment-stripe-session'
+    ),
+    path(
+        '<pk>/payment/paystack',
+        SalesOrderPaymentPaystackSessionAPI.as_view(),
+        name='orders-payment-paystack-session'
+    ),
+]
+
 api = [
     path('webhook/', WebhookView.as_view(), name='webhook-api'),
     path('fetch-products/',
@@ -59,16 +88,6 @@ api = [
         name='password_reset_confirm'),
     path('auth/validate-token/',
          ValidateTokenView.as_view(), name='validate-token'),
-    path(
-        'package/<pk>/checkout/stripe',
-        CheckoutStripeSessionAPI.as_view(),
-        name='checkout-stripe-session'
-    ),
-    path(
-        'package/<pk>/checkout/paystack',
-        CheckoutPaystackSessionAPI.as_view(),
-        name='checkout-paystack-session'
-    ),
     path('support/tickets/', get_tickets, name='get_tickets'),
     path(
         'support/tickets/create/',
@@ -80,6 +99,8 @@ api = [
         upload_attachments,
         name='upload_attachments'
     ),
+    path('package/', include(package)),
+    path('orders/', include(order_payment)),
 ]
 api += router.urls
 

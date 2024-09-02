@@ -2,10 +2,10 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, Heading, List, ListItem, Text } from '@chakra-ui/react';
 import { CheckIcon } from '@chakra-ui/icons';
-import {Package, Product} from '../../redux/reducers/productsSlice';
-import {formatPrice, packageName} from "../../utils/helpers";
+import { Package, Product } from '../../redux/reducers/productsSlice';
+import { formatPrice, packageName } from "../../utils/helpers";
 
-interface PackageProps {
+export interface PackageProps {
   product: Product;
   pkg: Package;
 }
@@ -14,7 +14,7 @@ const ProductPricing: React.FC<PackageProps> = ({ product, pkg }) => {
   const navigate = useNavigate();
 
   const handleCheckout = () => {
-    localStorage.setItem('selectedProduct', JSON.stringify({product, pkg}));
+    localStorage.setItem('selectedProduct', JSON.stringify({ product, pkg }));
     navigate('/checkout', { state: { product, pkg } });
   };
 
@@ -43,18 +43,21 @@ const ProductPricing: React.FC<PackageProps> = ({ product, pkg }) => {
         pt={2}
         pb={2}
       >
-        <Heading as="h4" fontSize={25} paddingTop={2} paddingBottom={2} textAlign="center" fontWeight={500}>
+        <Heading as="h4" fontSize={25} paddingTop={2} paddingBottom={2}
+                 textAlign="center" fontWeight={500}>
           {product.name} {packageName(pkg)}
         </Heading>
       </Box>
       <Box mt={10} mb={5}>
         <Box flexDirection={'row'} display={'flex'} alignItems={'end'}>
-          <Text fontSize={{ base: '35', sm: '45', md: '32', xl: '45' }} fontWeight={'bold'} color={'gray.600'}>
+          <Text fontSize={{ base: '35', sm: '45', md: '32', xl: '45' }}
+                fontWeight={'bold'} color={'gray.600'}>
             {formatPrice(pkg.price, pkg.currency)}
           </Text>
         </Box>
       </Box>
-      <Box mt={5} textAlign="center" width={{ base: "50%", md: '80%', xl: "50%" }} alignItems="center">
+      <Box mt={5} textAlign="center"
+           width={{ base: "50%", md: '80%', xl: "50%" }} alignItems="center">
         <Text fontWeight={'bold'} fontSize={18}>
           {packageName(pkg)} Features
         </Text>
@@ -63,7 +66,7 @@ const ProductPricing: React.FC<PackageProps> = ({ product, pkg }) => {
             pkg.feature_list['spec'] &&
             Object.entries(pkg.feature_list['spec']).map(([key, value]: any) => (
               <ListItem key={key} display="flex" alignItems="center">
-                <CheckIcon color="blue.500" mr={2} /> {value}
+                <CheckIcon color="blue.500" mr={2}/> {value}
               </ListItem>
             ))}
         </List>

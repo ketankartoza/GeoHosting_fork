@@ -19,5 +19,4 @@ class Command(BaseCommand):
         for activity in Activity.objects.filter(
                 status=ActivityStatus.BUILD_JENKINS
         ):
-            print(activity.id)
             activity.get_jenkins_status()

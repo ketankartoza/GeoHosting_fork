@@ -12,34 +12,13 @@ import {
 import axios from "axios";
 import { useSelector } from "react-redux";
 import PaystackPop from '@paystack/inline-js';
-import { RootState } from "../../redux/store";
 import { toast } from "react-toastify";
+import { RootState } from "../../../redux/store";
 
 interface StripePaymentModalProps {
-  packageId: number;
+  url: string,
 }
 
-
-const handleVerification = async (reference) => {
-  try {
-    const response = await fetch('/payments/verify_payment/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ reference }),
-    });
-
-    const data = await response.json();
-    if (data.status) {
-      alert('Payment verified successfully!');
-    } else {
-      toast.error('Payment verification failed: ' + data.message);
-    }
-  } catch (error) {
-    toast.error('Payment verification failed: ' + error);
-  }
-};
 export const PaystackPaymentModal = forwardRef(
   (props: StripePaymentModalProps, ref
   ) => {
@@ -51,7 +30,7 @@ export const PaystackPaymentModal = forwardRef(
         (
           async () => {
             try {
-              const response = await axios.post(`/api/package/${props.packageId}/checkout/paystack`, {}, {
+              const response = await axios.post(props.url, {}, {
                 headers: { Authorization: `Token ${token}` }
               });
               onClose()
@@ -61,7 +40,6 @@ export const PaystackPaymentModal = forwardRef(
                 window.location.replace(response.data.success_url);
               }
             } catch (error) {
-              console.log(error)
               toast.error("There is error on checkout, please try it again.");
               onClose()
             }

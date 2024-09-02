@@ -1,77 +1,75 @@
 /*** ORDER DETAILS **/
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from "react-router-dom";
-import axios from "axios";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../redux/store";
 import { Box, Spinner } from "@chakra-ui/react";
-
-
-interface DataProps {
-  data?: {
-    id: string,
-    status: string,
-    date: string,
-    order_status: string,
-    payment_method: string,
-    package: {
-      name: string,
-      feature_list: {
-        spec: Array<string>
-      },
-    }
-  },
-  error?: string
-}
+import { FaPrint } from "react-icons/fa6";
+import {
+  fetchSalesOrderDetail
+} from "../../../redux/reducers/salesOrdersSlice";
 
 const OrderDetail: React.FC = () => {
   /** Order Detail Component */
+
+  const dispatch: AppDispatch = useDispatch();
   const { id } = useParams<{ id: string }>();
-  const { token } = useSelector((state: RootState) => state.auth);
-  const [state, setState] = useState<DataProps>({});
+  const {
+    salesOrderDetail,
+    detailError
+  } = useSelector((state: RootState) => state.salesOrders);
 
   useEffect(() => {
-    (
-      async () => {
-        try {
-          const response = await axios.get(`/api/orders/${id}`, {
-            headers: { Authorization: `Token ${token}` }
-          });
-          setState({ data: response.data })
-        // @ts-ignore
-        } catch ({ message }) {
-          setState(
-            {
-              error: `${message}`
-            }
-          )
-        }
-      }
-    )()
-  }, []);
-
-  return <div>
-    {
-      !state.data && !state.error ? (
-        <Box display={'flex'} justifyContent={'center'}
-             width={'100%'} height={'100%'} alignItems={'center'}>
-          <Spinner size='xl'/>
-        </Box>
-      ) : state.error ? (
-        <Box color='Red'>{state.error}</Box>
-      ) : (
-        <Box>
-          You ordered at : {state.data?.date}
-          <div><b>Package</b> : {state.data?.package.name}</div>
-          <div><b>Status</b> : {state.data?.order_status}</div>
-          <div><b>Payment method</b> : {state.data?.payment_method}</div>
-          <div>
-            <b>Spec</b> : {state.data?.package.feature_list.spec.join(', ')}
-          </div>
-        </Box>
-      )
+    if (id != null) {
+      dispatch(fetchSalesOrderDetail(id));
     }
-  </div>
+  }, [dispatch]);
+
+  if (!salesOrderDetail && !detailError) {
+    return (
+      <Box
+        position={'absolute'} display={'flex'}
+        justifyContent={'center'} width={'100%'} height={'100%'}
+        alignItems={'center'}>
+        <Spinner size='xl'/>
+      </Box>
+    )
+  }
+
+  if (!salesOrderDetail && detailError) {
+    return (
+      <Box color='Red'>{detailError}</Box>
+    )
+  }
+
+  if (!salesOrderDetail) {
+    return (
+      <Box></Box>
+    )
+  }
+
+  return (
+    <div>
+      <Box>
+        You ordered at : {salesOrderDetail.date}
+        <Box><b>Package</b> : {salesOrderDetail.package.name}</Box>
+        <Box><b>Status</b> : {salesOrderDetail.order_status}</Box>
+        <Box><b>Payment method</b> : {salesOrderDetail.payment_method}
+        </Box>
+        <Box>
+          <b>Spec</b> : {salesOrderDetail.package.feature_list['spec'].join(', ')}
+        </Box>
+        {
+          salesOrderDetail.invoice_url ?
+            <Box marginTop={5}>
+              <a href={salesOrderDetail.invoice_url} target='_blank'>
+                Invoice <FaPrint style={{ display: "inline-block" }}/>
+              </a>
+            </Box> : null
+        }
+      </Box>
+    </div>
+  )
 }
 
 

@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { HashRouter as Router, Route, Routes } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { ToastContainer } from 'react-toastify';
@@ -10,7 +10,12 @@ import LoadingSpinner from "./components/LoadingSpinner/LoadingSpinner";
 
 const HomePage = lazy(() => import('./pages/HomePage/HomePage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage/DashboardPage'));
-const CheckoutPage = lazy(() => import('./pages/CheckoutPage/CheckoutPage'));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
+const SalesOrderCheckout = lazy(() => import('./pages/CheckoutPage/SalesOrderCheckout'));
+const CheckoutPayment = lazy(() => import('./pages/CheckoutPage/SalesOrderCheckout/CheckoutPayment'));
+const CheckoutConfiguration = lazy(() => import('./pages/CheckoutPage/SalesOrderCheckout/CheckoutConfiguration'));
+const CheckoutDeployment = lazy(() => import('./pages/CheckoutPage/SalesOrderCheckout/CheckoutDeployment'));
+const CheckoutFinish = lazy(() => import('./pages/CheckoutPage/SalesOrderCheckout/CheckoutFinish'));
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage/ResetPasswordPage'));
 const OverviewPage = lazy(() => import('./pages/OverviewPage/OverviewPage'));
 
@@ -20,13 +25,53 @@ const App: React.FC = () => {
       <Router>
         <Suspense fallback={<LoadingSpinner/>}>
           <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/" element={<HomePage/>}/>
+            <Route path="/reset-password" element={<ResetPasswordPage/>}/>
             <Route
               path="/dashboard/*"
               element={
                 <PrivateRoute>
-                  <DashboardPage />
+                  <DashboardPage/>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/orders/:id/payment"
+              element={
+                <PrivateRoute>
+                  <SalesOrderCheckout activeStep={0}>
+                    <CheckoutPayment salesOrderDetail={null}/>
+                  </SalesOrderCheckout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/orders/:id/configuration"
+              element={
+                <PrivateRoute>
+                  <SalesOrderCheckout activeStep={1}>
+                    <CheckoutConfiguration salesOrderDetail={null}/>
+                  </SalesOrderCheckout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/orders/:id/deployment"
+              element={
+                <PrivateRoute>
+                  <SalesOrderCheckout activeStep={2}>
+                    <CheckoutDeployment salesOrderDetail={null}/>
+                  </SalesOrderCheckout>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/orders/:id/finish"
+              element={
+                <PrivateRoute>
+                  <SalesOrderCheckout activeStep={3}>
+                    <CheckoutFinish salesOrderDetail={null}/>
+                  </SalesOrderCheckout>
                 </PrivateRoute>
               }
             />
@@ -34,15 +79,15 @@ const App: React.FC = () => {
               path="/checkout"
               element={
                 <PrivateRoute>
-                  <CheckoutPage />
+                  <CheckoutPage/>
                 </PrivateRoute>
               }
             />
-            <Route path="/app/:appName" element={<OverviewPage />} />
+            <Route path="/app/:appName" element={<OverviewPage/>}/>
           </Routes>
         </Suspense>
-        <ToastContainer hideProgressBar={true} newestOnTop={true} />
-        <TokenValidator />
+        <ToastContainer hideProgressBar={true} newestOnTop={true}/>
+        <TokenValidator/>
       </Router>
     </Provider>
   );

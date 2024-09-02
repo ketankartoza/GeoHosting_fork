@@ -20,7 +20,7 @@ import {
   EmbeddedCheckoutProvider,
 } from '@stripe/react-stripe-js';
 import { useSelector } from "react-redux";
-import { RootState } from "../../redux/store";
+import { RootState } from "../../../redux/store";
 import { toast } from "react-toastify";
 import axios from "axios";
 
@@ -31,7 +31,7 @@ interface EmbeddedCheckoutProviderProps {
 }
 
 interface StripePaymentModalProps {
-  packageId: number;
+  url: string;
 }
 
 export const StripePaymentModal = forwardRef(
@@ -55,7 +55,7 @@ export const StripePaymentModal = forwardRef(
                 })
                 setStripePromise(loadStripe(setting.data))
               }
-              const response = await axios.post(`/api/package/${props.packageId}/checkout/stripe`, {}, {
+              const response = await axios.post(props.url, {}, {
                 headers: { Authorization: `Token ${token}` }
               });
               setStripeOptions(

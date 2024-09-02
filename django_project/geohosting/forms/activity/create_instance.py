@@ -22,42 +22,6 @@ from geohosting_controller.variables import ActivityTypeTerm
 User = get_user_model()
 
 
-def _post_data(
-        activity_type, package_id: int, region_id: int, app_name
-):
-    """Refactor data."""
-    # Update the data based on type
-    if activity_type == ActivityTypeTerm.CREATE_INSTANCE.value:
-        try:
-            # TODO:
-            #  Later fix using region input
-            #  Change keys when API is universal
-            Activity.test_name(app_name)  # noqa
-            if Instance.objects.filter(name=app_name).count():
-                raise ActivityException('Instance already exists')
-            if Activity.objects.filter(
-                    client_data__app_name=app_name
-            ).exclude(
-                Q(status=ActivityStatus.ERROR) |
-                Q(status=ActivityStatus.SUCCESS)
-            ):
-                raise ActivityException('Some of activity is already running')
-
-            package = Package.objects.get(id=package_id)
-            product = package.product
-            return {
-                'subdomain': app_name,
-                'k8s_cluster': product.productcluster_set.get(
-                    cluster__region_id=region_id
-                ).cluster.code,
-                'geonode_size': package.package_code,
-                'geonode_name': app_name
-            }
-        except ProductCluster.DoesNotExist:
-            raise NoClusterException()
-    raise ActivityType.DoesNotExist()
-
-
 class CreateInstanceForm(forms.ModelForm):
     """Instance create form.
 

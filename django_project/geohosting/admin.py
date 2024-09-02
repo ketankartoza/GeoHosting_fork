@@ -156,9 +156,11 @@ def update_payment_status(modeladmin, request, queryset):
 @admin.register(SalesOrder)
 class SalesOrderAdmin(admin.ModelAdmin):
     list_display = (
-        'date', 'package', 'customer', 'order_status', 'payment_method'
+        'date', 'package', 'customer', 'order_status', 'payment_method',
+        'erpnext_code'
     )
     list_filter = ('order_status', 'payment_method')
+    search_fields = ('erpnext_code',)
     actions = [publish_sales_order, update_payment_status]
 
 
