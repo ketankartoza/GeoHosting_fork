@@ -66,7 +66,7 @@ const OverviewPage: React.FC = () => {
                       <Heading as="h3" fontSize={{ base: '20px', md: '2xl', xl: '3xl' }} pt={3} pb={3} fontWeight={'light'}>{productDetail.description}</Heading>
                     </Container>
                     <Container maxW='container.xl' mt={5} mb={5}>
-                      <Text color={'gray.700'} fontWeight="bold" fontSize={{ base: 'lg', sm: 'xl', md: '5xl', xl: '5xl' }} >
+                      <Text color={'gray.700'} fontWeight="bold" fontSize={{ base: 'lg', sm: 'xl', md: '2xl', xl: '3xl' }} >
                         Tailor Your Experience: Find the Right Plan for You
                       </Text>
                     </Container>
@@ -82,15 +82,9 @@ const OverviewPage: React.FC = () => {
                         </Suspense>
                       ))}
                     </SimpleGrid>
-
-                    <Container maxW='container.xl' mt={5} mb={5}>
-                      <Text color={'gray.700'} fontWeight="bold" fontSize={{ base: 'xl', md: '5xl', xl: '5xl' }}>
-                        What {productDetail.name} Can Do for You
-                      </Text>
-                    </Container>
                 </Container>
                 <Suspense fallback={<LoadingSpinner/>}>
-                  <ProductOverview medias={[]} {...productDetail.images} />
+                  <ProductOverview productMeta={ productDetail.product_meta } medias={productDetail.images} productName={productDetail.name}/>
                 </Suspense>
                 <Box 
                   width={{ base: '100%', md: '90vw', xl: '100%' }} 
@@ -101,7 +95,7 @@ const OverviewPage: React.FC = () => {
                   mx="auto"
 
                 >
-                  <Text color={'gray.700'} fontWeight="bold" fontSize={{ base: 'xl', md: '5xl', xl: '5xl' }}  mb={15}>
+                  <Text color={'gray.700'} fontWeight="bold" fontSize={{ base: 'xl', md: '2xl', xl: '3xl' }}  mb={15}>
                     Why Choose {productDetail.name}?
                   </Text>
                   <Suspense fallback={<LoadingSpinner/>}>
@@ -119,7 +113,7 @@ const OverviewPage: React.FC = () => {
                   <Text 
                     color={'gray.700'} 
                     fontWeight="bold" 
-                    fontSize={{ base: 'xl', md: '5xl', xl: '5xl' }}  
+                    fontSize={{ base: 'xl', md: '2xl', xl: '3xl' }}  
                     mb={15}
                   >
                     Start Transforming your Data with {productDetail.name} Today
