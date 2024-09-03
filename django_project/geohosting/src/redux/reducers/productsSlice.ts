@@ -9,6 +9,7 @@ export interface Product {
   image?: string;
   images: ProductMedia[];
   packages: Package[];
+  product_meta: { key: string; value: string; }[];
 }
 
 export interface ProductMedia {
