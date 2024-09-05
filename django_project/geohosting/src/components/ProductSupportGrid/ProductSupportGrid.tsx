@@ -87,6 +87,13 @@ const ProductSupportGrid = ({ product }) => {
     navigate('/dashboard/support');
   };
 
+  const handleGithubClick = () => {
+    const github_link = product.product_meta.find((meta) => meta.key === "github_link")?.value || "#";
+    if (github_link && github_link !== "#") {
+      window.location.href = github_link;
+    }
+  };
+
   return (
     <Flex
       direction={{ base: 'column', md: 'row' }}
@@ -102,7 +109,8 @@ const ProductSupportGrid = ({ product }) => {
         title="Download"
         description={`The source code of ${product.name} is freely available on GitHub`}
         buttonText="GitHub"
-        descriptionMb="20" onButtonClick={undefined}      />
+        descriptionMb="20" onButtonClick={handleGithubClick}
+      />
       <Card
         icon={FaHeadset}
         title="Support"
