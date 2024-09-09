@@ -51,22 +51,21 @@ const Footer: React.FC = () => {
           flexWrap="wrap"
           gap="6"
         >
-          {/* About Kartoza */}
           <Box flex="1" minW="300px">
-            <Text fontSize="lg" fontWeight="bold" mb="4" color="white"> {/* Increased margin-bottom */}
+            <Text fontSize="lg" fontWeight="bold" mb="4" color="white">
               About Kartoza
             </Text>
-            <Text color="#b4b6b0">
+            <Text color="#b4b6b0" fontSize={{ base: "md", md: "md" , xl: 'md' }} >
               We are a South Africa-based Free and Open Source GIS service provider. We develop and maintain geographic information systems and train teams to use geospatial software to its full potential.
             </Text>
           </Box>
 
           {/* Navigation Links */}
           <Box flex="1" minW="300px">
-            <Text fontSize="lg" fontWeight="bold" mb="4" color="white"> {/* Increased margin-bottom */}
+            <Text fontSize="lg" fontWeight="bold" mb="4" color="white">
               Navigate
             </Text>
-            <UnorderedList listStyleType="none" m="0" p="0">
+            <UnorderedList listStyleType="none" m="0" p="0" fontSize={{ base: "md", md: "md" , xl: 'md' }} >
               <ListItem>
                 <Link href="https://kartoza.com/crowdfunding" color="#b4b6b0">Crowdfunding</Link>
               </ListItem>
@@ -114,7 +113,7 @@ const Footer: React.FC = () => {
               </Link>
             </Flex>
 
-            <Text mb="6" color="#b4b6b0">
+            <Text mb="6" color="#b4b6b0" fontSize={{ base: "md", md: "md" , xl: 'md' }} >
               Be the first to know! Sign up for our newsletter and stay in the loop with all things Kartoza.
             </Text>
 
@@ -124,8 +123,10 @@ const Footer: React.FC = () => {
                   type="button"
                   bg="#f8b54b"
                   color="white"
-                  _hover={{ bg: "#e1a03e" }}
+                  _hover={{ bg: '#57a0c7' }}
                   onClick={handleOpenLoginForm}
+                  width="220px" 
+                  height="54px"
                 >
                   Sign Up
                 </Button>
@@ -142,7 +143,7 @@ const Footer: React.FC = () => {
             right="30px"
             bg="#f8b54b"
             color="white"
-            _hover={{ bg: "#e1a03e" }}
+            _hover={{ bg: '#57a0c7' }} 
             aria-label="Scroll to top"
             icon={<ChevronUpIcon />}
             onClick={scrollToTop}

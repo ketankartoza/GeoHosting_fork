@@ -84,7 +84,7 @@ const ProductOverview = ({ productMeta, medias, productName }: { productMeta: { 
                     <Heading as="h3" size="lg" textAlign={{ base: "center", md: "left" }} marginBottom={5}>
                       {continuationHeader}
                     </Heading>
-                    <Text marginTop={10} textAlign={{ base: "center", md: "left" }} fontSize={{ base: "md", md: "lg" }}>
+                    <Text marginTop={10} textAlign={{ base: "center", md: "left" }} fontSize={{ base: "md", md: "lg" , xl: 'xl' }}>
                       {overviewContinuation}
                     </Text>
                   </Box>
@@ -118,7 +118,7 @@ const ProductOverview = ({ productMeta, medias, productName }: { productMeta: { 
                     flex="1"
                     width={{ base: "100%", md: "60%" }}
                   >
-                    <Text marginTop={5} textAlign="center" fontSize={{ base: "md", md: "lg" }}>
+                    <Text marginTop={5} textAlign="center" fontSize={{ base: "md", md: "lg" , xl: 'xl' }}>
                       {overviewDescription}
                     </Text>
                   </Box>
