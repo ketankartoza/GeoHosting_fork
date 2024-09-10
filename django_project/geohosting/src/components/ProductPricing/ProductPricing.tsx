@@ -80,6 +80,11 @@ const ProductPricing: React.FC<PackageProps> = ({ product, pkg }) => {
             paddingBottom={5}
             onClick={handleCheckout}
             isDisabled={!available}
+            _disabled={{
+              backgroundColor: packageName(pkg) === 'Gold' ? 'customOrange.500' : 'blue.500',
+              cursor: 'not-allowed',
+              opacity: 0.6,
+            }}
             _hover={{
               filter: 'brightness(1.1)',
               cursor: available ? 'pointer' : 'not-allowed'

@@ -3,7 +3,7 @@ import { Box, Text, Button, Flex, Icon } from '@chakra-ui/react';
 import { FaGithub, FaHeadset } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
-const Card = ({ icon, title, description, buttonText, descriptionMb = "4",definedWidth='100%', onButtonClick }) => (
+const Card = ({ icon, title, description, buttonText, descriptionMb = "4", definedWidth, onButtonClick }) => (
   <Box
     width={{ base: '100%', md: '48%' }}
     borderRadius="8px"
@@ -12,6 +12,7 @@ const Card = ({ icon, title, description, buttonText, descriptionMb = "4",define
     display="flex"
     flexDirection="column"
     justifyContent="space-between"
+    boxShadow="sm"
   >
     <Flex
       direction={{ base: 'column', md: 'row' }}
@@ -20,8 +21,8 @@ const Card = ({ icon, title, description, buttonText, descriptionMb = "4",define
       mb="4"
     >
       <Box
-        width="125px"
-        height="125px"
+        width="100px"
+        height="100px"
         display="flex"
         alignItems="center"
         justifyContent="center"
@@ -29,12 +30,12 @@ const Card = ({ icon, title, description, buttonText, descriptionMb = "4",define
       >
         <Icon as={icon} w={32} h={32} color="#888B8C" />
       </Box>
-      <Box textAlign={{ base: 'center', md: 'left' }}>
+      <Box textAlign={{ base: 'center', md: 'left' }} flex="1">
         <Text
           fontFamily="Lato"
           fontStyle="normal"
           fontWeight="700"
-          fontSize={{ base: '24px', md: '24px' }}
+          fontSize={{ base: '20px', md: '24px' }}
           lineHeight={{ base: '28px', md: '38px' }}
           color="#3E3E3E"
           mb="4"
@@ -45,39 +46,37 @@ const Card = ({ icon, title, description, buttonText, descriptionMb = "4",define
           fontFamily="Lato"
           fontStyle="normal"
           fontWeight="400"
-          fontSize={{ base: "md", md: "lg" , xl: 'lg' }}
-          lineHeight={{ base: '18px', md: '19px' }}
+          fontSize={{ base: "sm", md: "md", xl: 'lg' }}
+          lineHeight={{ base: '1.5', md: '1.6' }}
           color="#555555"
           mb={descriptionMb}
           width={definedWidth}
         >
           {description}
         </Text>
-        <Button
-          width="full"
-          maxW="220px"
-          height="54px"
-          background="#57A0C7"
-          color="#FFFFFF"
-          borderRadius="5px"
-          fontFamily="Lato"
-          fontWeight="700"
-          fontSize="16px"
-          lineHeight="19px"
-          p="0"
-          display={{ base: 'relative', md: 'flex' }}
-          alignItems="center"
-          justifyContent="center"
-          _hover={{
-            background: "#4682b4",
-          }}
-          mt="auto"
-          onClick={onButtonClick}
-        >
-          {buttonText}
-        </Button>
       </Box>
     </Flex>
+    <Button
+      width="full"
+      maxW="220px"
+      height="54px"
+      background="#57A0C7"
+      color="#FFFFFF"
+      borderRadius="5px"
+      fontFamily="Lato"
+      fontWeight="700"
+      fontSize="16px"
+      lineHeight="19px"
+      p="0"
+      alignSelf={{ base: 'center', md: 'center' }}
+      _hover={{
+        background: "#4682b4",
+      }}
+      mt="auto"
+      onClick={onButtonClick}
+    >
+      {buttonText}
+    </Button>
   </Box>
 );
 
@@ -95,7 +94,6 @@ const ProductSupportGrid = ({ product }) => {
     }
   };
 
-
   return (
     <Flex
       direction={{ base: 'column', md: 'row' }}
@@ -109,18 +107,24 @@ const ProductSupportGrid = ({ product }) => {
       <Card
         icon={FaGithub}
         title="Download"
-        description={`The source code of ${product.name} is freely available on GitHub`}
+        description={
+          "The source code of " + product.name + " is freely available on GitHub"
+        }
         buttonText="GitHub"
-        descriptionMb="20" onButtonClick={handleGithubClick}
+        descriptionMb="10"
+        onButtonClick={handleGithubClick}
+        definedWidth={{ base: '100%', md: '100%' }}
       />
       <Card
         icon={FaHeadset}
         title="Support"
-        description="We provide a full support service with our hosting packages. Need a custom solution? Let's discuss how we can customize the platform to suit your organisation's specific requirements."
+        description={
+          "We provide a full support service with our hosting packages. Need a custom solution? Let's discuss how we can customize the platform to suit your organisation's specific requirements."
+        }
         buttonText="Support Center"
-        descriptionMb="9"
+        descriptionMb="2"
         onButtonClick={handleSupportClick}
-        definedWidth='150%'
+        definedWidth={{ base: '100%', md: '150%' }}
       />
     </Flex>
   );
