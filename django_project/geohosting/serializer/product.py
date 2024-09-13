@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from geohosting.models import Product, ProductMedia, Package, ProductMetadata
 
 
@@ -39,30 +40,16 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         super().__init__(*args, **kwargs)
 
     def get_packages(self, obj: Product):
-        packages = obj.packages.all()
-
         if self.currency:
-            preferred_currency_order = [self.currency]
-            for currency in ['USD', 'EUR', 'ZAR']:
-                if currency != self.currency:
-                    preferred_currency_order.append(currency)
+            preferred_currency_order = [self.currency, 'USD', 'EUR', 'ZAR']
         else:
             preferred_currency_order = ['USD', 'EUR', 'ZAR']
 
         unique_packages = {}
-
-        for package in packages:
-            if package.name not in unique_packages:
-                unique_packages[package.name] = package
-            else:
-                current_package = unique_packages[package.name]
-                for currency in preferred_currency_order:
-                    if (
-                        package.currency == currency and
-                        current_package.currency != currency
-                    ):
-                        unique_packages[package.name] = package
-                        break
+        for currency in preferred_currency_order:
+            for package in obj.packages.filter(currency=currency):
+                if package.name not in unique_packages:
+                    unique_packages[package.name] = package
 
         sorted_packages = sorted(
             unique_packages.values(),

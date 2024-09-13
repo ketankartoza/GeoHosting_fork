@@ -26,7 +26,6 @@ class ActivityType(models.Model):
     """Activity type contains URL."""
 
     identifier = models.CharField(
-        unique=True,
         max_length=256,
         help_text='Activity type.'
     )
@@ -52,6 +51,7 @@ class ActivityType(models.Model):
 
     class Meta:  # noqa
         verbose_name = 'Jenkins Activity Type'
+        unique_together = ('identifier', 'product')
 
     def mapping_data(self, data: dict):
         """Map data."""

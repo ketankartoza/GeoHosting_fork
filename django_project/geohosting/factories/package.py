@@ -20,6 +20,9 @@ class PackageGroupFactory(DjangoModelFactory):
     name = factory.Sequence(
         lambda n: f'package-{n}'
     )
+    package_code = factory.Sequence(
+        lambda n: f'package_code-{n}'
+    )
 
 
 class PackageFactory(DjangoModelFactory):

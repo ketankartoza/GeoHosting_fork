@@ -1,4 +1,4 @@
-import {Package} from "../redux/reducers/productsSlice";
+import { Package } from "../redux/reducers/productsSlice";
 
 export const isEmpty = value =>
   value === undefined ||
@@ -7,20 +7,20 @@ export const isEmpty = value =>
   (typeof value === "string" && value.trim().length === 0);
 
 export const formatPrice = (price: string, currency = 'USD') => {
-    const locale = navigator.language;
-    let formattedPrice = new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(parseFloat(price));
+  const locale = navigator.language;
+  let formattedPrice = new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(parseFloat(price));
 
-    if (formattedPrice.endsWith('.00')) {
-      formattedPrice = formattedPrice.slice(0, -3);
-    }
+  if (formattedPrice.endsWith('.00')) {
+    formattedPrice = formattedPrice.slice(0, -3);
+  }
 
-    return formattedPrice;
-  };
+  return formattedPrice;
+};
 
 export const packageName = (pkg: Package) => {
   if (pkg.name.toLowerCase().includes('small')) {
@@ -31,20 +31,22 @@ export const packageName = (pkg: Package) => {
     return 'Gold';
   }
 };
-
-export const getCurrencyBasedOnLocation = async () => {
+export const getUserLocation = async () => {
   try {
     const response = await fetch('https://ipapi.co/json/');
     const locationData = await response.json();
-    const userCountry = locationData.country_code;
-
-    let newCurrency = 'USD';
-    if (userCountry === 'ZA') newCurrency = 'ZAR';
-    else if (['AT', 'BE', 'FR', 'DE', 'IT', 'ES', 'NL', 'PT'].includes(userCountry)) newCurrency = 'EUR';
-
-    return newCurrency;
+    return locationData.country_code;
   } catch (error) {
-    console.error('Error determining location or currency:', error);
-    return 'USD';
+    return 'US';
   }
+}
+
+export const getCurrencyBasedOnLocation = async () => {
+  const userCountry = await getUserLocation();
+
+  let newCurrency = 'USD';
+  if (userCountry === 'ZA') newCurrency = 'ZAR';
+  else if (['AT', 'BE', 'FR', 'DE', 'IT', 'ES', 'NL', 'PT'].includes(userCountry)) newCurrency = 'EUR';
+
+  return newCurrency;
 };

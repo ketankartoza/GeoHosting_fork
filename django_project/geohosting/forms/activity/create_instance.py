@@ -64,6 +64,8 @@ class CreateInstanceForm(forms.ModelForm):
                 product_cluster = product.productcluster_set.get(
                     cluster__region_id=region_id
                 )
+                if not package.package_group.package_code:
+                    raise Exception('No package group code')
                 data = {
                     'cluster': product_cluster.cluster.code,
                     'environment': product_cluster.environment,
