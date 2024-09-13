@@ -225,7 +225,13 @@ class PackageAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Region)
-admin.site.register(WebhookEvent)
+
+
+@admin.register(WebhookEvent)
+class WebhookEventAdmin(admin.ModelAdmin):
+    list_display = (
+        'triggered_at', 'data', 'note'
+    )
 
 
 @admin.action(description="Push to erpnext")

@@ -14,7 +14,7 @@ class ProductViewSet(mixins.CreateModelMixin,
                      mixins.DestroyModelMixin,
                      mixins.ListModelMixin,
                      viewsets.GenericViewSet):
-    queryset = Product.objects.all()
+    queryset = Product.objects.all().order_by('-available', 'name')
     permission_classes = [IsAdminOrReadOnly]
 
     def get_serializer_class(self):

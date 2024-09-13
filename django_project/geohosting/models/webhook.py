@@ -17,6 +17,9 @@ class WebhookEvent(models.Model):
         editable=False
     )
     data = models.JSONField()
+    note = models.TextField(
+        blank=True, null=True
+    )
 
     class Meta:  # noqa
         ordering = ('-triggered_at',)

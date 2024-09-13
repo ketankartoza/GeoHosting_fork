@@ -191,11 +191,6 @@ class SalesOrderTests(TestCase):
                 call(
                     self.user, sales_order.doctype,
                     sales_order.erpnext_code,
-                    'Auto deployment: BUILD_JENKINS.'
-                ),
-                call(
-                    self.user, sales_order.doctype,
-                    sales_order.erpnext_code,
                     'Auto deployment: BUILD_ARGO.'
                 )
             ])

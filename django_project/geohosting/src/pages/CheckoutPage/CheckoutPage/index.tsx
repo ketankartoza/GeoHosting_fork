@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Button,
@@ -8,8 +8,6 @@ import {
   Flex,
   Grid,
   GridItem,
-  HStack,
-  IconButton,
   Link,
   Text,
   useBreakpointValue,
@@ -25,6 +23,7 @@ import { PaystackPaymentModal } from "./Paystack";
 import CheckoutTracker
   from "../../../components/ProgressTracker/CheckoutTracker";
 import { OrderSummary } from "../OrderSummary"
+import { getUserLocation } from "../../../utils/helpers";
 
 interface LocationState {
   productName: string;
@@ -48,9 +47,25 @@ export const MainCheckoutPageComponent: React.FC<CheckoutPageModalProps> = (
 ) => {
   /** For the payment component **/
   const columns = useBreakpointValue({ base: 1, md: 2 });
-  const [paymentMethod, setPaymentMethod] = useState<string>(PaymentMethods.STRIPE);
+  const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
+  const [paymentMethods, setPaymentMethods] = useState<[string] | null>(null);
   const stripePaymentModalRef = useRef(null);
   const paystackPaymentModalRef = useRef(null);
+
+  useEffect(() => {
+    (
+      async () => {
+        const userLocation = await getUserLocation()
+        if (userLocation === 'ZA') {
+          setPaymentMethod(PaymentMethods.PAYSTACK)
+          setPaymentMethods([PaymentMethods.PAYSTACK])
+        } else {
+          setPaymentMethod(PaymentMethods.STRIPE)
+          setPaymentMethods([PaymentMethods.STRIPE])
+        }
+      }
+    )();
+  }, []);
 
   // Checkout function
   async function checkout() {
@@ -85,12 +100,6 @@ export const MainCheckoutPageComponent: React.FC<CheckoutPageModalProps> = (
             <VStack spacing={4} align="stretch">
               <Box border="1px" borderColor="gray.300" borderRadius="md"
                    p="4">
-                <HStack justifyContent="space-between">
-                  <HStack>
-                    <FaCcStripe size="30px"/>
-                  </HStack>
-                  <IconButton aria-label={'icon'} variant="ghost"/>
-                </HStack>
                 <Text mt={2}>
                   By purchasing this subscription and clicking
                   "Continue", you agree to the <Link href="#">terms of
@@ -98,22 +107,34 @@ export const MainCheckoutPageComponent: React.FC<CheckoutPageModalProps> = (
                   terms</Link>, electronic document delivery, and
                   acknowledge the <Link href="#">privacy policy</Link>.
                 </Text>
-                <Button
-                  mt={4} leftIcon={<FaCcStripe/>} mr={1}
-                  colorScheme={paymentMethod === PaymentMethods.STRIPE ? "blue" : "blackAlpha"}
-                  size="lg"
-                  onClick={() => setPaymentMethod(PaymentMethods.STRIPE)}
-                >
-                  Pay with Stripe
-                </Button>
-                <Button
-                  mt={4}
-                  colorScheme={paymentMethod === PaymentMethods.PAYSTACK ? "blue" : "blackAlpha"}
-                  size="lg"
-                  onClick={() => setPaymentMethod(PaymentMethods.PAYSTACK)}
-                >
-                  Pay with Paystack
-                </Button>
+                <Box style={{ minHeight: "106px" }}>
+                  {
+                    paymentMethods?.includes(PaymentMethods.STRIPE) ?
+                      <Button
+                        mt={4} leftIcon={<FaCcStripe/>} mr={1}
+                        colorScheme={paymentMethod === PaymentMethods.STRIPE ? "blue" : "blackAlpha"}
+                        size="lg"
+                        onClick={() => setPaymentMethod(PaymentMethods.STRIPE)}
+                      >
+                        Pay with Stripe
+                      </Button> : null
+                  }
+                  {
+                    paymentMethods?.includes(PaymentMethods.PAYSTACK) ?
+                      <Button
+                        mt={4}
+                        colorScheme={paymentMethod === PaymentMethods.PAYSTACK ? "blue" : "blackAlpha"}
+                        size="lg"
+                        onClick={() => setPaymentMethod(PaymentMethods.PAYSTACK)}
+                      >
+                        Pay with Paystack
+                      </Button> : null
+                  }
+                  {!paymentMethods ?
+                    <Box paddingTop={5} fontStyle={"italic"} color={"gray"}>
+                      Loading payment methods
+                    </Box> : null}
+                </Box>
                 <Divider mt={4}/>
                 <Text mt={2} fontSize="sm">Payments are processed
                   in {pkg.currency}. Payment provider fees may
@@ -124,15 +145,18 @@ export const MainCheckoutPageComponent: React.FC<CheckoutPageModalProps> = (
         </GridItem>
         <OrderSummary product={product} pkg={pkg}/>
       </Grid>
-      <Box mt={4}>
-        <Button
-          w='100%'
-          colorScheme="orange"
-          onClick={checkout}
-        >
-          Pay with {paymentMethod.toLowerCase()}
-        </Button>
-      </Box>
+      {
+        paymentMethod ?
+          <Box mt={4}>
+            <Button
+              w='100%'
+              colorScheme="orange"
+              onClick={checkout}
+            >
+              Pay with {paymentMethod.toLowerCase()}
+            </Button>
+          </Box> : null
+      }
       <StripePaymentModal
         ref={stripePaymentModalRef}
         url={stripeUrl}

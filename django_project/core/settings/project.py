@@ -6,8 +6,6 @@ GeoHosting Controller.
 """
 import os  # noqa
 
-from celery.schedules import crontab
-
 from .contrib import *  # noqa
 
 ALLOWED_HOSTS = ['*']
@@ -36,13 +34,6 @@ INSTALLED_APPS = INSTALLED_APPS + (
     'geohosting',
     'geohosting_controller'
 )
-
-CELERY_BEAT_SCHEDULE = {
-    'sync_with_jenkins': {
-        'task': 'geohosting_controller.tasks.sync_with_jenkins',
-        'schedule': crontab(minute='*')
-    }
-}
 
 FIXTURE_DIRS = ['geohosting_controller/fixtures']
 

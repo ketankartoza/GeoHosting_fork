@@ -14,7 +14,7 @@ from django.utils import timezone
 
 from geohosting.models.instance import Instance
 from geohosting.models.product import Product
-from geohosting_controller.connection import request_post, request_get
+from geohosting_controller.connection import request_post
 from geohosting_controller.exceptions import (
     ConnectionErrorException, ActivityException
 )
@@ -85,7 +85,6 @@ class ActivityStatus:
     """Activity Status."""
 
     RUNNING = 'RUNNING'
-    BUILD_JENKINS = 'BUILD_JENKINS'
     BUILD_ARGO = 'BUILD_ARGO'
     SUCCESS = 'SUCCESS'
     ERROR = 'ERROR'
@@ -131,7 +130,6 @@ class Activity(models.Model):
         default=ActivityStatus.RUNNING,
         choices=(
             (ActivityStatus.RUNNING, ActivityStatus.RUNNING),
-            (ActivityStatus.BUILD_JENKINS, ActivityStatus.BUILD_JENKINS),
             (ActivityStatus.BUILD_ARGO, ActivityStatus.BUILD_ARGO),
             (ActivityStatus.ERROR, ActivityStatus.ERROR),
             (ActivityStatus.SUCCESS, ActivityStatus.SUCCESS),
@@ -179,48 +177,6 @@ class Activity(models.Model):
                 self.sales_order.order_status = SalesOrderStatus.DEPLOYED.key
                 self.sales_order.save()
 
-    def get_jenkins_build_url(self):
-        """Get jenkins build url."""
-        # We need to run this on the background
-        _url = self.jenkins_queue_url + 'api/json'
-        response = request_get(
-            url=_url
-        )
-        if response.status_code == 200:
-            try:
-                self.jenkins_build_url = response.json()['executable']['url']
-                self.save()
-                self.get_jenkins_status()
-            except KeyError:
-                pass
-        else:
-            self.update_status(
-                ActivityStatus.ERROR,
-                (
-                    'Unable to get jenkins build url, '
-                    f'queue API does not exist = {_url}'
-                )
-            )
-
-    def get_jenkins_status(self):
-        """Get jenkins status."""
-        if self.status == ActivityStatus.BUILD_JENKINS:
-            if not self.jenkins_build_url:
-                self.get_jenkins_build_url()
-            if self.jenkins_build_url:
-                response = request_get(url=self.jenkins_build_url + 'api/json')
-                if response.status_code == 200:
-                    if not response.json()['inProgress']:
-                        if response.json()['result'] == 'SUCCESS':
-                            self.update_status(ActivityStatus.BUILD_ARGO)
-                        elif response.json()['result'] == 'FAILURE':
-                            self.update_status(
-                                ActivityStatus.ERROR, (
-                                    f'Error note : '
-                                    f'{self.jenkins_build_url}consoleText'
-                                )
-                            )
-
     def run(self):
         """Run the activity."""
         try:
@@ -236,8 +192,7 @@ class Activity(models.Model):
                     response.content, response=response
                 )
             self.jenkins_queue_url = response.headers['Location']
-            self.update_status(ActivityStatus.BUILD_JENKINS)
-            self.get_jenkins_build_url()
+            self.update_status(ActivityStatus.BUILD_ARGO)
         except Exception as e:
             self.update_status(
                 ActivityStatus.ERROR, f'{e}'
