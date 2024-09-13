@@ -13,6 +13,7 @@ from django.db import models
 from django.utils import timezone
 
 from geohosting.models.instance import Instance
+from geohosting.models.product import Product
 from geohosting_controller.connection import request_post, request_get
 from geohosting_controller.exceptions import (
     ConnectionErrorException, ActivityException
@@ -35,6 +36,10 @@ class ActivityType(models.Model):
             'Jenkins URL based on identifier and product (optional).'
         )
     )
+    product = models.ForeignKey(
+        Product, on_delete=models.SET_NULL,
+        null=True, blank=True
+    )
 
     @property
     def url(self):
@@ -44,6 +49,36 @@ class ActivityType(models.Model):
     def __str__(self):
         """Return activity type name."""
         return self.identifier
+
+    class Meta:  # noqa
+        verbose_name = 'Jenkins Activity Type'
+
+    def mapping_data(self, data: dict):
+        """Map data."""
+        new_data = {}
+        for key, value in data.items():
+            try:
+                jenkins_key = self.activitytypemapping_set.get(
+                    geohosting_key=key
+                ).jenkins_key
+                new_data[jenkins_key] = value
+            except ActivityTypeMapping.DoesNotExist:
+                pass
+        return new_data
+
+
+class ActivityTypeMapping(models.Model):
+    """Mapping between GeoHosting json to jenkins payload."""
+
+    activity_type = models.ForeignKey(
+        ActivityType, on_delete=models.CASCADE
+    )
+    geohosting_key = models.CharField(
+        max_length=256
+    )
+    jenkins_key = models.CharField(
+        max_length=256
+    )
 
 
 class ActivityStatus:
@@ -117,9 +152,32 @@ class Activity(models.Model):
         null=True, blank=True, editable=False
     )
 
+    # The sales order of the activity
+    sales_order = models.ForeignKey(
+        'geohosting.SalesOrder',
+        on_delete=models.SET_NULL,
+        null=True, blank=True
+    )
+
     class Meta:  # noqa
         verbose_name_plural = 'Activities'
         ordering = ('-triggered_at',)
+
+    def update_status(self, status, note=None):
+        """Update activity status."""
+        from geohosting.models.sales_order import SalesOrderStatus
+        self.status = status
+        if note:
+            self.note = note
+        self.save()
+        if self.sales_order:
+            comment = f'Auto deployment: {self.status}.'
+            if self.note:
+                comment += f'\n{self.note}'
+            self.sales_order.add_comment(comment)
+            if self.status == ActivityStatus.SUCCESS:
+                self.sales_order.order_status = SalesOrderStatus.DEPLOYED.key
+                self.sales_order.save()
 
     def get_jenkins_build_url(self):
         """Get jenkins build url."""
@@ -136,12 +194,13 @@ class Activity(models.Model):
             except KeyError:
                 pass
         else:
-            self.status = ActivityStatus.ERROR
-            self.note = (
-                'Unable to get jenkins build url, '
-                f'queue API does not exist = {_url}'
+            self.update_status(
+                ActivityStatus.ERROR,
+                (
+                    'Unable to get jenkins build url, '
+                    f'queue API does not exist = {_url}'
+                )
             )
-            self.save()
 
     def get_jenkins_status(self):
         """Get jenkins status."""
@@ -153,15 +212,14 @@ class Activity(models.Model):
                 if response.status_code == 200:
                     if not response.json()['inProgress']:
                         if response.json()['result'] == 'SUCCESS':
-                            self.status = ActivityStatus.BUILD_ARGO
-                            self.save()
+                            self.update_status(ActivityStatus.BUILD_ARGO)
                         elif response.json()['result'] == 'FAILURE':
-                            self.status = ActivityStatus.ERROR
-                            self.note = (
-                                f'Error note : '
-                                f'{self.jenkins_build_url}consoleText'
+                            self.update_status(
+                                ActivityStatus.ERROR, (
+                                    f'Error note : '
+                                    f'{self.jenkins_build_url}consoleText'
+                                )
                             )
-                            self.save()
 
     def run(self):
         """Run the activity."""
@@ -171,27 +229,26 @@ class Activity(models.Model):
                 data=self.post_data
             )
             if response.status_code != 201:
-                self.status = ActivityStatus.ERROR
-                self.note = response.content
-                self.save()
+                self.update_status(
+                    ActivityStatus.ERROR, response.content
+                )
                 raise ConnectionErrorException(
                     response.content, response=response
                 )
-            self.status = ActivityStatus.BUILD_JENKINS
             self.jenkins_queue_url = response.headers['Location']
-            self.save()
+            self.update_status(ActivityStatus.BUILD_JENKINS)
             self.get_jenkins_build_url()
         except Exception as e:
-            self.status = ActivityStatus.ERROR
-            self.note = f'{e}'
-            self.save()
-            raise
+            self.update_status(
+                ActivityStatus.ERROR, f'{e}'
+            )
 
     def save(self, *args, **kwargs):
         """Override importer saved."""
         created = not self.pk
         super(Activity, self).save(*args, **kwargs)
         if created:
+            self.update_status(ActivityStatus.RUNNING)
             self.run()
 
     @staticmethod

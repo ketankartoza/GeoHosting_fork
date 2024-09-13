@@ -6,16 +6,17 @@ GeoHosting.
 """
 from django import forms
 from django.contrib.auth import get_user_model
-from django.db.models import Q
 
-from geohosting.models import (
-    Activity, ActivityType, ActivityStatus, Instance, Package,
-    ProductCluster
+from geohosting.models.activity import (
+    Activity, ActivityType, name_validator
 )
-from geohosting.models.activity import name_validator
+from geohosting.models.package import Package
+from geohosting.models.product import ProductCluster
 from geohosting.models.region import Region
+from geohosting.models.sales_order import SalesOrder
+from geohosting.validators import app_name_validator
 from geohosting_controller.exceptions import (
-    NoClusterException, ActivityException
+    NoClusterException
 )
 from geohosting_controller.variables import ActivityTypeTerm
 
@@ -29,7 +30,7 @@ class CreateInstanceForm(forms.ModelForm):
     """
 
     app_name = forms.CharField(
-        validators=[name_validator]
+        validators=[name_validator, app_name_validator]
     )
     package = forms.ModelChoiceField(
         queryset=Package.objects.all()
@@ -37,54 +38,45 @@ class CreateInstanceForm(forms.ModelForm):
     region = forms.ModelChoiceField(
         queryset=Region.objects.all()
     )
+    sales_order = forms.ModelChoiceField(
+        queryset=SalesOrder.objects.all(),
+        required=False
+    )
 
     class Meta:  # noqa: D106
         model = Activity
-        fields = ['app_name', 'package', 'region']
+        fields = ['app_name', 'package', 'region', 'sales_order']
 
     def _post_data(self):
         """Refactor data."""
         activity = self.instance
-        activity_type = activity.activity_type.identifier
-        if activity_type == ActivityTypeTerm.CREATE_INSTANCE.value:
+        if (
+                activity.activity_type.identifier ==
+                ActivityTypeTerm.CREATE_INSTANCE.value
+        ):
             data = activity.client_data
             try:
-                # TODO:
-                #  Later fix using region input
-                #  Change keys when API is universal
-
                 app_name = data['app_name']
                 package_id = data['package_id']
                 region_id = data['region_id']
-
-                if Instance.objects.filter(name=app_name).count():
-                    raise ActivityException('Instance already exists')
-
-                if Activity.objects.filter(
-                        client_data__app_name=app_name
-                ).exclude(
-                    Q(status=ActivityStatus.ERROR) |
-                    Q(status=ActivityStatus.SUCCESS)
-                ):
-                    raise ActivityException(
-                        'Some of activity is already running'
-                    )
-
                 package = Package.objects.get(id=package_id)
                 product = package.product
-                return {
-                    'subdomain': app_name,
-                    'k8s_cluster': product.productcluster_set.get(
-                        cluster__region_id=region_id
-                    ).cluster.code,
-                    'geonode_size': package.package_code,
-                    'geonode_name': app_name
+                product_cluster = product.productcluster_set.get(
+                    cluster__region_id=region_id
+                )
+                data = {
+                    'cluster': product_cluster.cluster.code,
+                    'environment': product_cluster.environment,
+                    'package': package.package_group.package_code,
+                    'app_name': app_name
                 }
+                return activity.activity_type.mapping_data(data)
             except ProductCluster.DoesNotExist:
                 raise NoClusterException()
         raise ActivityType.DoesNotExist()
 
     def clean(self):
+        """Clean form."""
         cleaned_data = super().clean()
         app_name = cleaned_data.get('app_name')
         package = cleaned_data.get('package')
@@ -93,7 +85,7 @@ class CreateInstanceForm(forms.ModelForm):
         data = {
             'app_name': app_name,
             'package_id': package.id,
-            'package_code': package.package_code,
+            'package_code': package.package_group.package_code,
             'product_name': package.product.name,
             'region_id': region.id,
             'region_name': region.name
@@ -116,8 +108,6 @@ class CreateInstanceForm(forms.ModelForm):
             raise forms.ValidationError(
                 f'Activity type {activity_type_id} does not exist.'
             )
-        except ActivityException as e:
-            raise forms.ValidationError(
-                f'{e}'
-            )
+        except Exception as e:
+            raise forms.ValidationError(f'{e}')
         return cleaned_data

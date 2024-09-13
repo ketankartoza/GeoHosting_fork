@@ -12,6 +12,26 @@ from geohosting.utils.paystack import create_paystack_price
 from geohosting.utils.stripe import create_stripe_price
 
 
+class PackageGroup(models.Model):
+    """Package model for products."""
+
+    name = models.CharField()
+    package_code = models.CharField(
+        max_length=256,
+        blank=True,
+        null=True,
+        help_text='This is the package code of the product on jenkins.'
+    )
+    vault_url = models.URLField(
+        null=True,
+        blank=True
+    )
+
+    def __str__(self):
+        """Return package group name."""
+        return self.name
+
+
 class Package(models.Model):
     """Package model for products."""
 
@@ -56,12 +76,6 @@ class Package(models.Model):
     updated_at = models.DateTimeField(
         auto_now=True
     )
-    package_code = models.CharField(
-        max_length=256,
-        blank=True,
-        null=True,
-        help_text='This is the package code of the product on jenkins.'
-    )
     stripe_id = models.CharField(
         blank=True,
         null=True,
@@ -71,6 +85,13 @@ class Package(models.Model):
         blank=True,
         null=True,
         help_text='Price id on the paystack.'
+    )
+
+    # Package group that basically grouping by the variant
+    package_group = models.ForeignKey(
+        PackageGroup,
+        on_delete=models.SET_NULL,
+        null=True, blank=True
     )
 
     class Meta:

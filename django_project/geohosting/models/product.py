@@ -42,6 +42,59 @@ class Product(models.Model):
         """Return product name."""
         return self.name
 
+    def save(self, *args, **kwargs):
+        """Save model."""
+        super(Product, self).save(*args, **kwargs)
+        self.generate_data()
+
+    def generate_data(self):
+        """Generate data."""
+        from geohosting.models.activity import (
+            ActivityType, ActivityTypeMapping
+        )
+        from geohosting_controller.default_data import (
+            get_jenkin_activity_types, get_product_clusters
+        )
+
+        jenkins_config = get_jenkin_activity_types()
+        product_cluster = get_product_clusters()
+
+        # Save jenkins config
+        try:
+            config = jenkins_config[self.name.lower()]
+            mapping = config['mapping']
+            del config['mapping']
+            activity_type, _ = ActivityType.objects.update_or_create(
+                product=self,
+                defaults=config
+            )
+            for geohosting_key, jenkins_key in mapping.items():
+                ActivityTypeMapping.objects.update_or_create(
+                    activity_type=activity_type,
+                    geohosting_key=geohosting_key,
+                    defaults={
+                        'jenkins_key': jenkins_key
+                    }
+                )
+        except KeyError:
+            pass
+
+        # Save product cluster
+        try:
+            config = product_cluster[self.name.lower()]
+            ProductCluster.objects.update_or_create(
+                product=self,
+                cluster=Cluster.objects.get(
+                    code=config['cluster'],
+                    region__code=config['region']
+                ),
+                defaults={
+                    'environment': config['environment']
+                }
+            )
+        except (KeyError, Cluster.DoesNotExist):
+            pass
+
 
 class ProductMetadata(models.Model):
     """Product metadata."""
@@ -69,6 +122,11 @@ class ProductCluster(models.Model):
     )
     cluster = models.ForeignKey(
         Cluster, on_delete=models.CASCADE
+    )
+    environment = models.CharField(
+        max_length=256,
+        help_text='The environment of the instance.',
+        null=True, blank=True
     )
 
     class Meta:

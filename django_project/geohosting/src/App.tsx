@@ -59,7 +59,7 @@ const App: React.FC = () => {
               path="/orders/:id/deployment"
               element={
                 <PrivateRoute>
-                  <SalesOrderCheckout activeStep={2}>
+                  <SalesOrderCheckout activeStep={2} callPeriodically={true}>
                     <CheckoutDeployment salesOrderDetail={null}/>
                   </SalesOrderCheckout>
                 </PrivateRoute>

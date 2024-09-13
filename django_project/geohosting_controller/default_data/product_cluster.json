@@ -1,0 +1,7 @@
+{
+  "geonode": {
+    "cluster": "ktz-sta-ks-gn-01",
+    "region": "global",
+    "environment": "sta"
+  }
+}

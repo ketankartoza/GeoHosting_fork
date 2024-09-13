@@ -7,6 +7,15 @@ import axios from 'axios';
 import { Package, Product } from "./productsSlice";
 
 
+export interface Instance {
+  id: number,
+  url: string,
+  name: string,
+  price: number,
+  cluster: number,
+  owner: number
+}
+
 export interface SalesOrder {
   id: string,
   status: string,
@@ -16,7 +25,8 @@ export interface SalesOrder {
   invoice_url: string,
   product: Product,
   package: Package,
-  app_name: string
+  app_name: string,
+  instance: Instance
 }
 
 interface SalesOrderState {

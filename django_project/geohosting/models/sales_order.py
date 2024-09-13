@@ -7,15 +7,16 @@ from django.db import models
 from django.utils.timezone import now
 
 from geohosting.models.activity import name_validator
+from geohosting.models.region import Region
 from geohosting.models.user_profile import UserProfile
 from geohosting.utils.erpnext import (
     post_to_erpnext, put_to_erpnext, add_erp_next_comment
 )
 from geohosting.utils.paystack import verify_paystack_payment
 from geohosting.utils.stripe import get_checkout_detail
+from geohosting.validators import app_name_validator
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
-
 User = get_user_model()
 
 
@@ -168,7 +169,7 @@ class SalesOrder(models.Model):
             'App name that would be used for instance.'
             'It will also be used for sub domain.'
         ),
-        validators=[name_validator]
+        validators=[name_validator, app_name_validator]
     )
 
     class Meta:
@@ -184,12 +185,14 @@ class SalesOrder(models.Model):
         # Check if order status is waiting configuration
         order_status_obj = self.sales_order_status_obj
         if order_status_obj == SalesOrderStatus.WAITING_CONFIGURATION:
-            if self.app_name and self.erpnext_code:
-                self.set_order_status(SalesOrderStatus.WAITING_DEPLOYMENT)
-                add_erp_next_comment(
-                    self.customer, self.doctype, self.erpnext_code,
-                    f"App name : {self.app_name}"
-                )
+            self.auto_deploy()
+
+    def add_comment(self, comment):
+        """Add comment."""
+        if self.erpnext_code:
+            add_erp_next_comment(
+                self.customer, self.doctype, self.erpnext_code, comment
+            )
 
     def __str__(self):
         return (
@@ -280,3 +283,35 @@ class SalesOrder(models.Model):
                 f"{settings.ERPNEXT_BASE_URL}/printview?doctype=Sales%20Order"
                 f"&name={self.erpnext_code}&format=Standard"
             )
+
+    def auto_deploy(self):
+        """Change status to deployment and do deployment."""
+        from geohosting.forms.activity.create_instance import (
+            CreateInstanceForm
+        )
+        # Check if order status is waiting configuration
+        if self.app_name and self.erpnext_code:
+            if self.order_status != SalesOrderStatus.WAITING_CONFIGURATION:
+                self.add_comment(f"App name : {self.app_name}")
+            self.set_order_status(SalesOrderStatus.WAITING_DEPLOYMENT)
+
+            # TODO:
+            #  When we have multi region, we will change below
+            #  Link region to sales order
+
+            form = CreateInstanceForm(
+                {
+                    'region': Region.default_region(),
+                    'app_name': self.app_name,
+                    'package': self.package,
+                    'sales_order': self
+                }
+            )
+            form.user = self.customer
+            if not form.is_valid():
+                errors = []
+                for key, val in form.errors.items():
+                    errors += val
+                self.add_comment(', '.join(errors))
+            else:
+                form.save()

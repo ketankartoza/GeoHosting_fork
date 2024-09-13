@@ -44,8 +44,15 @@ const CheckoutConfiguration: React.FC<Props> = ({ salesOrderDetail }) => {
         dispatch(fetchSalesOrderDetail(id));
       }
       // @ts-ignore
-    } catch ({ message }) {
-      toast.error("App name should just contains letter, number and dash");
+    } catch ({ response }) {
+      let error = "App name should just contains letter, number and dash"
+      try {
+        // @ts-ignore
+        error = response['data']['app_name'][0]
+      } catch (err) {
+
+      }
+      toast.error(error);
       setDisabled(false)
     }
   };

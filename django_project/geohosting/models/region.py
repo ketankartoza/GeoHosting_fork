@@ -19,3 +19,14 @@ class Region(models.Model):
     def __str__(self):
         """Return region name."""
         return self.name
+
+    @staticmethod
+    def default_region():
+        """Return default region."""
+        region, _ = Region.objects.get_or_create(
+            code='global',
+            defaults={
+                'name': 'Global'
+            }
+        )
+        return region

@@ -23,10 +23,14 @@ import { checkCheckoutUrl } from "../utils";
 
 interface Props {
   activeStep: number;
+  callPeriodically?: boolean;
   children: JSX.Element;
 }
 
-const Index: React.FC<Props> = ({ activeStep, children }) => {
+let interval: any = null;
+const Index: React.FC<Props> = (
+  { activeStep, callPeriodically = false, children }
+) => {
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -43,6 +47,14 @@ const Index: React.FC<Props> = ({ activeStep, children }) => {
   useEffect(() => {
     if (id && salesOrderDetail?.id != id) {
       dispatch(fetchSalesOrderDetail(id));
+      if (callPeriodically) {
+        if (interval) {
+          clearInterval(interval);
+        }
+        interval = setInterval(function () {
+          dispatch(fetchSalesOrderDetail(id));
+        }, 5000);
+      }
     }
     // Check the url and redirect to correct page
     if (salesOrderDetail && salesOrderDetail.id + '' === id) {

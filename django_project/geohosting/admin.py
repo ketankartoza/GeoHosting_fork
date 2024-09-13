@@ -4,13 +4,16 @@ GeoHosting Controller.
 
 .. note:: Admins
 """
+
 from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
+from django.utils.safestring import mark_safe
 
 from geohosting.forms.activity import CreateInstanceForm
 from geohosting.models import (
-    Activity, ActivityType, Region, Product, ProductMetadata,
+    Activity, ActivityType, ActivityTypeMapping, Region, Product, PackageGroup,
+    ProductMetadata,
     Cluster, ProductCluster, Instance, Package, WebhookEvent, ProductMedia,
     SalesOrder, UserProfile
 )
@@ -55,7 +58,7 @@ class ActivityAdmin(admin.ModelAdmin):
 
     list_display = (
         'id', 'instance', 'activity_type', 'triggered_at', 'triggered_by',
-        'status', 'client_data'
+        'status', 'note'
     )
     list_filter = ('instance', 'triggered_at', 'triggered_by')
     actions = [get_jenkins_status]
@@ -69,11 +72,17 @@ class ActivityAdmin(admin.ModelAdmin):
         return False
 
 
+class ActivityTypeMappingInline(admin.TabularInline):
+    model = ActivityTypeMapping
+    extra = 1
+
+
 @admin.register(ActivityType)
 class ActivityTypeAdmin(admin.ModelAdmin):
     """ActivityType admin."""
 
-    list_display = ('identifier', 'jenkins_url')
+    list_display = ('identifier', 'jenkins_url', 'product')
+    inlines = (ActivityTypeMappingInline,)
 
 
 @admin.register(Cluster)
@@ -153,15 +162,29 @@ def update_payment_status(modeladmin, request, queryset):
         order.update_payment_status()
 
 
+@admin.action(description="Auto deploy")
+def auto_deploy(modeladmin, request, queryset):
+    for sales_order in queryset:
+        sales_order.auto_deploy()
+
+
 @admin.register(SalesOrder)
 class SalesOrderAdmin(admin.ModelAdmin):
     list_display = (
         'date', 'package', 'customer', 'order_status', 'payment_method',
-        'erpnext_code'
+        'erpnext_code', 'activities'
     )
     list_filter = ('order_status', 'payment_method')
     search_fields = ('erpnext_code',)
-    actions = [publish_sales_order, update_payment_status]
+    actions = [publish_sales_order, update_payment_status, auto_deploy]
+
+    def activities(self, obj: Instance):
+        """Return product."""
+        return mark_safe(
+            f'<a href="/admin/geohosting/activity/?'
+            f'sales_order__id__exact={obj.id}" target="_blank"'
+            f'>activities</a>'
+        )
 
 
 @admin.register(ProductCluster)
@@ -182,10 +205,19 @@ def create_paystack_price(modeladmin, request, queryset):
         package.get_paystack_price_id()
 
 
+@admin.register(PackageGroup)
+class PackageGroupAdmin(admin.ModelAdmin):
+    list_display = (
+        'name', 'package_code', 'vault_url'
+    )
+    list_editable = ('package_code', 'vault_url')
+
+
 @admin.register(Package)
 class PackageAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'price', 'product', 'package_code', 'stripe_id', 'paystack_id'
+        'name', 'price', 'currency', 'product', 'package_group',
+        'stripe_id', 'paystack_id'
     )
     search_fields = ('name', 'product__name')
     list_filter = ('created_at', 'updated_at')
