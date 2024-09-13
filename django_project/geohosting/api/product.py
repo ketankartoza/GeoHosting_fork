@@ -22,6 +22,14 @@ class ProductViewSet(mixins.CreateModelMixin,
             return ProductDetailSerializer
         return ProductListSerializer
 
+    def get_serializer(self, *args, **kwargs):
+        currency = self.request.query_params.get('currency')
+        kwargs['context'] = self.get_serializer_context()
+        if currency and self.action == 'retrieve':
+            kwargs['currency'] = currency
+        serializer_class = self.get_serializer_class()
+        return serializer_class(*args, **kwargs)
+
     def get_object(self):
         lookup_value = self.kwargs.get(self.lookup_field)
 

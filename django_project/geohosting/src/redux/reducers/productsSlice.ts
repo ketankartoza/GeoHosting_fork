@@ -1,5 +1,6 @@
 import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
 import axios from 'axios';
+import { getCurrencyBasedOnLocation } from '../../utils/helpers';
 
 export interface Product {
   id: number;
@@ -84,7 +85,10 @@ export const fetchProductDetailByName = createAsyncThunk(
   'products/fetchProductDetailByName',
   async (productName: string, thunkAPI) => {
     try {
-      const response = await axios.get(`/api/products/${productName}/`);
+      const currency = await getCurrencyBasedOnLocation();
+      const response = await axios.get(`/api/products/${productName}/`, {
+        params: { currency },
+      });
       return response.data;
     } catch (error: any) {
       const errorData = error.response.data;

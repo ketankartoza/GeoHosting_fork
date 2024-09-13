@@ -31,3 +31,20 @@ export const packageName = (pkg: Package) => {
     return 'Gold';
   }
 };
+
+export const getCurrencyBasedOnLocation = async () => {
+  try {
+    const response = await fetch('https://ipapi.co/json/');
+    const locationData = await response.json();
+    const userCountry = locationData.country_code;
+
+    let newCurrency = 'USD';
+    if (userCountry === 'ZA') newCurrency = 'ZAR';
+    else if (['AT', 'BE', 'FR', 'DE', 'IT', 'ES', 'NL', 'PT'].includes(userCountry)) newCurrency = 'EUR';
+
+    return newCurrency;
+  } catch (error) {
+    console.error('Error determining location or currency:', error);
+    return 'USD';
+  }
+};

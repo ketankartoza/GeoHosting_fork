@@ -7,7 +7,9 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase, APIClient
 from django.contrib.auth.models import User
-from geohosting.models import Product
+from geohosting.models import Product, Package, ProductMetadata
+from geohosting.serializer.product import ProductDetailSerializer
+
 
 
 class ProductViewSetTest(APITestCase):
@@ -207,3 +209,123 @@ class FetchProductsTestCase(TestCase):
         # Ensure product was created without image
         product1 = Product.objects.get(upstream_id='product_2')
         self.assertEqual(product1.image.name, '')
+
+class ProductViewSetTestCase(APITestCase):
+    def setUp(self):
+        # Create test product
+        self.product = Product.objects.create(
+            name="BIMS",
+            description="Biodiversity Information Management System.",
+            upstream_id='123',
+            available=True,
+        )
+        
+        # Create test packages
+        self.product = Product.objects.create(
+            name="BIMS",
+            description="Biodiversity Information Management System.",
+            upstream_id='123',
+            available=True,
+        )
+        
+        # Create test packages
+        self.package1 = Package.objects.create(
+            name="BIMS-SMALL-DO",
+            currency="EUR",
+            price="6155.58",
+            periodicity="monthly",
+            product=self.product,
+        )
+        self.package2 = Package.objects.create(
+            name="BIMS-SMALL-DO",
+            currency="USD",
+            price="6695.12",
+            periodicity="monthly",
+            product=self.product,
+        )
+        self.package3 = Package.objects.create(
+            name="BIMS-SMALL-DO",
+            currency="ZAR",
+            price="7890.52",
+            periodicity="monthly",
+            product=self.product,
+        )
+        self.package1 = Package.objects.create(
+            name="BIMS-MEDIUM-DO",
+            currency="EUR",
+            price="6155.58",
+            periodicity="monthly",
+            product=self.product,
+        )
+        self.package2 = Package.objects.create(
+            name="BIMS-MEDIUM-DO",
+            currency="USD",
+            price="6695.12",
+            periodicity="monthly",
+            product=self.product,
+        )
+        self.package3 = Package.objects.create(
+            name="BIMS-MEDIUM-DO",
+            currency="ZAR",
+            price="7890.52",
+            periodicity="monthly",
+            product=self.product,
+        )
+        self.package1 = Package.objects.create(
+            name="BIMS-LARGE-DO",
+            currency="EUR",
+            price="6155.58",
+            periodicity="monthly",
+            product=self.product,
+        )
+        self.package2 = Package.objects.create(
+            name="BIMS-LARGE-DO",
+            currency="USD",
+            price="6695.12",
+            periodicity="monthly",
+            product=self.product,
+        )
+        self.package3 = Package.objects.create(
+            name="BIMS-LARGE-DO",
+            currency="ZAR",
+            price="7890.52",
+            periodicity="monthly",
+            product=self.product,
+        )
+
+        # Create test metadata
+        self.metadata1 = ProductMetadata.objects.create(
+            product=self.product,
+            key="meta_key_1",
+            value="meta_value_1"
+        )
+
+        self.client = APIClient()
+        self.url = reverse('product-detail', kwargs={'pk': self.product.pk})
+
+    def test_retrieve_product_detail_with_currency(self):
+        # Test retrieving product details with specific currency
+        response = self.client.get(self.url, {'currency': 'USD'})
+        self.assertEqual(response.status_code, 200)
+
+        # Check if serializer is returning correct packages based on currency
+        product_data = response.data
+        serializer = ProductDetailSerializer(instance=self.product, context={'currency': 'USD'})
+
+        self.assertEqual(product_data['packages'], serializer.data['packages'])
+        self.assertEqual(product_data['packages'][0]['currency'], serializer.data['packages'][0]['currency'])
+        self.assertEqual(product_data['images'], serializer.data['images'])
+        self.assertEqual(product_data['product_meta'], serializer.data['product_meta'])
+
+    def test_retrieve_product_detail_without_currency(self):
+        # Test retrieving product details without specifying a currency
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+
+        # Check if serializer is returning correct packages with default currency order
+        product_data = response.data
+        serializer = ProductDetailSerializer(instance=self.product)
+
+        self.assertEqual(product_data['packages'], serializer.data['packages'])
+        self.assertEqual(product_data['images'], serializer.data['images'])
+        self.assertEqual(product_data['product_meta'], serializer.data['product_meta'])
