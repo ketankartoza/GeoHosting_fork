@@ -11,6 +11,12 @@ headers = {
 }
 
 
+def test_connection():
+    """Test erpnext connection."""
+    url = f"{settings.ERPNEXT_BASE_URL}/api/resource/Item?limit=1"
+    return requests.get(url, headers=headers)
+
+
 def fetch_erpnext_detail_data(doctype, filters=None):
     url = f"{settings.ERPNEXT_BASE_URL}/api/resource/{doctype}"
     params = {

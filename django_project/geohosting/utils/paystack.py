@@ -9,6 +9,13 @@ from paystackapi.transaction import Transaction
 paystack = Paystack(secret_key=settings.PAYSTACK_SECRET_KEY)
 
 
+def test_connection():
+    """Test connection to Paystack API."""
+    response = Plan.list()
+    if not response['status']:
+        raise ConnectionError(response['message'])
+
+
 def create_paystack_price(
         name: str, currency: str, amount: Decimal, interval: str,
         features: list
