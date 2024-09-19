@@ -1,14 +1,9 @@
 import React, { useState } from 'react';
-import {
-  Box,
-} from '@chakra-ui/react';
-
+import ServicesPage from './ServicesPage';
 
 const DashboardMainPage: React.FC = () => {
   return (
-    <Box>
-      Welcome to the dashboard page!
-    </Box>
+     <ServicesPage />
   );
 };
 

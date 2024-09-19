@@ -98,7 +98,8 @@ class CreateInstanceForm(forms.ModelForm):
         try:
             activity_type_id = ActivityTypeTerm.CREATE_INSTANCE.value
             self.instance.activity_type_id = ActivityType.objects.get(
-                identifier=activity_type_id
+                identifier=activity_type_id,
+                product=package.product
             ).id
             self.instance.triggered_by = self.user
 

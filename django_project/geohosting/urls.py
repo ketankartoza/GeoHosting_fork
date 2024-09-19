@@ -10,6 +10,7 @@ from geohosting.api.checkout import (
     CheckoutStripeSessionAPI, CheckoutPaystackSessionAPI
 )
 from geohosting.api.product import ProductViewSet
+from geohosting.api.instance import InstanceViewSet
 from geohosting.api.sales_order import (
     SalesOrderSetView, SalesOrderPaymentStripeSessionAPI,
     SalesOrderPaymentPaystackSessionAPI
@@ -36,6 +37,7 @@ from geohosting.views.support import (
 router = DefaultRouter()
 router.register(r'activities', ActivityViewSet, basename='activities')
 router.register(r'products', ProductViewSet)
+router.register(r'instances', InstanceViewSet, basename='instance')
 router.register(r'orders', SalesOrderSetView, basename='orders')
 router.register(
     r'activity_types', ActivityTypeViewSet, basename='activity_types'

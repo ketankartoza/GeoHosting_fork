@@ -102,7 +102,8 @@ class SalesOrderTests(TestCase):
             jenkins_url=(
                 'https://jenkins.example.com/job/kartoza/job/devops/job/'
                 'geohosting/job/geonode_create/buildWithParameters'
-            )
+            ),
+            product=self.package.product
         )
         sales_order.auto_deploy()
         mock_add_erp_next_comment.assert_has_calls([
