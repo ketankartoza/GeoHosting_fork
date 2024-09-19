@@ -143,6 +143,7 @@ const Footer: React.FC = () => {
             right="30px"
             bg="#f8b54b"
             color="white"
+            fontSize="2.5rem"
             _hover={{ bg: '#57a0c7' }} 
             aria-label="Scroll to top"
             icon={<ChevronUpIcon />}

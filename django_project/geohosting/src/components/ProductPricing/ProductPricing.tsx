@@ -1,9 +1,22 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Heading, List, ListItem, Text, Tooltip, Image } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Heading,
+  Image,
+  List,
+  ListItem,
+  Text,
+  Tooltip,
+  useDisclosure
+} from '@chakra-ui/react';
 import { CheckIcon } from '@chakra-ui/icons';
 import { Package, Product } from '../../redux/reducers/productsSlice';
 import { formatPrice, packageName } from "../../utils/helpers";
+import LoginForm from "../LoginForm/LoginForm";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
 
 export interface PackageProps {
   product: Product;
@@ -13,10 +26,19 @@ export interface PackageProps {
 const ProductPricing: React.FC<PackageProps> = ({ product, pkg }) => {
   const navigate = useNavigate();
   const available = product.available;
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { token } = useSelector((state: RootState) => state.auth);
 
   const handleCheckout = () => {
-    localStorage.setItem('selectedProduct', JSON.stringify({ product, pkg }));
-    navigate('/checkout', { state: { product, pkg } });
+    localStorage.setItem('selectedProduct', JSON.stringify({
+      product,
+      pkg
+    }));
+    if (token) {
+      navigate('/checkout', { state: { product, pkg } });
+    } else {
+      onOpen()
+    }
   };
 
   return (
@@ -60,7 +82,8 @@ const ProductPricing: React.FC<PackageProps> = ({ product, pkg }) => {
         pt={2}
         pb={2}
       >
-        <Heading as="h4" fontSize={25} paddingTop={2} paddingBottom={2} textAlign="center" fontWeight={500}>
+        <Heading as="h4" fontSize={25} paddingTop={2} paddingBottom={2}
+                 textAlign="center" fontWeight={500}>
           {product.name} {packageName(pkg)}
         </Heading>
       </Box>
@@ -74,9 +97,11 @@ const ProductPricing: React.FC<PackageProps> = ({ product, pkg }) => {
         width="100%"
         textAlign="center"
       >
-        <Box flexDirection={'row'} display={'flex'} alignItems={'end'} justifyContent="center">
-          <Text fontSize={{ base: '35', sm: '45', md: '32', xl: '45' }} fontWeight={'bold'} color={'gray.600'}>
-            {!available ? pkg.currency:formatPrice(pkg.price, pkg.currency)}
+        <Box flexDirection={'row'} display={'flex'} alignItems={'end'}
+             justifyContent="center">
+          <Text fontSize={{ base: '35', sm: '45', md: '32', xl: '45' }}
+                fontWeight={'bold'} color={'gray.600'}>
+            {!available ? pkg.currency : formatPrice(pkg.price, pkg.currency)}
           </Text>
         </Box>
       </Box>
@@ -96,7 +121,7 @@ const ProductPricing: React.FC<PackageProps> = ({ product, pkg }) => {
             pkg.feature_list['spec'] &&
             Object.entries(pkg.feature_list['spec']).map(([key, value]: any) => (
               <ListItem key={key} display="flex" alignItems="center">
-                <CheckIcon color="blue.500" mr={2} /> {value}
+                <CheckIcon color="blue.500" mr={2}/> {value}
               </ListItem>
             ))}
         </List>
@@ -129,6 +154,13 @@ const ProductPricing: React.FC<PackageProps> = ({ product, pkg }) => {
           </Button>
         </Tooltip>
       </Box>
+      <LoginForm
+        isOpen={isOpen}
+        onClose={onClose}
+        onSuccess={() => {
+          navigate('/checkout', { state: { product, pkg } });
+        }}
+      />
     </Box>
   );
 };

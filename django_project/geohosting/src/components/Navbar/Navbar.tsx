@@ -2,21 +2,21 @@ import React, { useEffect } from 'react';
 import {
   Box,
   Container,
+  Drawer,
+  DrawerBody,
+  DrawerCloseButton,
+  DrawerContent,
+  DrawerHeader,
+  DrawerOverlay,
   Flex,
   HStack,
+  IconButton,
   Image,
   Link as ChakraLink,
   useDisclosure,
-  IconButton,
-  Drawer,
-  DrawerBody,
-  DrawerHeader,
-  DrawerOverlay,
-  DrawerContent,
-  DrawerCloseButton,
   VStack
 } from '@chakra-ui/react';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { HamburgerIcon, LockIcon } from '@chakra-ui/icons';
 import LoginForm from '../LoginForm/LoginForm';
 import { useDispatch, useSelector } from "react-redux";
@@ -31,7 +31,11 @@ const Navbar: React.FC = () => {
   );
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { token } = useSelector((state: RootState) => state.auth);
-  const { isOpen: isDrawerOpen, onOpen: onDrawerOpen, onClose: onDrawerClose } = useDisclosure();
+  const {
+    isOpen: isDrawerOpen,
+    onOpen: onDrawerOpen,
+    onClose: onDrawerClose
+  } = useDisclosure();
 
   useEffect(() => {
     dispatch(fetchProducts());
@@ -47,16 +51,18 @@ const Navbar: React.FC = () => {
             <Image
               src='/static/images/kartoza-logo-only.png'
               alt='Kartoza Logo'
-              style={{'cursor': 'pointer'}}
+              style={{ 'cursor': 'pointer' }}
               onClick={() => navigate('/')}
               width={8}
             />
-            <ChakraLink as={RouterLink} to="https://kartoza.com/about" fontSize="md">
+            <ChakraLink as={RouterLink} to="https://kartoza.com/about"
+                        fontSize="md">
               About us
             </ChakraLink>
           </HStack>
 
-          <HStack spacing="24px" display={{ base: 'none', md: 'flex' }} marginLeft="auto">
+          <HStack spacing="24px" display={{ base: 'none', md: 'flex' }}
+                  marginLeft="auto">
             {products.map((product) => (
               <ChakraLink
                 key={product.name}
@@ -67,20 +73,32 @@ const Navbar: React.FC = () => {
                 {product.name}
               </ChakraLink>
             ))}
-            <ChakraLink
-              as="button"
-              onClick={() => token ? navigate('/dashboard') : onOpen()}
-              fontSize="md"
-              style={{ display: 'flex', alignItems: 'center' }}
-            >
-              <LockIcon boxSize={4} marginRight={1} />
-              My account
-            </ChakraLink>
+            {
+              token ?
+                <ChakraLink
+                  as="button"
+                  onClick={() => navigate('/dashboard')}
+                  fontSize="md"
+                  style={{ display: 'flex', alignItems: 'center' }}
+                >
+                  <LockIcon boxSize={4} marginRight={1}/>
+                  My account
+                </ChakraLink> :
+                <ChakraLink
+                  as="button"
+                  onClick={() => onOpen()}
+                  fontSize="md"
+                  style={{ display: 'flex', alignItems: 'center' }}
+                >
+                  <LockIcon boxSize={4} marginRight={1}/>
+                  Sign in
+                </ChakraLink>
+            }
           </HStack>
 
           <IconButton
             aria-label="Open menu"
-            icon={<HamburgerIcon />}
+            icon={<HamburgerIcon/>}
             display={{ base: 'flex', md: 'none' }}
             backgroundColor={'gray.500'}
             _hover={{ backgroundColor: 'gray.500' }}
@@ -88,10 +106,11 @@ const Navbar: React.FC = () => {
           />
         </Flex>
 
-        <Drawer isOpen={isDrawerOpen} placement="right" onClose={onDrawerClose}>
-          <DrawerOverlay />
+        <Drawer isOpen={isDrawerOpen} placement="right"
+                onClose={onDrawerClose}>
+          <DrawerOverlay/>
           <DrawerContent>
-            <DrawerCloseButton />
+            <DrawerCloseButton/>
             <DrawerHeader>Menu</DrawerHeader>
 
             <DrawerBody>
@@ -118,7 +137,7 @@ const Navbar: React.FC = () => {
                   fontSize="md"
                   style={{ display: 'flex', alignItems: 'center' }}
                 >
-                  <LockIcon boxSize={4} marginRight={1} />
+                  <LockIcon boxSize={4} marginRight={1}/>
                   My account
                 </ChakraLink>
               </VStack>
@@ -126,7 +145,7 @@ const Navbar: React.FC = () => {
           </DrawerContent>
         </Drawer>
 
-        <LoginForm isOpen={isOpen} onClose={onClose} />
+        <LoginForm isOpen={isOpen} onClose={onClose}/>
       </Container>
     </Box>
   );

@@ -1,5 +1,5 @@
 import React, { MouseEventHandler, useState } from 'react';
-import { Box, Heading, Text, Button, Skeleton, Image } from '@chakra-ui/react';
+import { Box, Button, Heading, Image, Text } from '@chakra-ui/react';
 import ImageWithSkeleton from "../ImageWithSkeleton/ImageWithSkeleton";
 
 interface CardProps {
@@ -11,7 +11,16 @@ interface CardProps {
   selected: boolean;
 }
 
-const ProductCard: React.FC<CardProps> = ({ image, title, description, comingSoon, onClick, selected }) => {
+const ProductCard: React.FC<CardProps> = (
+  {
+    image,
+    title,
+    description,
+    comingSoon,
+    onClick,
+    selected
+  }
+) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [hovering, setHovering] = useState(false);
 
@@ -22,6 +31,7 @@ const ProductCard: React.FC<CardProps> = ({ image, title, description, comingSoo
 
   const handleMouseEnter = () => setHovering(true);
   const handleMouseLeave = () => setHovering(false);
+  const opacity = comingSoon ? 0.5 : 1
 
   return (
     <Box
@@ -79,7 +89,12 @@ const ProductCard: React.FC<CardProps> = ({ image, title, description, comingSoo
           />
         </Box>
       )}
-      <Box justifyContent={'center'} display={'flex'} zIndex={1}>
+      <Box
+        justifyContent={'center'}
+        display={'flex'}
+        zIndex={1}
+        opacity={opacity}
+      >
         <ImageWithSkeleton
           src={image || ''}
           alt={title}
@@ -88,14 +103,32 @@ const ProductCard: React.FC<CardProps> = ({ image, title, description, comingSoo
           borderRadius="none"
         />
       </Box>
-      <Heading as="h3" size="md" marginBottom="10px" zIndex={1}>
+      <Heading
+        as="h3"
+        size="md"
+        marginBottom="10px"
+        zIndex={1}
+        opacity={opacity}>
         {title}
       </Heading>
-      <Text justifyContent={'center'} display={'flex'} fontSize="md" marginBottom="20px"
-        maxW={["500px", "350px", "320px", "320px"]} pt={2} pb={5} pl={5} pr={5} height={75} zIndex={1}>
+      <Text
+        justifyContent={'center'} display={'flex'} fontSize="md"
+        marginBottom="20px"
+        maxW={["500px", "350px", "320px", "320px"]} pt={2} pb={5} pl={5}
+        pr={5} height={75} zIndex={1}
+        opacity={opacity}
+      >
         {description}
       </Text>
-      <Button colorScheme="orange" onClick={onClick} zIndex={1}>Learn More</Button>
+      <Button
+        colorScheme="orange"
+        onClick={onClick}
+        zIndex={1}
+        padding="0 4rem"
+        opacity={opacity}
+      >
+        Learn More
+      </Button>
     </Box>
   );
 };

@@ -1,38 +1,50 @@
 import React, { useState } from 'react';
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
   Button,
   FormControl,
   FormLabel,
   Input,
-  Link,
-  VStack,
   InputGroup,
   InputRightElement,
+  Link,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Text,
+  VStack,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import { AppDispatch, RootState } from '../../redux/store';
-import { login, logout, register, resetPassword } from '../../redux/reducers/authSlice';
+import {
+  login,
+  logout,
+  register,
+  resetPassword
+} from '../../redux/reducers/authSlice';
 
 interface LoginFormProps {
   isOpen: boolean;
   onClose: () => void;
   formType?: 'login' | 'signup' | 'forgotPassword';
+  onSuccess?: () => void;
 }
 
-const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose, formType = 'login' }) => {
+const LoginForm: React.FC<LoginFormProps> = (
+  { isOpen, onClose, formType = 'login', onSuccess }
+) => {
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
-  const { token, loading, error } = useSelector((state: RootState) => state.auth);
+  const {
+    token,
+    loading,
+    error
+  } = useSelector((state: RootState) => state.auth);
   const [show, setShow] = useState(false);
   const [email, setEmail] = useState<string>('');
   const [isEmailValid, setIsEmailValid] = useState<boolean>(true);
@@ -61,7 +73,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose, formType = 'logi
     dispatch(login({ email, password })).then((result: any) => {
       if (result.meta.requestStatus === 'fulfilled') {
         onClose();
-        navigate('/dashboard');
+        if (!onSuccess) {
+          navigate('/dashboard');
+        } else {
+          onSuccess()
+        }
       } else if (result.meta.requestStatus === 'rejected') {
         const errorMessages = result.payload
           ? Object.entries(result.payload).map(([key, value]) => `${value}`).join('\n')
@@ -72,7 +88,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose, formType = 'logi
   };
 
   const handleSignUp = () => {
-    dispatch(register({ email, password, firstName, lastName })).then((result: any) => {
+    dispatch(register({
+      email,
+      password,
+      firstName,
+      lastName
+    })).then((result: any) => {
       if (result.meta.requestStatus === 'fulfilled') {
         onClose();
         navigate('/dashboard');
@@ -134,19 +155,20 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose, formType = 'logi
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} blockScrollOnMount={true} preserveScrollBarGap={true}>
-      <ModalOverlay />
+    <Modal isOpen={isOpen} onClose={onClose} blockScrollOnMount={true}
+           preserveScrollBarGap={true}>
+      <ModalOverlay/>
       <ModalContent>
         <ModalHeader>
           {token
             ? 'Welcome'
             : isSignUp || formType === 'signup'
-            ? 'Sign Up'
-            : isForgotPassword
-            ? 'Reset Password'
-            : 'Log in'}
+              ? 'Sign Up'
+              : isForgotPassword
+                ? 'Reset Password'
+                : 'Log in'}
         </ModalHeader>
-        <ModalCloseButton />
+        <ModalCloseButton/>
         <ModalBody>
           {token ? (
             <Text>You are already logged in.</Text>
@@ -186,7 +208,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose, formType = 'logi
                   onChange={handleEmailChange}
                   onKeyUp={handleKeyPress}
                 />
-                {isEmailTouched && !isEmailValid && <Text color="red.500">Invalid email address.</Text>}
+                {isEmailTouched && !isEmailValid &&
+                  <Text color="red.500">Invalid email address.</Text>}
               </FormControl>
               {!isForgotPassword && (
                 <FormControl id="password" isRequired>
@@ -201,10 +224,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose, formType = 'logi
                       onKeyUp={handleKeyPress}
                     />
                     <InputRightElement width="4.5rem">
-                      <Button 
-                        h="1.75rem" 
-                        size="sm" 
-                        onClick={handleClick} 
+                      <Button
+                        h="1.75rem"
+                        size="sm"
+                        onClick={handleClick}
                         colorScheme="blue"
                       >
                         {show ? 'Hide' : 'Show'}
@@ -233,7 +256,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose, formType = 'logi
         </ModalBody>
         <ModalFooter justifyContent="center" flexDirection="column">
           {token ? (
-            <Button colorScheme="blue" onClick={handleLogout} isLoading={loading}>
+            <Button colorScheme="blue" onClick={handleLogout}
+                    isLoading={loading}>
               Logout
             </Button>
           ) : (
@@ -246,16 +270,23 @@ const LoginForm: React.FC<LoginFormProps> = ({ isOpen, onClose, formType = 'logi
               >
                 {isForgotPassword ? 'Reset Password' : (isSignUp || formType === 'signup') ? 'Sign Up' : 'Login'}
               </Button>
-              {!isForgotPassword && formType !== 'signup' && (
-                <Button variant="ghost" size="sm" mt={2} onClick={() => setIsSignUp(!isSignUp)}>
-                  {isSignUp ? 'Have an account? Log in' : 'Need an account? Sign up'}
-                </Button>
-              )}
-              {isForgotPassword && (
-                <Button variant="ghost" size="sm" mt={2} onClick={handleBackToLogin}>
-                  Back to Login
-                </Button>
-              )}
+              {
+                !isForgotPassword && formType !== 'signup' && (
+                  <Button variant="ghost" size="sm" mt={2}
+                          onClick={() => setIsSignUp(!isSignUp)}>
+                    {isSignUp ? 'Have an account? Log in' : 'Need an account? Sign up'}
+                  </Button>
+                )
+              }
+              {
+                isForgotPassword && (
+                  <Button
+                    variant="ghost" size="sm" mt={2}
+                    onClick={handleBackToLogin}>
+                    Back to Login
+                  </Button>
+                )
+              }
             </>
           )}
         </ModalFooter>
