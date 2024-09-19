@@ -198,7 +198,7 @@ def fetch_products_from_erpnext():
 def fetch_products(request):
     fetching_data = "Products fetch initiated in the background."
 
-    fetch_products_from_erpnext_task()
+    fetch_products_from_erpnext_task.delay()
 
     messages.add_message(
         request,

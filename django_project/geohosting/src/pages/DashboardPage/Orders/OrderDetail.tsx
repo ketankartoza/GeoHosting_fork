@@ -1,76 +1,64 @@
-/*** ORDER DETAILS **/
 import React, { useEffect } from 'react';
-import { useParams } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../../redux/store";
-import { Box, Spinner } from "@chakra-ui/react";
-import { FaPrint } from "react-icons/fa6";
-import {
-  fetchSalesOrderDetail
-} from "../../../redux/reducers/salesOrdersSlice";
+import { useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../../../redux/store';
+import { fetchOrderById } from '../../../redux/reducers/ordersSlice';
+import { Box, Spinner, Text, Link } from '@chakra-ui/react';
+import { FaPrint } from 'react-icons/fa';
 
 const OrderDetail: React.FC = () => {
-  /** Order Detail Component */
-
-  const dispatch: AppDispatch = useDispatch();
   const { id } = useParams<{ id: string }>();
-  const {
-    salesOrderDetail,
-    detailError
-  } = useSelector((state: RootState) => state.salesOrders);
+  const dispatch = useDispatch<AppDispatch>();
+  const { orderDetail, loading, error } = useSelector((state: RootState) => state.orders);
+  const { token } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
-    if (id != null) {
-      dispatch(fetchSalesOrderDetail(id));
+    if (id && token) {
+      dispatch(fetchOrderById({ id, token }));
     }
-  }, [dispatch]);
+  }, [dispatch, id, token]);
 
-  if (!salesOrderDetail && !detailError) {
+  if (loading) {
     return (
       <Box
-        position={'absolute'} display={'flex'}
-        justifyContent={'center'} width={'100%'} height={'100%'}
-        alignItems={'center'}>
-        <Spinner size='xl'/>
+        position='absolute'
+        display='flex'
+        justifyContent='center'
+        width='100%'
+        height='100%'
+        alignItems='center'
+      >
+        <Spinner size='xl' />
       </Box>
-    )
+    );
   }
 
-  if (!salesOrderDetail && detailError) {
-    return (
-      <Box color='Red'>{detailError}</Box>
-    )
-  }
-
-  if (!salesOrderDetail) {
-    return (
-      <Box></Box>
-    )
+  if (error) {
+    return <Box color='red'>{error}</Box>;
   }
 
   return (
-    <div>
-      <Box>
-        You ordered at : {salesOrderDetail.date}
-        <Box><b>Package</b> : {salesOrderDetail.package.name}</Box>
-        <Box><b>Status</b> : {salesOrderDetail.order_status}</Box>
-        <Box><b>Payment method</b> : {salesOrderDetail.payment_method}
-        </Box>
+    <Box p={4}>
+      {orderDetail ? (
         <Box>
-          <b>Spec</b> : {salesOrderDetail.package.feature_list['spec'].join(', ')}
+          <Text mb={2}>You ordered at: {orderDetail.date}</Text>
+          <Text mb={2}><b>Package</b>: {orderDetail.package.name}</Text>
+          <Text mb={2}><b>Status</b>: {orderDetail.order_status}</Text>
+          <Text mb={2}><b>Payment method</b>: {orderDetail.payment_method}</Text>
+          <Text mb={4}><b>Spec</b>: {orderDetail.package.feature_list.spec.join(', ')}</Text>
+          {orderDetail.invoice_url && (
+            <Box mt={4}>
+              <Link href={orderDetail.invoice_url} isExternal>
+                Invoice <FaPrint style={{ display: "inline-block" }} />
+              </Link>
+            </Box>
+          )}
         </Box>
-        {
-          salesOrderDetail.invoice_url ?
-            <Box marginTop={5}>
-              <a href={salesOrderDetail.invoice_url} target='_blank'>
-                Invoice <FaPrint style={{ display: "inline-block" }}/>
-              </a>
-            </Box> : null
-        }
-      </Box>
-    </div>
-  )
-}
-
+      ) : (
+        <Box>No order details found</Box>
+      )}
+    </Box>
+  );
+};
 
 export default OrderDetail;

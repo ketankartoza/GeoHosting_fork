@@ -11,6 +11,18 @@ from geohosting.serializer.product import (
 class SalesOrderSerializer(serializers.ModelSerializer):
     """Sales order serializer."""
 
+    package = serializers.SerializerMethodField()
+    order_status = serializers.SerializerMethodField()
+
+    def get_package(self, obj: SalesOrder):
+        """Return package."""
+        return ProductPackageSerializer(obj.package).data
+
+    def get_order_status(self, obj: SalesOrder):
+        """Return package."""
+        obj.update_payment_status()
+        return obj.order_status
+
     class Meta:
         model = SalesOrder
         fields = '__all__'
@@ -23,6 +35,7 @@ class SalesOrderDetailSerializer(serializers.ModelSerializer):
     package = serializers.SerializerMethodField()
     invoice_url = serializers.SerializerMethodField()
     instance = serializers.SerializerMethodField()
+    order_status = serializers.SerializerMethodField()
 
     def get_product(self, obj: SalesOrder):
         """Return product."""
@@ -44,6 +57,11 @@ class SalesOrderDetailSerializer(serializers.ModelSerializer):
             ).data
         except Instance.DoesNotExist:
             return None
+
+    def get_order_status(self, obj: SalesOrder):
+        """Return package."""
+        obj.update_payment_status()
+        return obj.order_status
 
     class Meta:
         model = SalesOrder

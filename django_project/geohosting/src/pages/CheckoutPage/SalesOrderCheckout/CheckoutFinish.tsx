@@ -32,12 +32,15 @@ const CheckoutFinish: React.FC<Props> = ({ salesOrderDetail }) => {
         <Box>
           <Text fontSize={22} color={'white'}>Title</Text>
         </Box>
-        <Box padding={8} backgroundColor="gray.100" borderRadius={10}>
-          Your service is ready! You can check it out here:<br/>
-          <a href={salesOrderDetail.instance.url} target='_blank'>
-            {salesOrderDetail.instance.url}
-          </a>
-        </Box>
+        {
+          salesOrderDetail.instance ?
+            <Box padding={8} backgroundColor="gray.100" borderRadius={10}>
+              Your service is ready! You can check it out here:<br/>
+              <a href={salesOrderDetail.instance.url} target='_blank'>
+                {salesOrderDetail.instance.url}
+              </a>
+            </Box> : null
+        }
       </GridItem>
     </Grid>
   );

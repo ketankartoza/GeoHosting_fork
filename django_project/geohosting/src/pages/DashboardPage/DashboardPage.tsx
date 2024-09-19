@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   ChakraProvider,
   Box,
@@ -10,9 +10,10 @@ import {
 import { HamburgerIcon } from '@chakra-ui/icons';
 import customTheme from '../../theme/theme';
 import DashboardSidePanel from "../../components/DashboardSidePanel/DashboardSidePanel";
-import {Route, Routes, useLocation} from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 import DashboardMainPage from "./DashboardMainPage";
 import SupportPage from "./Support/SupportPage";
+import OrdersList from './Orders/OrderList';
 import OrderDetail from "./Orders/OrderDetail";
 
 const DashboardPage = ({ title="Dashboard" }) => {
@@ -51,9 +52,10 @@ const DashboardPage = ({ title="Dashboard" }) => {
 
           {/* Main content area below the header */}
           <Box p={4} pt={8}>
-           <Routes>
+            <Routes>
               <Route path="/" element={<DashboardMainPage />} />
               <Route path="/support" element={<SupportPage />} />
+              <Route path="/orders" element={<OrdersList />} />
               <Route path="/orders/:id" element={<OrderDetail />} />
             </Routes>
           </Box>
