@@ -55,6 +55,11 @@ class Package(models.Model):
         default='',
         blank=True
     )
+    price_list = models.CharField(
+        default='',
+        blank=True,
+        help_text='Selling price list of the package.'
+    )
     price = models.DecimalField(
         max_digits=10,
         decimal_places=2

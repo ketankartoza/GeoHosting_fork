@@ -10,7 +10,8 @@ from geohosting.models.activity import name_validator
 from geohosting.models.region import Region
 from geohosting.models.user_profile import UserProfile
 from geohosting.utils.erpnext import (
-    post_to_erpnext, put_to_erpnext, add_erp_next_comment
+    post_to_erpnext, put_to_erpnext,
+    add_erp_next_comment, download_erp_file
 )
 from geohosting.utils.paystack import verify_paystack_payment
 from geohosting.utils.stripe import get_checkout_detail
@@ -160,6 +161,11 @@ class SalesOrder(models.Model):
         null=True,
         help_text='Checkout id on the payment gateway.'
     )
+    invoice = models.FileField(
+        upload_to='invoices/',
+        blank=True,
+        null=True,
+    )
 
     # This is configuration for create
     app_name = models.CharField(
@@ -224,6 +230,9 @@ class SalesOrder(models.Model):
                     "doctype": doctype,
                     'customer': user_profile.erpnext_code,
                     'date': self.date.strftime('%Y-%m-%d'),
+                    'selling_price_list': self.package.price_list,
+                    'price_list_currency': self.package.currency,
+                    'currency': self.package.currency,
                     'items': [
                         {
                             'name': self.package.erpnext_code,
@@ -279,10 +288,20 @@ class SalesOrder(models.Model):
     def invoice_url(self):
         """Return invoice url when the status is not payment anymore."""
         if self.sales_order_status_obj != SalesOrderStatus.WAITING_PAYMENT:
-            return (
-                f"{settings.ERPNEXT_BASE_URL}/printview?doctype=Sales%20Order"
-                f"&name={self.erpnext_code}&format=Standard"
-            )
+            if self.invoice:
+                return self.invoice.url
+            else:
+                image_file = download_erp_file(
+                    '/api/method/frappe.utils.print_format.download_pdf'
+                    f'?doctype=Sales%20Order&name={self.erpnext_code}',
+                    folder='invoices',
+                    filename=f'{self.erpnext_code}.pdf'
+                )
+                if image_file:
+                    self.invoice = image_file
+                    self.save()
+                    return self.invoice.url
+        return None
 
     def auto_deploy(self):
         """Change status to deployment and do deployment."""

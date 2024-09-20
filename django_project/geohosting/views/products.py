@@ -1,11 +1,6 @@
-import os
 import re
 
-import requests
-from django.conf import settings
 from django.contrib import messages
-from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser
@@ -19,30 +14,11 @@ from geohosting.tasks.products import (
     fetch_products_from_erpnext_task
 )
 from geohosting.utils.erpnext import (
-    fetch_erpnext_data,
-    fetch_erpnext_detail_data
+    fetch_erpnext_data, fetch_erpnext_detail_data, download_erp_file
 )
 from geohosting_controller.default_data import (
     generate_regions, generate_cluster
 )
-
-
-def handle_image(image_path):
-    image_url = f"{settings.ERPNEXT_BASE_URL}{image_path}"
-    response = requests.get(image_url)
-
-    if response.status_code == 200:
-        image_filename = os.path.basename(image_path)
-        image_content = ContentFile(response.content)
-        image_saved_path = (
-            default_storage.save(
-                f'product_images/{image_filename}',
-                image_content)
-        )
-        return image_saved_path
-    else:
-        print(f"Failed to download image: {image_url}")
-        return None
 
 
 def parse_description(html_content: str) -> dict:
@@ -66,14 +42,14 @@ def save_product_image(
     try:
         title = product_desc[title_key]
         description = product_desc[description_key]
-        image_file = handle_image(image_path)
+        image_file = download_erp_file(image_path)
         if not image_file:
             raise AttributeError()
         media, _ = ProductMedia.objects.update_or_create(
             product=obj,
             title=title,
             defaults={
-                'image': handle_image(image_path),
+                'image': image_file,
                 'description': description
             }
         )
@@ -116,7 +92,7 @@ def fetch_products_from_erpnext():
             image_file = None
 
             if image_path:
-                image_file = handle_image(image_path)
+                image_file = download_erp_file(image_path)
 
             product_obj, created = Product.objects.update_or_create(
                 upstream_id=upstream_id,
@@ -185,7 +161,8 @@ def fetch_products_from_erpnext():
                             'currency': currency,
                             'name': item_price.get('item_name'),
                             'erpnext_item_code': item_price.get('item_code'),
-                            'package_group': package_group
+                            'package_group': package_group,
+                            'price_list': item_price.get('price_list')
                         }
                     )
                 except Product.DoesNotExist:

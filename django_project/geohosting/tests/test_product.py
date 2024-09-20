@@ -1,24 +1,27 @@
-from unittest import TestCase
+from unittest import TestCase, mock
 from unittest.mock import patch, MagicMock
 
+from django.contrib.auth.models import User
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase, APIClient
-from django.contrib.auth.models import User
+
 from geohosting.models import Product, Package, ProductMetadata
 from geohosting.serializer.product import ProductDetailSerializer
-from unittest import mock
-from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 class ProductViewSetTest(APITestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.admin_user = User.objects.create_superuser('admin', 'admin@test.com', 'password')
-        self.regular_user = User.objects.create_user('user', 'user@test.com', 'password')
+        self.admin_user = User.objects.create_superuser('admin',
+                                                        'admin@test.com',
+                                                        'password')
+        self.regular_user = User.objects.create_user('user', 'user@test.com',
+                                                     'password')
 
         # Generate token for admin user
         self.admin_token = Token.objects.create(user=self.admin_user)
@@ -30,7 +33,8 @@ class ProductViewSetTest(APITestCase):
             description='Test Description',
             available=True
         )
-        self.product_url = reverse('product-detail', kwargs={'pk': self.product.pk})
+        self.product_url = reverse('product-detail',
+                                   kwargs={'pk': self.product.pk})
         self.products_url = reverse('product-list')
 
     def test_public_get_list(self):
@@ -42,7 +46,8 @@ class ProductViewSetTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_admin_create_product(self):
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.admin_token.key)
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Token ' + self.admin_token.key)
         data = {
             'name': 'New Product',
             'order': 2,
@@ -54,7 +59,8 @@ class ProductViewSetTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_admin_update_product(self):
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.admin_token.key)
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Token ' + self.admin_token.key)
         data = {
             'name': 'Updated Product',
             'order': 1,
@@ -66,7 +72,8 @@ class ProductViewSetTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_admin_delete_product(self):
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.admin_token.key)
+        self.client.credentials(
+            HTTP_AUTHORIZATION='Token ' + self.admin_token.key)
         response = self.client.delete(self.product_url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
@@ -112,7 +119,7 @@ class FetchProductsTestCase(TestCase):
         self.url = reverse('fetch_products')
 
     @patch('geohosting.views.products.fetch_erpnext_data')
-    @patch('geohosting.views.products.requests.get')
+    @patch('geohosting.utils.erpnext.requests.get')
     def test_fetch_products_success(self, mock_get, mock_fetch_erpnext_data):
         # Mocking the ERPNext data fetch
         mock_fetch_erpnext_data.side_effect = [
@@ -187,8 +194,9 @@ class FetchProductsTestCase(TestCase):
         self.assertFalse(product2.available)
 
     @patch('geohosting.views.products.fetch_erpnext_data')
-    @patch('geohosting.views.products.requests.get')
-    def test_fetch_products_image_download_fail(self, mock_get, mock_fetch_erpnext_data):
+    @patch('geohosting.utils.erpnext.requests.get')
+    def test_fetch_products_image_download_fail(self, mock_get,
+                                                mock_fetch_erpnext_data):
         # Mocking the ERPNext data fetch
         mock_fetch_erpnext_data.side_effect = [[
             {'name': 'product_2', 'item_name': 'Product 2',
@@ -211,6 +219,7 @@ class FetchProductsTestCase(TestCase):
         product1 = Product.objects.get(upstream_id='product_2')
         self.assertEqual(product1.image.name, '')
 
+
 class ProductViewSetTestCase(APITestCase):
     def setUp(self):
         # Create test product
@@ -220,7 +229,7 @@ class ProductViewSetTestCase(APITestCase):
             upstream_id='123',
             available=True,
         )
-        
+
         # Create test packages
         self.product = Product.objects.create(
             name="BIMS",
@@ -228,7 +237,7 @@ class ProductViewSetTestCase(APITestCase):
             upstream_id='123',
             available=True,
         )
-        
+
         # Create test packages
         self.package1 = Package.objects.create(
             name="BIMS-SMALL-DO",
@@ -311,12 +320,15 @@ class ProductViewSetTestCase(APITestCase):
 
         # Check if serializer is returning correct packages based on currency
         product_data = response.data
-        serializer = ProductDetailSerializer(instance=self.product, context={'currency': 'USD'})
+        serializer = ProductDetailSerializer(instance=self.product,
+                                             context={'currency': 'USD'})
 
         self.assertEqual(product_data['packages'], serializer.data['packages'])
-        self.assertEqual(product_data['packages'][0]['currency'], serializer.data['packages'][0]['currency'])
+        self.assertEqual(product_data['packages'][0]['currency'],
+                         serializer.data['packages'][0]['currency'])
         self.assertEqual(product_data['images'], serializer.data['images'])
-        self.assertEqual(product_data['product_meta'], serializer.data['product_meta'])
+        self.assertEqual(product_data['product_meta'],
+                         serializer.data['product_meta'])
 
     def test_retrieve_product_detail_without_currency(self):
         # Test retrieving product details without specifying a currency
@@ -329,15 +341,20 @@ class ProductViewSetTestCase(APITestCase):
 
         self.assertEqual(product_data['packages'], serializer.data['packages'])
         self.assertEqual(product_data['images'], serializer.data['images'])
-        self.assertEqual(product_data['product_meta'], serializer.data['product_meta'])
+        self.assertEqual(product_data['product_meta'],
+                         serializer.data['product_meta'])
 
 
 class DeleteOldImageSignalTest(TestCase):
 
     def setUp(self):
         # Create an initial Product instance with an image
-        self.initial_image = SimpleUploadedFile(name='initial_image.jpg', content=b'file_content', content_type='image/jpeg')
-        self.new_image = SimpleUploadedFile(name='new_image.jpg', content=b'new_content', content_type='image/jpeg')
+        self.initial_image = SimpleUploadedFile(name='initial_image.jpg',
+                                                content=b'file_content',
+                                                content_type='image/jpeg')
+        self.new_image = SimpleUploadedFile(name='new_image.jpg',
+                                            content=b'new_content',
+                                            content_type='image/jpeg')
 
         self.product = Product.objects.create(
             name="Test Product",
@@ -348,7 +365,8 @@ class DeleteOldImageSignalTest(TestCase):
 
     @mock.patch('os.path.exists', return_value=True)
     @mock.patch('django.core.files.storage.default_storage.delete')
-    def test_old_image_deleted_when_new_image_uploaded(self, mock_delete, mock_exists):
+    def test_old_image_deleted_when_new_image_uploaded(self, mock_delete,
+                                                       mock_exists):
         # Update product with a new image
         old_image_path = self.product.image.path  # Store the old image path
         self.product.image = self.new_image
@@ -388,7 +406,8 @@ class DeleteOldImageSignalTest(TestCase):
 
     @mock.patch('os.path.exists', return_value=True)
     @mock.patch('django.core.files.storage.default_storage.delete')
-    def test_no_action_if_product_does_not_exist(self, mock_delete, mock_exists):
+    def test_no_action_if_product_does_not_exist(self, mock_delete,
+                                                 mock_exists):
         # Simulate product that doesn't exist by deleting it first
         self.product.delete()
 

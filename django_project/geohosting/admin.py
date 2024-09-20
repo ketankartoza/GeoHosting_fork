@@ -216,7 +216,7 @@ class PackageGroupAdmin(admin.ModelAdmin):
 @admin.register(Package)
 class PackageAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'price', 'currency', 'product', 'package_group',
+        'name', 'price', 'price_list', 'currency', 'product', 'package_group',
         'stripe_id', 'paystack_id'
     )
     search_fields = ('name', 'product__name')

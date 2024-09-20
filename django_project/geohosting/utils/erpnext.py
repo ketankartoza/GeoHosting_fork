@@ -1,7 +1,10 @@
 import json
+import os
 
 import requests
 from django.conf import settings
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 
 headers = {
     "Authorization": (
@@ -203,3 +206,24 @@ def add_erp_next_comment(user, doctype: str, id: str, comment: str):
         return {"status": "success", "data": data}
     except requests.exceptions.HTTPError as err:
         return {"status": "error", "message": str(err)}
+
+
+def download_erp_file(image_path, folder='product_images', filename=None):
+    """Download file from erpnext."""
+    url = f"{settings.ERPNEXT_BASE_URL}{image_path}"
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 200:
+        if not filename:
+            filename = os.path.basename(image_path)
+        content = ContentFile(response.content)
+        saved_path = (
+            default_storage.save(
+                f'{folder}/{filename}',
+                content
+            )
+        )
+        return saved_path
+    else:
+        print(f"Failed to download image: {url}")
+        return None

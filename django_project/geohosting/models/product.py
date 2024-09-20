@@ -5,14 +5,15 @@ GeoHosting.
 .. note:: Product model.
 """
 
+import os
+
+from django.core.files.storage import default_storage
 from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 
 from geohosting.models.cluster import Cluster
 from geohosting.models.fields import SVGAndImageField
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
-from django.core.files.storage import default_storage
-import os
 
 
 class Product(models.Model):
@@ -166,11 +167,12 @@ class ProductMedia(models.Model):
 
 
 @receiver(pre_save, sender=Product)
+@receiver(pre_save, sender=ProductMedia)
 def delete_old_image(sender, instance, **kwargs):
     """Delete the old image file if a new image is being set."""
     if instance.pk:
         try:
-            old_product = Product.objects.get(pk=instance.pk)
+            old_product = sender.objects.get(pk=instance.pk)
         except Product.DoesNotExist:
             return
         if old_product.image and instance.image != old_product.image:
