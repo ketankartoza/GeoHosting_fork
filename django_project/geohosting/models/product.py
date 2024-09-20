@@ -9,6 +9,10 @@ from django.db import models
 
 from geohosting.models.cluster import Cluster
 from geohosting.models.fields import SVGAndImageField
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from django.core.files.storage import default_storage
+import os
 
 
 class Product(models.Model):
@@ -159,3 +163,17 @@ class ProductMedia(models.Model):
 
     class Meta:
         ordering = ['product__order', 'order']
+
+
+@receiver(pre_save, sender=Product)
+def delete_old_image(sender, instance, **kwargs):
+    """Delete the old image file if a new image is being set."""
+    if instance.pk:
+        try:
+            old_product = Product.objects.get(pk=instance.pk)
+        except Product.DoesNotExist:
+            return
+        if old_product.image and instance.image != old_product.image:
+            old_image_path = old_product.image.path
+            if os.path.exists(old_image_path):
+                default_storage.delete(old_image_path)

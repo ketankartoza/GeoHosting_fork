@@ -9,7 +9,8 @@ from rest_framework.test import APITestCase, APIClient
 from django.contrib.auth.models import User
 from geohosting.models import Product, Package, ProductMetadata
 from geohosting.serializer.product import ProductDetailSerializer
-
+from unittest import mock
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 class ProductViewSetTest(APITestCase):
@@ -329,3 +330,71 @@ class ProductViewSetTestCase(APITestCase):
         self.assertEqual(product_data['packages'], serializer.data['packages'])
         self.assertEqual(product_data['images'], serializer.data['images'])
         self.assertEqual(product_data['product_meta'], serializer.data['product_meta'])
+
+
+class DeleteOldImageSignalTest(TestCase):
+
+    def setUp(self):
+        # Create an initial Product instance with an image
+        self.initial_image = SimpleUploadedFile(name='initial_image.jpg', content=b'file_content', content_type='image/jpeg')
+        self.new_image = SimpleUploadedFile(name='new_image.jpg', content=b'new_content', content_type='image/jpeg')
+
+        self.product = Product.objects.create(
+            name="Test Product",
+            upstream_id="upstream_test",
+            available=True,
+            image=self.initial_image
+        )
+
+    @mock.patch('os.path.exists', return_value=True)
+    @mock.patch('django.core.files.storage.default_storage.delete')
+    def test_old_image_deleted_when_new_image_uploaded(self, mock_delete, mock_exists):
+        # Update product with a new image
+        old_image_path = self.product.image.path  # Store the old image path
+        self.product.image = self.new_image
+        self.product.save()
+
+        # We expect os.path.exists to be called once for the old image path
+        mock_exists.assert_any_call(old_image_path)
+
+        # Assert that default_storage.delete was called to delete the old image
+        mock_delete.assert_called_once_with(old_image_path)
+
+    @mock.patch('os.path.exists', return_value=False)
+    @mock.patch('django.core.files.storage.default_storage.delete')
+    def test_no_delete_if_image_does_not_exist(self, mock_delete, mock_exists):
+        # Update product with a new image but simulate old image file doesn't exist
+        old_image_path = self.product.image.path  # Store the old image path
+        self.product.image = self.new_image
+        self.product.save()
+
+        # Ensure os.path.exists was called for the old image path
+        mock_exists.assert_any_call(old_image_path)
+
+        # Since os.path.exists returns False, default_storage.delete should not be called
+        mock_delete.assert_not_called()
+
+    @mock.patch('os.path.exists', return_value=True)
+    @mock.patch('django.core.files.storage.default_storage.delete')
+    def test_no_delete_if_image_same(self, mock_delete, mock_exists):
+        # Save the product without changing the image (image stays the same)
+        self.product.save()
+
+        # Assert that os.path.exists was not called because image didn't change
+        mock_exists.assert_not_called()
+
+        # Assert that default_storage.delete was not called
+        mock_delete.assert_not_called()
+
+    @mock.patch('os.path.exists', return_value=True)
+    @mock.patch('django.core.files.storage.default_storage.delete')
+    def test_no_action_if_product_does_not_exist(self, mock_delete, mock_exists):
+        # Simulate product that doesn't exist by deleting it first
+        self.product.delete()
+
+        # Try to save a non-existing product (this simulates a race condition or invalid state)
+        self.product.image = self.new_image
+
+        # Since the instance no longer exists, os.path.exists or delete should not be called
+        mock_exists.assert_not_called()
+        mock_delete.assert_not_called()
