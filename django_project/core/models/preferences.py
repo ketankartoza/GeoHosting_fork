@@ -15,6 +15,7 @@ from core.models.singleton import SingletonModel
 from geohosting.utils.erpnext import test_connection
 from geohosting.utils.paystack import test_connection as paystack_connection
 from geohosting.utils.stripe import test_connection as strip_connection
+from geohosting.utils.vault import get_token as vault_connection
 from geohosting_controller.connection import get_crumb
 
 
@@ -78,6 +79,15 @@ class Preferences(SingletonModel):
         """Paystack test."""
         try:
             paystack_connection()
+            return 'OK'
+        except Exception as e:
+            return f'{e}'
+
+    @property
+    def vault_test(self):
+        """Vaule test."""
+        try:
+            vault_connection()
             return 'OK'
         except Exception as e:
             return f'{e}'

@@ -15,6 +15,14 @@ try:
 except NotRegistered:
     pass
 
+test_fields = (
+    'erp_next_test',
+    'jenkins_test',
+    'stripe_test',
+    'paystack_test',
+    'vault_test'
+)
+
 
 @admin.register(Preferences)
 class PreferencesAdmin(admin.ModelAdmin):
@@ -23,18 +31,8 @@ class PreferencesAdmin(admin.ModelAdmin):
     fieldsets = (
         (
             None, {
-                'fields': (
-                    'erp_next_test',
-                    'jenkins_test',
-                    'stripe_test',
-                    'paystack_test'
-                )
+                'fields': test_fields
             }
         ),
     )
-    readonly_fields = (
-        'erp_next_test',
-        'jenkins_test',
-        'stripe_test',
-        'paystack_test'
-    )
+    readonly_fields = test_fields

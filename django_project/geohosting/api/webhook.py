@@ -11,9 +11,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from geohosting.models import (
-    Activity, ActivityStatus, Instance, Cluster, Package, WebhookEvent
+    Activity, ActivityStatus, Package, WebhookEvent
 )
-from geohosting_controller.variables import ActivityTypeTerm
 
 
 class WebhookView(APIView):
@@ -64,30 +63,10 @@ class WebhookView(APIView):
                 activity.update_status(ActivityStatus.ERROR)
                 return Response()
 
-            if status not in ['succeeded', 'synced']:
+            if status not in ['success', 'succeeded', 'synced']:
                 raise KeyError('Status does not found')
 
             if source == self.ARGO_CD:
-                price = Package.objects.filter(
-                    package_group__package_code=activity.client_data[
-                        'package_code'
-                    ]
-                ).first()
-                if activity.sales_order:
-                    price = activity.sales_order.package
-                if (
-                        activity.activity_type.identifier ==
-                        ActivityTypeTerm.CREATE_INSTANCE.value
-                ):
-                    cluster = Cluster.objects.get(
-                        code=activity.post_data['k8s_cluster']
-                    )
-                    Instance.objects.create(
-                        name=activity.client_data['app_name'],
-                        price=price,
-                        cluster=cluster,
-                        owner=activity.triggered_by
-                    )
                 activity.note = json.dumps(data)
                 activity.update_status(ActivityStatus.SUCCESS)
                 activity.save()

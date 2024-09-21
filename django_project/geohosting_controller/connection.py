@@ -45,8 +45,8 @@ def get_crumb(url):
     return response.json()['crumb']
 
 
-def _request_get(url: str, params: dict = None):
-    """Request to server."""
+def request_get(url: str, params: dict = None):
+    """Handle get connection."""
     user, token = auth()
     return requests.get(
         url, params=params if params else {},
@@ -58,13 +58,8 @@ def _request_get(url: str, params: dict = None):
     )
 
 
-def request_get(url: str, params: dict = None):
-    """Handle get connection."""
-    return _request_get(url, params=params)
-
-
-def _request_post(url: str, data: dict):
-    """Request to server."""
+def request_post(url: str, data: dict):
+    """Handle post connection."""
     user, token = auth()
     return requests.post(
         url,
@@ -75,8 +70,3 @@ def _request_post(url: str, data: dict):
         auth=(user, token),
         verify=False
     )
-
-
-def request_post(url: str, data: dict):
-    """Handle post connection."""
-    return _request_post(url, data=data)

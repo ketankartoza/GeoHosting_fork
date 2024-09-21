@@ -20,7 +20,7 @@ class InstanceSerializer(serializers.ModelSerializer):
 
     def get_url(self, obj: Instance):
         """Return url."""
-        return f'https://{obj.name}.{obj.cluster.domain}'
+        return obj.url
 
     def get_package(self, obj: Instance):
         """Return package."""

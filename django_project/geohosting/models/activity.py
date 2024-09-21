@@ -13,11 +13,13 @@ from django.db import models
 from django.utils import timezone
 
 from geohosting.models.instance import Instance
-from geohosting.models.product import Product
+from geohosting.models.package import Package
+from geohosting.models.product import Product, ProductCluster
 from geohosting_controller.connection import request_post
 from geohosting_controller.exceptions import (
     ConnectionErrorException, ActivityException
 )
+from geohosting_controller.variables import ActivityTypeTerm
 
 User = get_user_model()
 
@@ -177,6 +179,13 @@ class Activity(models.Model):
                 self.sales_order.order_status = SalesOrderStatus.DEPLOYED.key
                 self.sales_order.save()
 
+        # Update instance status
+        if self.instance:
+            if self.status == ActivityStatus.SUCCESS:
+                self.instance.online()
+            if self.status == ActivityStatus.ERROR:
+                self.instance.offline()
+
     def run(self):
         """Run the activity."""
         try:
@@ -193,6 +202,9 @@ class Activity(models.Model):
                 )
             self.jenkins_queue_url = response.headers['Location']
             self.update_status(ActivityStatus.BUILD_ARGO)
+
+            # Create instance when jenkins communication is ok
+            self.create_instance()
         except Exception as e:
             self.update_status(
                 ActivityStatus.ERROR, f'{e}'
@@ -205,9 +217,42 @@ class Activity(models.Model):
         if created:
             self.update_status(ActivityStatus.RUNNING)
             self.run()
+        else:
+            # Create instance when activity is not created
+            self.create_instance()
 
     @staticmethod
     def test_name(name):
         """Validate name."""
         if not re.match(regex_name, name):
             raise ActivityException(regex_name_error)
+
+    def create_instance(self):
+        """Create activity."""
+        if not self.instance and self.jenkins_queue_url:
+            if self.sales_order:
+                price = self.sales_order.package
+            else:
+                price = Package.objects.filter(
+                    package_group__package_code=self.client_data[
+                        'package_code'
+                    ]
+                ).first()
+
+            if (
+                    self.activity_type.identifier ==
+                    ActivityTypeTerm.CREATE_INSTANCE.value
+            ):
+                product_cluster_id = self.client_data['product_cluster_id']
+                product_cluster = ProductCluster.objects.get(
+                    id=product_cluster_id
+                )
+                cluster = product_cluster.cluster
+                instance = Instance.objects.create(
+                    name=self.client_data['app_name'],
+                    price=price,
+                    cluster=cluster,
+                    owner=self.triggered_by
+                )
+                self.instance = instance
+                self.save()

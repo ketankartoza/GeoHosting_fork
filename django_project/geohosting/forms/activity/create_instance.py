@@ -58,14 +58,11 @@ class CreateInstanceForm(forms.ModelForm):
             try:
                 app_name = data['app_name']
                 package_id = data['package_id']
-                region_id = data['region_id']
                 package = Package.objects.get(id=package_id)
-                product = package.product
-                product_cluster = product.productcluster_set.get(
-                    cluster__region_id=region_id
+                product_cluster_id = data['product_cluster_id']
+                product_cluster = ProductCluster.objects.get(
+                    id=product_cluster_id
                 )
-                if not package.package_group.package_code:
-                    raise Exception('No package group code')
                 data = {
                     'cluster': product_cluster.cluster.code,
                     'environment': product_cluster.environment,
@@ -83,19 +80,13 @@ class CreateInstanceForm(forms.ModelForm):
         app_name = cleaned_data.get('app_name')
         package = cleaned_data.get('package')
         region = cleaned_data.get('region')
-
-        data = {
-            'app_name': app_name,
-            'package_id': package.id,
-            'package_code': package.package_group.package_code,
-            'product_name': package.product.name,
-            'region_id': region.id,
-            'region_name': region.name
-        }
-        cleaned_data['client_data'] = data
-        self.instance.client_data = data
-        activity_type_id = ''
         try:
+            # Check package group
+            if not package.package_group.package_code:
+                raise Exception('No package group code')
+
+            # Check activity
+            activity_type_id = ''
             activity_type_id = ActivityTypeTerm.CREATE_INSTANCE.value
             self.instance.activity_type_id = ActivityType.objects.get(
                 identifier=activity_type_id,
@@ -103,10 +94,32 @@ class CreateInstanceForm(forms.ModelForm):
             ).id
             self.instance.triggered_by = self.user
 
+            # Check product cluster
+            product = package.product
+            product_cluster = product.productcluster_set.get(
+                cluster__region=region
+            )
+
+            data = {
+                'app_name': app_name,
+                'package_id': package.id,
+                'package_code': package.package_group.package_code,
+                'product_name': package.product.name,
+                'region_id': region.id,
+                'region_name': region.name,
+                'product_cluster_id': product_cluster.id
+            }
+            cleaned_data['client_data'] = data
+            self.instance.client_data = data
+
             # Get post data
             self.instance.post_data = self._post_data()
         except AttributeError:
             raise forms.ValidationError('User is missing.')
+        except ProductCluster.DoesNotExist:
+            raise forms.ValidationError(
+                f'Product cluster for region {region.name} does not exist.'
+            )
         except ActivityType.DoesNotExist:
             raise forms.ValidationError(
                 f'Activity type {activity_type_id} does not exist.'

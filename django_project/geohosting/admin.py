@@ -20,18 +20,13 @@ from geohosting.models import (
 from geohosting.models.support import Ticket, Attachment
 
 
-def get_jenkins_status(modeladmin, request, queryset):
-    """Return jenkins status."""
-    for config in queryset:
-        config.get_jenkins_status()
-
-
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
     """Ticket admin."""
 
-    list_display = ('id', 'customer', 'subject',
-                    'status', 'created_at', 'updated_at')
+    list_display = (
+        'id', 'customer', 'subject', 'status', 'created_at', 'updated_at'
+    )
     list_filter = ('status', 'created_at', 'updated_at')
     search_fields = ('customer', 'subject', 'details')
     readonly_fields = ('created_at', 'updated_at')
@@ -61,7 +56,6 @@ class ActivityAdmin(admin.ModelAdmin):
         'status', 'note'
     )
     list_filter = ('instance', 'triggered_at', 'triggered_by')
-    actions = [get_jenkins_status]
     readonly_fields = (
         'activity_type', 'instance', 'triggered_at', 'triggered_by',
         'client_data', 'post_data', 'note', 'jenkins_queue_url',
@@ -92,13 +86,20 @@ class ClusterAdmin(admin.ModelAdmin):
     list_display = ('code', 'region', 'domain')
 
 
+def send_credentials(modeladmin, request, queryset):
+    """Return jenkins status."""
+    for config in queryset:
+        config.send_credentials()
+
+
 @admin.register(Instance)
 class InstanceAdmin(admin.ModelAdmin):
     """Instance admin."""
 
     list_display = (
-        'name', 'product', 'cluster', 'price', 'owner'
+        'name', 'product', 'cluster', 'price', 'owner', 'status'
     )
+    actions = (send_credentials,)
 
     def has_add_permission(*args, **kwargs):
         return False

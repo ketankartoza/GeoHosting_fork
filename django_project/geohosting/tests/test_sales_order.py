@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 from geohosting.factories import PackageFactory, SalesOrderFactory
 from geohosting.models import (
     SalesOrderStatus, SalesOrderPaymentMethod, ActivityType, Cluster,
-    Region, ProductCluster
+    Region, ProductCluster, Instance, InstanceStatus
 )
 from geohosting_controller.variables import ActivityTypeTerm
 
@@ -114,7 +114,7 @@ class SalesOrderTests(TestCase):
             call(
                 self.user, sales_order.doctype,
                 sales_order.erpnext_code,
-                'No cluster found.'
+                'Product cluster for region Global does not exist.'
             )
         ])
         mock_add_erp_next_comment.reset_mock()
@@ -195,3 +195,6 @@ class SalesOrderTests(TestCase):
                     'Auto deployment: BUILD_ARGO.'
                 )
             ])
+
+            instance = Instance.objects.get(name=sales_order.app_name)
+            self.assertEqual(instance.status, InstanceStatus.DEPLOYING)

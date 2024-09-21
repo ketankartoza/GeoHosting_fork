@@ -4,18 +4,27 @@ import {
   Button,
   Flex,
   FormControl,
-  FormLabel,
-  IconButton,
   Image,
   Input,
+  keyframes,
+  Link,
   Spinner,
-  Switch,
   Text
 } from '@chakra-ui/react';
-import { EditIcon } from '@chakra-ui/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/store';
 import { fetchUserInstances } from '../../redux/reducers/instanceSlice';
+import { FaGear, FaLink } from "react-icons/fa6";
+
+const spin = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg)
+  }
+`;
+const spinAnimation = `${spin} infinite 2s linear`;
 
 const ServicesPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -81,7 +90,6 @@ const ServicesPage: React.FC = () => {
     <Box p={5} display="flex" flexDirection="column">
       {/* Search bar */}
       <FormControl mb={4}>
-        <FormLabel>Search Services</FormLabel>
         <Input
           placeholder="Search by name or package"
           value={searchTerm}
@@ -106,34 +114,105 @@ const ServicesPage: React.FC = () => {
                 boxShadow="lg"
               >
                 {/* Logo and Switch */}
-                <Flex justify="space-between" align="center" mb={4}>
-                  <Image
-                    src={instance.product.image}
-                    alt={`${instance.package.name} logo`}
-                    boxSize="80px"
-                    borderRadius="full"
-                  />
-                  <Flex align="center">
-                    <Switch
-                      size="lg"
-                      colorScheme={instance?.isActive ? "blue" : "red"}
-                      isChecked={instance?.isActive || true}
-                      onChange={() => toggleStatus(instance.id)}
-                      mr={2}
+                <Flex
+                  wrap="wrap"
+                  justify="flex-end"
+                  gap={2}
+                  direction={{ base: 'column', md: 'row' }}
+                >
+                  <Box flexGrow={1}>
+                    <Image
+                      src={instance.product.image}
+                      alt={`${instance.package.name} logo`}
+                      boxSize="80px"
+                      borderRadius="full"
                     />
-                  </Flex>
+                  </Box>
+
+                  <Box>
+                    <Flex
+                      wrap="wrap"
+                      justify="flex-end"
+                      gap={2}
+                      direction={{ base: 'column', md: 'row' }}
+                      height="fit-content"
+                      alignItems="center"
+                    >
+                      {
+                        instance.status === 'Deploying' ?
+                          <>
+                            <Box
+                              animation={spinAnimation}
+                              width='fit-content'
+                              height='fit-content'
+                            >
+                              <FaGear/>
+                            </Box>
+                            <Text>Deploying</Text>
+                          </> : instance.status === 'Online' ?
+                            <>
+                              <Box
+                                width='16px'
+                                height='16px'
+                                backgroundColor="var(--chakra-colors-green-300)"
+                                borderRadius='50'
+                                border='1px solid var(--chakra-colors-gray-600)'
+                              />
+                              <Text>Online</Text>
+                            </> : instance.status === 'Offline' ?
+                              <>
+                                <Box
+                                  width='16px'
+                                  height='16px'
+                                  backgroundColor="var(--chakra-colors-red-300)"
+                                  borderRadius='50'
+                                  border='1px solid var(--chakra-colors-gray-600)'
+                                />
+                                <Text>Offline</Text>
+                              </> : null
+                      }
+                    </Flex>
+                  </Box>
+                </Flex>
+                <Flex justify="space-between" align="center" mb={4}>
+                  {/* TODO: Uncomment after we able to turn off/on */}
+                  {/*<Flex align="center">*/}
+                  {/*  <Switch*/}
+                  {/*    size="lg"*/}
+                  {/*    colorScheme={instance?.isActive ? "blue" : "red"}*/}
+                  {/*    isChecked={instance?.isActive || true}*/}
+                  {/*    onChange={() => toggleStatus(instance.id)}*/}
+                  {/*    mr={2}*/}
+                  {/*  />*/}
+                  {/*</Flex>*/}
                 </Flex>
 
                 {/* Package name and Edit Icon */}
                 <Flex justify="space-between" align="center" mb={4}>
-                  <Text fontWeight="bold" isTruncated>{instance.name}</Text>
-                  <IconButton
-                    aria-label="Edit instance"
-                    icon={<EditIcon/>}
-                    onClick={() => console.log(`Edit instance ${instance.id}`)}
-                    color="blue.500"
-                    size="sm"
-                  />
+                  <Text fontWeight="bold" isTruncated>
+                    {
+                      instance.url ?
+                        <Link href={instance.url} target='_blank'>
+                          <Flex
+                            wrap="wrap" gap={1}
+                            direction={{ base: 'column', md: 'row' }}
+                            alignItems='center'
+                          >
+                            <FaLink/> {instance.name}
+                          </Flex>
+                        </Link> :
+                        instance.name
+                    }
+                  </Text>
+
+                  {/* TODO: Uncomment after we can change it */}
+                  {/*<IconButton*/}
+                  {/*  aria-label="Edit instance"*/}
+                  {/*  icon={<EditIcon/>}*/}
+                  {/*  onClick={() => console.log(`Edit instance ${instance.id}`)}*/}
+                  {/*  color="blue.500"*/}
+                  {/*  size="sm"*/}
+                  {/*/>*/}
                 </Flex>
 
                 {/* Package details */}

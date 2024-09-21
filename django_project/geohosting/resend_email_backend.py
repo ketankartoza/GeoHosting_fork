@@ -47,11 +47,14 @@ class ResendBackend(BaseEmailBackend):
             payload["html"] = email.body
 
         # Check for HTML content
-        if email.alternatives:
-            for alternative in email.alternatives:
-                content_type, content = alternative
-                if content_type == "text/html":
-                    payload["html"] = content
+        try:
+            if email.alternatives:
+                for alternative in email.alternatives:
+                    content_type, content = alternative
+                    if content_type == "text/html":
+                        payload["html"] = content
+        except AttributeError:
+            pass
 
         attachments = []
 

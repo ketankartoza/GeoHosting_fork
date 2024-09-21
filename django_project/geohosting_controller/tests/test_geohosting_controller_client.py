@@ -15,7 +15,7 @@ from geohosting.factories.package import (
 )
 from geohosting.forms.activity import CreateInstanceForm
 from geohosting.models import (
-    Activity, Instance, Region, WebhookEvent, ActivityStatus
+    Activity, Instance, Region, WebhookEvent, ActivityStatus, InstanceStatus
 )
 from geohosting_controller.default_data import (
     generate_cluster, generate_regions
@@ -192,6 +192,10 @@ class ControllerTest(TestCase):
                 self.assertEqual(response.status_code, 200)
                 activity.refresh_from_db()
                 self.assertEqual(activity.status, ActivityStatus.BUILD_ARGO)
+                self.assertIsNotNone(activity.instance)
+                self.assertEqual(
+                    activity.instance.status, InstanceStatus.DEPLOYING
+                )
 
                 # Success if admin but error
                 response = client.post(
@@ -208,6 +212,9 @@ class ControllerTest(TestCase):
                 activity.refresh_from_db()
                 self.assertEqual(activity.status, ActivityStatus.ERROR)
                 self.assertEqual(activity.note, 'Error')
+                self.assertEqual(
+                    activity.instance.status, InstanceStatus.OFFLINE
+                )
 
                 # Success if admin but success
                 activity.update_status(ActivityStatus.BUILD_ARGO)
@@ -229,6 +236,9 @@ class ControllerTest(TestCase):
                         'status': 'succeeded',
                         'source': 'ArgoCD'
                     }
+                )
+                self.assertEqual(
+                    activity.instance.status, InstanceStatus.ONLINE
                 )
 
                 # Get the activity status from server
