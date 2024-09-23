@@ -1,30 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Box,
-  Button,
-  Flex,
-  FormControl,
-  Image,
-  Input,
-  keyframes,
-  Link,
-  Spinner,
-  Text
-} from '@chakra-ui/react';
+import { Box, Spinner, Image, Text, Flex, Switch, IconButton, Button } from '@chakra-ui/react';
+import { EditIcon } from '@chakra-ui/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/store';
 import { fetchUserInstances } from '../../redux/reducers/instanceSlice';
-import { FaGear, FaLink } from "react-icons/fa6";
+import SearchBar from '../../components/SearchBar/SearchBar';
+import Pagination from '../../components/Pagination/Pagination';
 
-const spin = keyframes`
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg)
-  }
-`;
-const spinAnimation = `${spin} infinite 2s linear`;
+import Geoserver from '../../assets/images/GeoServer.svg';
+import Geonode from '../../assets/images/GeoNode.svg';
 
 const ServicesPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -35,11 +19,7 @@ const ServicesPage: React.FC = () => {
 
   const Placeholder = 'https://via.placeholder.com/60';
 
-  const {
-    instances,
-    loading,
-    error
-  } = useSelector((state: RootState) => state.instance);
+  const { instances, loading, error } = useSelector((state: RootState) => state.instance);
   const { token } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
@@ -51,9 +31,9 @@ const ServicesPage: React.FC = () => {
   useEffect(() => {
     if (instances) {
       // Filter instances based on search term
-      const filtered = instances.filter((instance: any) =>
+      const filtered = instances.filter((instance: any) => 
         instance.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        instance.package.name.toLowerCase().includes(searchTerm.toLowerCase())
+        instance.price.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredInstances(filtered);
     }
@@ -64,218 +44,122 @@ const ServicesPage: React.FC = () => {
   const indexOfFirstCard = indexOfLastCard - cardsPerPage;
   const currentCards = filteredInstances.slice(indexOfFirstCard, indexOfLastCard);
 
-  const handleNextPage = () => {
-    if (currentPage < Math.ceil(filteredInstances.length / cardsPerPage)) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   const toggleStatus = (id: number) => {
-    const updatedInstances = filteredInstances.map((instance: any) =>
-      instance.id === id ? {
-        ...instance,
-        isActive: !instance.isActive
-      } : instance
+    const updatedInstances = filteredInstances.map((instance: any) => 
+      instance.id === id ? { ...instance, isActive: !instance.isActive } : instance
     );
     setFilteredInstances(updatedInstances);
   };
 
-  return (
-    <Box p={5} display="flex" flexDirection="column">
-      {/* Search bar */}
-      <FormControl mb={4}>
-        <Input
-          placeholder="Search by name or package"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </FormControl>
+  // Function to determine the correct image based on package name
+  const getImageForPackage = (packageName: string) => {
+    if (packageName.toLowerCase().includes('geoserver')) {
+      return Geoserver;
+    } else if (packageName.toLowerCase().includes('geonode')) {
+      return Geonode;
+    } else {
+      return Placeholder;
+    }
+  };
 
-      {loading ? <Spinner/> : error ? <Text>Error loading instances</Text> : (
+  return (
+    <Box>
+    <Box p={0} display="flex" flexDirection="column" height={{ base: 'auto', md: '80vh' }}>
+      <Text fontSize="2xl" fontWeight="bold" mb={2}>
+        Hosted Services
+      </Text>
+      <Box borderBottom="2px" borderColor="blue.500" mb={4} />
+
+      {/* Search bar */}
+      <SearchBar
+        onSearch={setSearchTerm}
+        showDateFields={false}
+        showClearButton={false}
+        placeholder={'Search by service'}
+      />
+
+      {loading ? <Spinner /> : error ? <Text>Error loading instances</Text> : (
         <>
           {/* Cards */}
           <Flex wrap="wrap" justify="flex-start" gap={6}
-                direction={{ base: 'column', md: 'row' }}
+            direction={{ base: 'column', md: 'row' }}
           >
             {currentCards.map((instance: any) => (
-              <Box
-                key={instance.id}
-                borderWidth="1px"
-                borderRadius="lg"
-                p={6}
+              <Box 
+                key={instance.id} 
+                borderWidth="1px" 
+                borderRadius="lg" 
+                p={6} 
                 width={{ base: "100%", md: "320px" }}
-                bg="white"
+                bg="white" 
                 boxShadow="lg"
               >
                 {/* Logo and Switch */}
-                <Flex
-                  wrap="wrap"
-                  justify="flex-end"
-                  gap={2}
-                  direction={{ base: 'column', md: 'row' }}
-                >
-                  <Box flexGrow={1}>
-                    <Image
-                      src={instance.product.image}
-                      alt={`${instance.package.name} logo`}
-                      boxSize="80px"
-                      borderRadius="full"
-                    />
-                  </Box>
-
-                  <Box>
-                    <Flex
-                      wrap="wrap"
-                      justify="flex-end"
-                      gap={2}
-                      direction={{ base: 'column', md: 'row' }}
-                      height="fit-content"
-                      alignItems="center"
-                    >
-                      {
-                        instance.status === 'Deploying' ?
-                          <>
-                            <Box
-                              animation={spinAnimation}
-                              width='fit-content'
-                              height='fit-content'
-                            >
-                              <FaGear/>
-                            </Box>
-                            <Text>Deploying</Text>
-                          </> : instance.status === 'Online' ?
-                            <>
-                              <Box
-                                width='16px'
-                                height='16px'
-                                backgroundColor="var(--chakra-colors-green-300)"
-                                borderRadius='50'
-                                border='1px solid var(--chakra-colors-gray-600)'
-                              />
-                              <Text>Online</Text>
-                            </> : instance.status === 'Offline' ?
-                              <>
-                                <Box
-                                  width='16px'
-                                  height='16px'
-                                  backgroundColor="var(--chakra-colors-red-300)"
-                                  borderRadius='50'
-                                  border='1px solid var(--chakra-colors-gray-600)'
-                                />
-                                <Text>Offline</Text>
-                              </> : null
-                      }
-                    </Flex>
-                  </Box>
-                </Flex>
                 <Flex justify="space-between" align="center" mb={4}>
-                  {/* TODO: Uncomment after we able to turn off/on */}
-                  {/*<Flex align="center">*/}
-                  {/*  <Switch*/}
-                  {/*    size="lg"*/}
-                  {/*    colorScheme={instance?.isActive ? "blue" : "red"}*/}
-                  {/*    isChecked={instance?.isActive || true}*/}
-                  {/*    onChange={() => toggleStatus(instance.id)}*/}
-                  {/*    mr={2}*/}
-                  {/*  />*/}
-                  {/*</Flex>*/}
+                  <Image 
+                    src={getImageForPackage(instance.price.name)} 
+                    alt={`${instance.price.name} logo`} 
+                    boxSize="80px" 
+                    borderRadius="full" 
+                  />
+                  <Flex align="center">
+                    <Switch
+                      size="lg"
+                      colorScheme={instance.isActive ? "blue" : "red"}
+                      isChecked={instance.isActive}
+                      onChange={() => toggleStatus(instance.id)}
+                      mr={2}
+                    />
+                  </Flex>
                 </Flex>
 
                 {/* Package name and Edit Icon */}
                 <Flex justify="space-between" align="center" mb={4}>
-                  <Text fontWeight="bold" isTruncated>
-                    {
-                      instance.url ?
-                        <Link href={instance.url} target='_blank'>
-                          <Flex
-                            wrap="wrap" gap={1}
-                            direction={{ base: 'column', md: 'row' }}
-                            alignItems='center'
-                          >
-                            <FaLink/> {instance.name}
-                          </Flex>
-                        </Link> :
-                        instance.name
-                    }
-                  </Text>
-
-                  {/* TODO: Uncomment after we can change it */}
-                  {/*<IconButton*/}
-                  {/*  aria-label="Edit instance"*/}
-                  {/*  icon={<EditIcon/>}*/}
-                  {/*  onClick={() => console.log(`Edit instance ${instance.id}`)}*/}
-                  {/*  color="blue.500"*/}
-                  {/*  size="sm"*/}
-                  {/*/>*/}
+                  <Text fontWeight="bold" isTruncated>{instance.name}</Text>
+                  <IconButton 
+                    aria-label="Edit instance" 
+                    icon={<EditIcon />} 
+                    onClick={() => console.log(`Edit instance ${instance.id}`)}
+                    color="blue.500" 
+                    size="sm"
+                  />
                 </Flex>
 
                 {/* Package details */}
-                {instance.package.feature_list && (
-                  <Box width="100%">
-                    {
-                      instance.package.feature_list.spec.map((spec, idx) =>
-                        <Box fontSize="sm" width="50%" display='inline-block'
-                             textAlign={idx % 2 == 0 ? "left" : "right"}>
-                          {spec}
-                        </Box>
-                      )
-                    }
-                  </Box>
+                {instance.price.feature_list && (
+                  <Flex direction="column">
+                    <Text fontSize="sm">
+                      Storage: {instance.price.feature_list.spec[0]?.split(' ')[0]}
+                    </Text>
+                    <Text fontSize="sm" textAlign="right">
+                      Memory: {instance.price.feature_list.spec[2]?.split(' ')[1]}
+                    </Text>
+                    <Text fontSize="sm" mt={2}>
+                      CPUs: {instance.price.feature_list.spec[1]?.split(' ')[2]}
+                    </Text>
+                  </Flex>
                 )}
               </Box>
             ))}
           </Flex>
 
-          {/* Pagination controls */}
-          <Flex justify="space-between" align="center" mt="auto" py={6}
-                width="100%">
-            {/* Back button aligned to the left */}
-            <Button
-              onClick={handlePrevPage}
-              isDisabled={currentPage === 1}
-              colorScheme="orange"
-              _disabled={{ bg: 'orange.300', cursor: 'not-allowed' }}
-            >
-              Back
-            </Button>
-
-            {/* Page numbers centered */}
-            <Flex justify="center" flex="1">
-              {Array.from({ length: Math.ceil(filteredInstances.length / cardsPerPage) }, (_, index) => (
-                <Button
-                  key={index}
-                  onClick={() => setCurrentPage(index + 1)}
-                  bg={currentPage === index + 1 ? "orange" : "transparent"}
-                  color={currentPage === index + 1 ? "white" : "black"}
-                  border="1px solid"
-                  borderColor={currentPage === index + 1 ? "orange" : "gray"}
-                  _hover={{ bg: currentPage === index + 1 ? "orange" : "gray.100" }}
-                  mx={1}
-                >
-                  {index + 1}
-                </Button>
-              ))}
-            </Flex>
-
-            {/* Next button aligned to the right */}
-            <Button
-              onClick={handleNextPage}
-              isDisabled={currentPage === Math.ceil(filteredInstances.length / cardsPerPage)}
-              colorScheme="orange"
-              _disabled={{ bg: 'orange.300', cursor: 'not-allowed' }}
-            >
-              Next
-            </Button>
-          </Flex>
+          
         </>
       )}
     </Box>
+    {/* Pagination Component */}
+    <Pagination 
+            totalItems={filteredInstances.length}
+            itemsPerPage={cardsPerPage}
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+          />
+</Box>
+
   );
 };
 

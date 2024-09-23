@@ -56,9 +56,14 @@ const DashboardSidePanel = ({ selected, onClose, ...rest }) => {
       </Flex>
       <VStack spacing={4} align="start" mt={5}>
         <SidebarItem
-          label="Home"
+          label="Hosted Services"
           isSelected={selected === 'dashboard'}
           onClick={() => navigate('/dashboard')}
+        />
+        <SidebarItem
+          label="Agreements"
+          isSelected={selected === 'agreements'}
+          onClick={() => navigate('/dashboard/agreements')}
         />
         <SidebarItem
           label="Orders"

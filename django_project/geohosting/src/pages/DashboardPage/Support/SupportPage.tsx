@@ -3,16 +3,16 @@ import {
   Box,
   Flex,
   Button,
-  IconButton,
   Text,
   useColorModeValue,
 } from '@chakra-ui/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../../redux/store';
-import { fetchTickets, setSelectedTicket ,} from '../../../redux/reducers/supportSlice';
-import { EditIcon } from '@chakra-ui/icons';
+import { fetchTickets, setSelectedTicket } from '../../../redux/reducers/supportSlice';
 import SupportTicketForm from "../../../components/SupportTicketForm/SupportTicketForm";
 import { toast } from 'react-toastify';
+import Pagination from '../../../components/Pagination/Pagination';
+import SearchBar from '../../../components/SearchBar/SearchBar';
 
 const stripHtmlTags = (html: string) => {
   const doc = new DOMParser().parseFromString(html, 'text/html');
@@ -24,7 +24,9 @@ const SupportPage: React.FC = () => {
   const { tickets, loading, error } = useSelector((state: RootState) => state.support);
   const [showSupportForm, setShowSupportForm] = useState(false);
   const [editTicket, setEditTicket] = useState<any>(null);
-  
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ticketsPerPage = 5;
 
   useEffect(() => {
     dispatch(fetchTickets());
@@ -37,7 +39,7 @@ const SupportPage: React.FC = () => {
   const handleEditTicket = (ticketId: number) => {
     const selectedTicket = tickets.find(ticket => ticket.id === ticketId);
     if (selectedTicket) {
-      setEditTicket(selectedTicket)
+      setEditTicket(selectedTicket);
       dispatch(setSelectedTicket(selectedTicket));
       setShowSupportForm(true);
     }
@@ -49,14 +51,37 @@ const SupportPage: React.FC = () => {
     }
   }, [error]);
 
+  // Filter and paginate tickets
+  const filteredTickets = tickets.filter(ticket =>
+    ticket.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    ticket.details.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const indexOfLastTicket = currentPage * ticketsPerPage;
+  const indexOfFirstTicket = indexOfLastTicket - ticketsPerPage;
+  const currentTickets = filteredTickets.slice(indexOfFirstTicket, indexOfLastTicket);
+
   return (
-    <Box position="relative">
-      {(
-        <Button colorScheme="blue" onClick={handleCreateIssue}>
+    <Box>
+    <Box position="relative" p={0} height={{ base: 'auto', md: '80vh' }}>
+      <Text fontSize="2xl" fontWeight="bold" mb={2}>
+        Support
+      </Text>
+      <Box borderBottom="2px" borderColor="blue.500" mb={4} />
+
+      <Flex mb={2} alignItems="center">
+        <SearchBar
+          onSearch={setSearchTerm}
+          showDateFields={false}
+          showClearButton={false}
+          placeholder={'Search Ticket'}
+        />
+        
+      </Flex>
+      <Button colorScheme="blue" onClick={handleCreateIssue}>
           Create Issue
         </Button>
-      )}
-      
+
       {showSupportForm && (
         <Flex
           justifyContent="center"
@@ -66,7 +91,7 @@ const SupportPage: React.FC = () => {
           left="0"
           width="100vw"
           height="100vh"
-          bg="rgba(0, 0, 0, 0.4)" 
+          bg="rgba(0, 0, 0, 0.4)"
           zIndex={1}
         >
           <Flex
@@ -76,12 +101,12 @@ const SupportPage: React.FC = () => {
             p={4}
             zIndex={2}
           >
-            <SupportTicketForm 
+            <SupportTicketForm
               onClose={() => {
                 setShowSupportForm(false);
                 setEditTicket(null);
-              }}  
-              ticket={editTicket} 
+              }}
+              ticket={editTicket}
             />
           </Flex>
         </Flex>
@@ -91,7 +116,7 @@ const SupportPage: React.FC = () => {
         {loading && <Text>Loading...</Text>}
         {!loading && (
           <Box>
-            {tickets.map((ticket) => (
+            {currentTickets.map((ticket) => (
               <Box
                 key={ticket.id}
                 p={4}
@@ -114,16 +139,16 @@ const SupportPage: React.FC = () => {
                     <Box
                       width="12px"
                       height="12px"
-                      bg={ticket.status === 'open' ? 'blue.500' : ticket.status === 'closed'? 'red.500': 'orange.500'}
+                      bg={ticket.status === 'open' ? 'blue.500' : ticket.status === 'closed' ? 'red.500' : 'orange.500'}
                       borderRadius="full"
                     />
                     <Text
                       fontFamily="'Roboto', sans-serif"
                       fontWeight="300"
                       fontSize="16px"
-                      color={ticket.status === 'open' ? 'blue.500' : ticket.status === 'closed'? 'red.500': 'orange.500'}
+                      color={ticket.status === 'open' ? 'blue.500' : ticket.status === 'closed' ? 'red.500' : 'orange.500'}
                     >
-                      {ticket.status === 'open' ? 'Open' : ticket.status === 'closed'? 'Closed': 'Pending'}
+                      {ticket.status === 'open' ? 'Open' : ticket.status === 'closed' ? 'Closed' : 'Pending'}
                     </Text>
                   </Flex>
                 </Box>
@@ -134,15 +159,6 @@ const SupportPage: React.FC = () => {
                   mb={2}
                 >
                   <Text>{stripHtmlTags(ticket.details)}</Text>
-                  {/* HIDE EDIT */}
-                  {/* <IconButton
-                    icon={<EditIcon />}
-                    aria-label="Edit Ticket"
-                    onClick={() => handleEditTicket(ticket.id)}
-                    isDisabled={ticket.status !== 'open'}
-                    variant="outline"
-                    colorScheme={ticket.status === 'open' ? 'blue' : 'gray'}
-                  /> */}
                 </Box>
                 <Text
                   fontSize="sm"
@@ -156,6 +172,17 @@ const SupportPage: React.FC = () => {
           </Box>
         )}
       </Box>
+
+      
+    </Box>
+    {/* Pagination Component */}
+    <Pagination
+        totalItems={filteredTickets.length}
+        itemsPerPage={ticketsPerPage}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+      />
+
     </Box>
   );
 };
