@@ -1,5 +1,6 @@
 """Checkout API."""
 
+from django.http import HttpResponseServerError
 from django.shortcuts import get_object_or_404
 
 from geohosting.api.payment import (
@@ -15,11 +16,14 @@ class CheckoutAPI(PaymentAPI):
     def post(self, request, pk):
         """Post to create checkout session."""
         package = get_object_or_404(Package, pk=pk)
-        order = SalesOrder.objects.create(
-            package=package,
-            customer=request.user
-        )
-        return self.get_post(order=order)
+        try:
+            order = SalesOrder.objects.create(
+                package=package,
+                customer=request.user
+            )
+            return self.get_post(order=order)
+        except Exception as e:
+            return HttpResponseServerError(f'{e}')
 
 
 class CheckoutStripeSessionAPI(PaymentStripeSessionAPI, CheckoutAPI):

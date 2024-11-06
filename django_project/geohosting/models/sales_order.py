@@ -186,7 +186,9 @@ class SalesOrder(models.Model):
         """Save model."""
         super(SalesOrder, self).save(*args, **kwargs)
         # Push to erp
-        self.post_to_erpnext()
+        result = self.post_to_erpnext()
+        if result['status'] != 'success':
+            raise Exception(result['message'])
 
         # Check if order status is waiting configuration
         order_status_obj = self.sales_order_status_obj
