@@ -1,19 +1,21 @@
 import threading
+
+from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.authtoken.models import Token
+from django.core.mail import send_mail
+from django.utils.crypto import get_random_string
 from rest_framework import status
+from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.contrib.auth import get_user_model
-from django.core.mail import send_mail
-from django.utils.crypto import get_random_string
+
+from core.settings.base import FRONTEND_URL, DEFAULT_FROM_EMAIL
 from geohosting.models import UserProfile
 from geohosting.serializer.email_auth_token import EmailAuthTokenSerializer
 from geohosting.serializer.register import RegisterSerializer
-from core.settings.base import FRONTEND_URL, DEFAULT_FROM_EMAIL
 
 User = get_user_model()
 

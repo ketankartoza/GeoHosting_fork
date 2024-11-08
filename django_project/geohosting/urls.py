@@ -9,13 +9,14 @@ from geohosting.api.activity import (
 from geohosting.api.checkout import (
     CheckoutStripeSessionAPI, CheckoutPaystackSessionAPI
 )
-from geohosting.api.product import ProductViewSet
 from geohosting.api.instance import InstanceViewSet
+from geohosting.api.product import ProductViewSet
 from geohosting.api.sales_order import (
     SalesOrderSetView, SalesOrderPaymentStripeSessionAPI,
     SalesOrderPaymentPaystackSessionAPI
 )
 from geohosting.api.token import CreateToken
+from geohosting.api.user import (UserProfileView, ChangePasswordView)
 from geohosting.api.webhook import WebhookView
 from geohosting.views.auth import (
     CustomAuthToken,
@@ -43,14 +44,27 @@ router.register(
     r'activity_types', ActivityTypeViewSet, basename='activity_types'
 )
 
+user_profile = [
+    path(
+        'change-password/',
+        ChangePasswordView.as_view(),
+        name='user-change-password'
+    ),
+    path(
+        '',
+        UserProfileView.as_view(),
+        name='user-profile'
+    ),
+]
+
 package = [
     path(
-        '<pk>/payment/stripe',
+        'payment/stripe',
         CheckoutStripeSessionAPI.as_view(),
         name='checkout-stripe-session'
     ),
     path(
-        '<pk>/payment/paystack',
+        'payment/paystack',
         CheckoutPaystackSessionAPI.as_view(),
         name='checkout-paystack-session'
     ),
@@ -58,12 +72,12 @@ package = [
 
 order_payment = [
     path(
-        '<pk>/payment/stripe',
+        'payment/stripe',
         SalesOrderPaymentStripeSessionAPI.as_view(),
         name='orders-payment-stripe-session'
     ),
     path(
-        '<pk>/payment/paystack',
+        'payment/paystack',
         SalesOrderPaymentPaystackSessionAPI.as_view(),
         name='orders-payment-paystack-session'
     ),
@@ -101,8 +115,9 @@ api = [
         upload_attachments,
         name='upload_attachments'
     ),
-    path('package/', include(package)),
-    path('orders/', include(order_payment)),
+    path('package/<pk>/', include(package)),
+    path('orders/<pk>/', include(order_payment)),
+    path('user/profile/', include(user_profile)),
 ]
 api += router.urls
 

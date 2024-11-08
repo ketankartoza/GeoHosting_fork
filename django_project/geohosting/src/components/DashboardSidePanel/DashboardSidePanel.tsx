@@ -76,6 +76,11 @@ const DashboardSidePanel = ({ selected, onClose, ...rest }) => {
           onClick={() => navigate('/dashboard/support')}
         />
         <SidebarItem
+          label="Profile"
+          isSelected={selected === 'profile'}
+          onClick={() => navigate('/dashboard/profile')}
+        />
+        <SidebarItem
           label="Logout"
           isSelected={false}
           onClick={handleLogout}

@@ -10,3 +10,15 @@ export const setAxiosAuthToken = token => {
     delete axios.defaults.headers.common["Authorization"];
   }
 };
+
+export const thunkAPIRejected = (result: {
+  meta: { requestStatus: string; };
+}) => {
+  return result.meta.requestStatus === 'rejected'
+}
+
+export const thunkAPIFulfilled = (result: {
+  meta: { requestStatus: string; };
+}) => {
+  return result.meta.requestStatus === 'fulfilled'
+}

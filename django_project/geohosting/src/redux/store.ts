@@ -5,6 +5,7 @@ import supportSlice from './reducers/supportSlice';
 import ordersSlice from './reducers/ordersSlice';
 import salesOrdersReducer from './reducers/salesOrdersSlice';
 import instanceSlice from './reducers/instanceSlice';
+import profileSlice from './reducers/profileSlice';
 
 export const store = configureStore({
   reducer: {
@@ -13,7 +14,8 @@ export const store = configureStore({
     support: supportSlice,
     salesOrders: salesOrdersReducer,
     instance: instanceSlice,
-    orders:ordersSlice
+    orders:ordersSlice,
+    profile: profileSlice
   },
 });
 

@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 interface AuthState {
@@ -26,12 +26,19 @@ const initialState: AuthState = {
   error: null,
 };
 
+
 // Async thunk for login
 export const login = createAsyncThunk(
   'auth/login',
-  async ({ email, password }: { email: string; password: string }, thunkAPI) => {
+  async ({ email, password }: {
+    email: string;
+    password: string
+  }, thunkAPI) => {
     try {
-      const response = await axios.post('/api/auth/login/', { email, password });
+      const response = await axios.post('/api/auth/login/', {
+        email,
+        password
+      });
       const token = response.data.token;
       localStorage.setItem('token', token);
       localStorage.setItem('email', response.data.email);
@@ -67,7 +74,10 @@ export const confirmResetPassword = createAsyncThunk<
   async (payload, thunkAPI) => {
     const { token, new_password } = payload;
     try {
-      const response = await axios.post<ResetPasswordResponse>('/api/auth/password-reset-confirm/', { token, new_password });
+      const response = await axios.post<ResetPasswordResponse>('/api/auth/password-reset-confirm/', {
+        token,
+        new_password
+      });
       return response.data;
     } catch (error: any) {
       const errorData: ResetPasswordError = error.response?.data || { error: 'An unknown error occurred' };
@@ -101,9 +111,19 @@ export const logout = createAsyncThunk(
 // Async thunk for register
 export const register = createAsyncThunk(
   'auth/register',
-  async ({ email, password, firstName, lastName }: { email: string; password: string; firstName: string; lastName: string }, thunkAPI) => {
+  async ({ email, password, firstName, lastName }: {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string
+  }, thunkAPI) => {
     try {
-      const response = await axios.post('/api/auth/register/', { email, password, first_name: firstName, last_name: lastName });
+      const response = await axios.post('/api/auth/register/', {
+        email,
+        password,
+        first_name: firstName,
+        last_name: lastName
+      });
       const token = response.data.token;
       localStorage.setItem('token', token);
       return token;

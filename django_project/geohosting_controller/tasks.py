@@ -1,6 +1,6 @@
 # coding=utf-8
 """
-Tomorrow Now GAP.
+GeoHosting.
 
 .. note:: Tasks.
 """
