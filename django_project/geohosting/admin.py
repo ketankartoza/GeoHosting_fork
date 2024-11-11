@@ -26,7 +26,8 @@ class TicketAdmin(admin.ModelAdmin):
     """Ticket admin."""
 
     list_display = (
-        'id', 'customer', 'subject', 'status', 'created_at', 'updated_at'
+        'id', 'erpnext_code', 'customer', 'subject', 'status', 'created_at',
+        'updated_at'
     )
     list_filter = ('status', 'created_at', 'updated_at')
     search_fields = ('customer', 'subject', 'details')
@@ -38,6 +39,12 @@ class TicketAdmin(admin.ModelAdmin):
         return self.readonly_fields
 
 
+def send_attachment(modeladmin, request, queryset):
+    """Return jenkins status."""
+    for config in queryset:
+        config.post_to_erpnext()
+
+
 @admin.register(Attachment)
 class AttachmentAdmin(admin.ModelAdmin):
     """Attachment admin."""
@@ -46,6 +53,7 @@ class AttachmentAdmin(admin.ModelAdmin):
     list_filter = ('uploaded_at',)
     search_fields = ('ticket__subject', 'ticket__customer')
     readonly_fields = ('uploaded_at',)
+    actions = (send_attachment,)
 
 
 @admin.register(Activity)

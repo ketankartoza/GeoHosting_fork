@@ -2,6 +2,7 @@
 """GeoHosting."""
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+from rest_framework_nested.routers import NestedSimpleRouter
 
 from geohosting.api.activity import (
     ActivityViewSet, ActivityTypeViewSet
@@ -15,6 +16,7 @@ from geohosting.api.sales_order import (
     SalesOrderSetView, SalesOrderPaymentStripeSessionAPI,
     SalesOrderPaymentPaystackSessionAPI
 )
+from geohosting.api.support import TicketSetView, AttachmentSetView
 from geohosting.api.token import CreateToken
 from geohosting.api.user import (UserProfileView, ChangePasswordView)
 from geohosting.api.webhook import WebhookView
@@ -29,11 +31,6 @@ from geohosting.views.auth import (
 from geohosting.views.home import HomeView
 from geohosting.views.products import fetch_products
 from geohosting.views.reset_password import ResetPasswordView
-from geohosting.views.support import (
-    get_tickets,
-    create_ticket,
-    upload_attachments
-)
 
 router = DefaultRouter()
 router.register(r'activities', ActivityViewSet, basename='activities')
@@ -42,6 +39,13 @@ router.register(r'instances', InstanceViewSet, basename='instance')
 router.register(r'orders', SalesOrderSetView, basename='orders')
 router.register(
     r'activity_types', ActivityTypeViewSet, basename='activity_types'
+)
+router.register(r'tickets', TicketSetView, basename='tickets')
+tickets_router = NestedSimpleRouter(
+    router, r'tickets', lookup='tickets'
+)
+tickets_router.register(
+    'attachments', AttachmentSetView, basename='ticket_attachments'
 )
 
 user_profile = [
@@ -104,22 +108,12 @@ api = [
         name='password_reset_confirm'),
     path('auth/validate-token/',
          ValidateTokenView.as_view(), name='validate-token'),
-    path('support/tickets/', get_tickets, name='get_tickets'),
-    path(
-        'support/tickets/create/',
-        create_ticket,
-        name='create_ticket'
-    ),
-    path(
-        'support/tickets/<int:ticket_id>/attachments/',
-        upload_attachments,
-        name='upload_attachments'
-    ),
     path('package/<pk>/', include(package)),
     path('orders/<pk>/', include(order_payment)),
     path('user/profile/', include(user_profile)),
 ]
 api += router.urls
+api += tickets_router.urls
 
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),

@@ -3,7 +3,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from geohosting.utils.erpnext import post_to_erpnext, put_to_erpnext
+from geohosting.models.erp_model import ErpModel
 
 
 class UserBillingInformation(models.Model):
@@ -40,14 +40,11 @@ class UserBillingInformation(models.Model):
     )
 
 
-class UserProfile(models.Model):
+class UserProfile(ErpModel):
     """User profile model."""
 
     user = models.OneToOneField(
         User, on_delete=models.CASCADE
-    )
-    erpnext_code = models.CharField(
-        max_length=100, blank=True, null=True
     )
     reset_token = models.CharField(
         max_length=64, blank=True, null=True
@@ -58,35 +55,33 @@ class UserProfile(models.Model):
         upload_to='avatars/', blank=True, null=True
     )
 
-    def __str__(self):
-        return self.user.username
+    @property
+    def doc_type(self):
+        """Doctype for this model."""
+        return 'Customer'
 
-    def post_to_erpnext(self):
-        data = {
+    @property
+    def erp_payload_for_create(self):
+        """ERP Payload for create request."""
+        return {
+            "doctype": "Customer",
+            "customer_name": self.user.get_full_name(),
+            "customer_type": "Individual",
+            "customer_group": "Commercial",
+            "territory": "All Territories",
+            "tax_category": "VAT"
+        }
+
+    @property
+    def erp_payload_for_edit(self):
+        """ERP Payload for edit request."""
+        return {
             "doctype": "Customer",
             "customer_name": self.user.get_full_name(),
         }
-        if not self.erpnext_code:
-            data = {
-                "customer_type": "Individual",
-                "customer_group": "Commercial",
-                "territory": "All Territories",
-                "tax_category": "VAT"
-            }
-            result = post_to_erpnext(
-                data,
-                'Customer'
-            )
-            if result['status'] == 'success':
-                self.erpnext_code = result['id']
-                self.save()
-        else:
-            result = put_to_erpnext(
-                data,
-                'Customer',
-                self.erpnext_code
-            )
-        return result
+
+    def __str__(self):
+        return self.user.username
 
 
 @receiver(post_save, sender=User)

@@ -1,27 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Button,
   FormControl,
   FormLabel,
+  HStack,
+  IconButton,
   Input,
   Select,
-  VStack,
-  HStack,
   Table,
-  Thead,
   Tbody,
-  Tr,
-  Th,
   Td,
-  IconButton,
   Textarea,
+  Tr,
+  VStack,
 } from '@chakra-ui/react';
-import { DeleteIcon } from '@chakra-ui/icons';
+import { CheckCircleIcon, DeleteIcon, WarningIcon } from '@chakra-ui/icons';
 import styled from '@emotion/styled';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/store';
-import { createTicket, uploadAttachments, updateTicket } from '../../redux/reducers/supportSlice';
+import {
+  createTicket,
+  updateTicket,
+  uploadAttachment
+} from '../../redux/reducers/supportSlice';
 import { toast } from 'react-toastify';
 
 const EditorContainer = styled.div`
@@ -31,7 +33,7 @@ const EditorContainer = styled.div`
 `;
 
 const FormContainer = styled(Box)`
-  min-height: 600px; 
+  min-height: 600px;
   max-height: 80vh;
   overflow-y: auto;
 `;
@@ -39,6 +41,9 @@ const FormContainer = styled(Box)`
 interface Attachment {
   name: string;
   file: File;
+  uploading: boolean;
+  uploaded: boolean;
+  error: string;
 }
 
 interface SupportTicketFormProps {
@@ -54,7 +59,8 @@ interface SupportTicketFormProps {
   };
 }
 
-const SupportTicketForm: React.FC<SupportTicketFormProps> = ({ onClose, ticket }) => {
+const SupportTicketForm: React.FC<SupportTicketFormProps> = (
+  { onClose, ticket }) => {
   const dispatch: AppDispatch = useDispatch();
   const { loading, error } = useSelector((state: RootState) => state.support);
   const [subject, setSubject] = useState<string>('');
@@ -74,7 +80,7 @@ const SupportTicketForm: React.FC<SupportTicketFormProps> = ({ onClose, ticket }
       setIssueType(ticket.issue_type);
       setEditorData(ticket.details);
       setAttachments(ticket.attachments);
-    }else {
+    } else {
       setIsEditMode(false);
       setSubject('');
       setIssueType('');
@@ -88,8 +94,13 @@ const SupportTicketForm: React.FC<SupportTicketFormProps> = ({ onClose, ticket }
       const newAttachments = Array.from(e.target.files).map(file => ({
         name: file.name,
         file: file,
+        uploading: false,
+        uploaded: false,
+        error: '',
       }));
-      setAttachments(prevAttachments => [...prevAttachments, ...newAttachments]);
+      setAttachments(
+        prevAttachments => [...prevAttachments, ...newAttachments]
+      );
     }
   };
 
@@ -97,7 +108,43 @@ const SupportTicketForm: React.FC<SupportTicketFormProps> = ({ onClose, ticket }
     setAttachments(attachments.filter((_, i) => i !== index));
   };
 
+  /**
+   * Upload attachment
+   * @param ticketId
+   */
+  const uploadAttachmentFn = async (ticketId: number) => {
+    let success = true;
+    // Upload attachment after ticket
+    if (attachments?.length) {
+      for (let i = 0; i < attachments.length; i++) {
+        const attachment = attachments[i]
+        if (attachment.uploaded) {
+          return
+        }
+        attachment.uploading = true
+        setAttachments([...attachments]);
+
+        await dispatch(
+          uploadAttachment({
+            ticketId, file: attachment.file
+          })
+        ).then((result: any) => {
+          attachment.uploading = false
+          if (result.meta.requestStatus === 'fulfilled') {
+            attachment.uploaded = true
+          } else {
+            attachment.error = 'Failed to upload attachment.'
+            success = false;
+          }
+        });
+        setAttachments([...attachments])
+      }
+    }
+    return success
+  }
+
   const handleSubmit = () => {
+    // Upload attachment after ticket
     const customer = customerEmail;
     const ticketData = {
       subject,
@@ -121,27 +168,36 @@ const SupportTicketForm: React.FC<SupportTicketFormProps> = ({ onClose, ticket }
         }
       });
     } else {
-      dispatch(createTicket(ticketData)).then((result: any) => {
+      dispatch(
+        createTicket(ticketData)
+      ).then((result: any) => {
         if (result.meta.requestStatus === 'fulfilled') {
-          toast.success('Ticket created successfully.');
-          onClose();
-          setSubject('');
-          setIssueType('');
-          setEditorData('');
-          setAttachments([]);
+          toast.success(
+            'Ticket created successfully. Now uploading attachments.'
+          );
+          (
+            async () => {
+              const ticketId = result.payload.id;
+              const success = await uploadAttachmentFn(ticketId)
+              if (success) {
+                toast.success(
+                  'All attachment uploaded successfully.'
+                );
+              } else {
+                toast.error(
+                  'Some of attachments are failed. Please reupload.'
+                );
+                return
+              }
 
-          const ticketId = result.payload.id;
-
-          dispatch(uploadAttachments({
-            ticketId,
-            files: attachments.map(attachment => attachment.file)
-          })).then((result: any) => {
-            if (result.meta.requestStatus === 'fulfilled') {
-              toast.success('Attachment uploaded successfully.');
-            } else {
-              toast.error('Failed to upload attachment.');
+              // Close and make default
+              onClose();
+              setSubject('');
+              setIssueType('');
+              setEditorData('');
+              setAttachments([]);
             }
-          });
+          )()
         } else {
           toast.error('Failed to create ticket.');
         }
@@ -150,18 +206,11 @@ const SupportTicketForm: React.FC<SupportTicketFormProps> = ({ onClose, ticket }
   };
 
   return (
-    <FormContainer
-      p={8}
-      maxWidth="700px"
-      borderWidth={1}
-      borderRadius={8}
-      boxShadow="lg"
-      bg="white"
-    >
+    <FormContainer p={4}>
       <VStack spacing={4}>
         <FormControl id="customer" isReadOnly>
           <FormLabel>Customer</FormLabel>
-          <Input type="text" value={customerEmail} isReadOnly bg="gray.100" />
+          <Input type="text" value={customerEmail} isReadOnly bg="gray.100"/>
         </FormControl>
 
         <FormControl id="subject" isRequired>
@@ -197,67 +246,79 @@ const SupportTicketForm: React.FC<SupportTicketFormProps> = ({ onClose, ticket }
           </EditorContainer>
         </FormControl>
 
-        <FormControl id="attachments">
+        <FormControl id="attachments" position={"relative"}>
           <FormLabel>Attachments</FormLabel>
-          <Input 
-            type="file" 
-            multiple 
+          <Input
+            id={'attachments'}
+            type="file"
+            multiple
             onChange={handleFileChange}
-            sx={{
-              '&::file-selector-button': {
-                border: 'none',
-                color: 'white',
-                bg: 'blue.500',
-                fontSize: 'sm',
-                fontWeight: 'bold',
-                p: '2',
-                cursor: 'pointer',
-                borderRadius: 'md',
-                mt: '1.5px',
-                _hover: {
-                  bg: 'blue.600',
-                },
-              },
-            }}
+            pos='absolute'
+            top={0}
+            left={0}
+            height='100%'
+            width='100%'
+            opacity={0}
           />
+          <Button
+            disabled={true}
+            colorScheme="orange"
+            width='100%'
+            onClick={() => {
+              // @ts-ignore
+              document.getElementById("attachments").click();
+            }}
+          >
+            Add attachment
+          </Button>
         </FormControl>
 
-        {attachments.length > 0 && (
-          <Table variant="simple">
-            <Thead>
-              <Tr>
-                <Th>File Name</Th>
-                <Th>Action</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {attachments.map((attachment, index) => (
-                <Tr key={index}>
-                  <Td>{attachment.name}</Td>
-                  <Td>
-                    <IconButton
-                      aria-label="Delete attachment"
-                      icon={<DeleteIcon />}
-                      onClick={() => handleDeleteAttachment(index)}
-                      colorScheme="red"
-                    />
-                  </Td>
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
-        )}
+        {
+          attachments.length > 0 && (
+            <Table variant="simple">
+              <Tbody>
+                {
+                  attachments.map((attachment, index) => (
+                    <Tr key={index}>
+                      <Td padding={0}>{attachment.name}</Td>
+                      <Td padding={0}>
+                        {
+                          attachment.uploading ?
+                            <span>uploading</span> : attachment.error ?
+                              <WarningIcon color='red'/> : null
+                        }
+                      </Td>
+                      <Td padding={0}>
+                        {
+                          attachment.uploaded ?
+                            <CheckCircleIcon color='green'/> :
+                            <IconButton
+                              size={'xs'}
+                              aria-label="Delete attachment"
+                              icon={<DeleteIcon/>}
+                              onClick={() => handleDeleteAttachment(index)}
+                              colorScheme="red"
+                            />
+                        }
+                      </Td>
+                    </Tr>
+                  ))
+                }
+              </Tbody>
+            </Table>
+          )
+        }
 
-        <HStack spacing={4}>
-          <Button 
-            colorScheme="blue" 
+        <HStack spacing={4} mt={4}>
+          <Button
+            colorScheme="blue"
             onClick={handleSubmit}
             isLoading={loading}
           >
             {isEditMode ? 'Update' : 'Submit'}
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={onClose}
           >
             Cancel

@@ -28,7 +28,8 @@ class TicketTests(TestCase):
             'customer': 'tinashe@test.com'
         }
         response = self.client.post(
-            '/api/support/tickets/create/', payload, format='json')
+            '/api/tickets/', payload, format='json'
+        )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['subject'], payload['subject'])
 
@@ -38,7 +39,7 @@ class TicketTests(TestCase):
             'subject': '',  # Invalid subject
         }
         response = self.client.post(
-            '/api/support/tickets/create/', payload, format='json')
+            '/api/tickets/', payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('details', response.data)
 
@@ -46,35 +47,35 @@ class GetTicketsTestCase(APITestCase):
 
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', email='testuser@example.com', password='testpassword')
-        
+
         # Create another user to ensure we only fetch tickets for the authenticated user
         self.other_user = User.objects.create_user(username='otheruser', email='otheruser@example.com', password='otherpassword')
-        
+
         # Create tickets for the authenticated user
         self.ticket1 = Ticket.objects.create(customer=self.user.email, subject="Issue 1", details="Details of issue 1", status="open", issue_type="bug")
         self.ticket2 = Ticket.objects.create(customer=self.user.email, subject="Issue 2", details="Details of issue 2", status="open", issue_type="support")
-        
+
         # Create a ticket for another user
         self.ticket3 = Ticket.objects.create(customer=self.other_user.email, subject="Issue 3", details="Details of issue 3", status="open", issue_type="feature")
-        
+
         # Initialize the client and authenticate the user
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
-    
+
     def test_get_tickets(self):
         # Define the URL for the get_tickets view
-        url = reverse('get_tickets')
-        
+        url = reverse('tickets-list')
+
         # Send a GET request to the get_tickets endpoint
         response = self.client.get(url)
-        
+
         # Fetch the tickets for the authenticated user directly from the database
         tickets = Ticket.objects.filter(customer=self.user.email)
         serializer = TicketSerializer(tickets, many=True)
-        
+
         # Verify that the status code is 200 OK
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
+
         # Verify that the returned data matches the serialized ticket data
         self.assertEqual(response.data, serializer.data)
 
@@ -111,31 +112,28 @@ class AttachmentTests(TestCase):
         mock_file = SimpleUploadedFile(
             "test_file.txt", b"test content", content_type="text/plain")
         response = self.client.post(
-            f'/api/support/tickets/{self.ticket.id}/attachments/',
-            {'attachments': [mock_file]},
+            f'/api/tickets/{self.ticket.id}/attachments/',
+            {'file': mock_file},
             format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(len(response.data), 1)
 
     def test_upload_attachments_ticket_not_found(self):
         # Upload attachments to a non-existent ticket
         mock_file = SimpleUploadedFile(
             "test_file.txt", b"test content", content_type="text/plain")
         response = self.client.post(
-            '/api/support/tickets/999/attachments/',
-            {'attachments': [mock_file]},
+            '/api/tickets/999/attachments/',
+            {'file': mock_file},
             format='multipart'
         )
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response.data['error'], 'Ticket not found')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_upload_attachments_invalid_file(self):
         # Upload a file without providing the file field
         response = self.client.post(
-            f'/api/support/tickets/{self.ticket.id}/attachments/',
+            f'/api/tickets/{self.ticket.id}/attachments/',
             {},
             format='multipart'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['error'], 'No files provided')

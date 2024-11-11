@@ -29,7 +29,7 @@ interface Props {
 
 }
 
-export const PasswordResetModal = forwardRef(
+export const ChangePasswordModal = forwardRef(
   (props: Props, ref
   ) => {
     const dispatch: AppDispatch = useDispatch();

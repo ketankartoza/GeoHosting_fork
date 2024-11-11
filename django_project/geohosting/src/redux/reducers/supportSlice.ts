@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 interface Ticket {
@@ -45,7 +45,7 @@ export const fetchTickets = createAsyncThunk(
   async (_, thunkAPI) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('/api/support/tickets/', {
+      const response = await axios.get('/api/tickets/', {
         headers: { Authorization: `Token ${token}` }
       });
       return response.data;
@@ -61,7 +61,7 @@ export const fetchTicket = createAsyncThunk(
   'support/fetchTicket',
   async (id: number, thunkAPI) => {
     try {
-      const response = await axios.get(`/api/support/tickets/${id}/`);
+      const response = await axios.get(`/api/tickets/${id}/`);
       return response.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(error.response?.data || 'An unknown error occurred');
@@ -75,7 +75,7 @@ export const createTicket = createAsyncThunk(
   async (ticketData: CreateTicketData, thunkAPI) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('/api/support/tickets/create/', ticketData, { headers: { Authorization: `Token ${token}` }});
+      const response = await axios.post('/api/tickets/', ticketData, { headers: { Authorization: `Token ${token}` } });
       return response.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(error.response?.data || 'An unknown error occurred');
@@ -87,9 +87,12 @@ export const createTicket = createAsyncThunk(
 // Async thunk for updating a ticket
 export const updateTicket = createAsyncThunk(
   'support/updateTicket',
-  async ({ id, updateData }: { id: number; updateData: Partial<Ticket> }, thunkAPI) => {
+  async ({ id, updateData }: {
+    id: number;
+    updateData: Partial<Ticket>
+  }, thunkAPI) => {
     try {
-      const response = await axios.put(`/api/support/tickets/${id}/`, updateData);
+      const response = await axios.put(`/api/tickets/${id}/`, updateData);
       return response.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(error.response?.data || 'An unknown error occurred');
@@ -97,16 +100,17 @@ export const updateTicket = createAsyncThunk(
   }
 );
 
-// Async thunk for uploading attachments 
-export const uploadAttachments = createAsyncThunk(
+// Async thunk for uploading attachment
+export const uploadAttachment = createAsyncThunk(
   'support/uploadAttachments',
-  async ({ ticketId, files }: { ticketId: number; files: File[] }, thunkAPI) => {
+  async ({ ticketId, file }: { ticketId: number; file: File }, thunkAPI) => {
     const formData = new FormData();
     const token = localStorage.getItem('token');
-    files.forEach(file => formData.append('attachments', file));
+    formData.append('file', file);
+    formData.append('ticket', ticketId.toString());
 
     try {
-      const response = await axios.post(`/api/support/tickets/${ticketId}/attachments/`, formData, {
+      const response = await axios.post(`/api/tickets/${ticketId}/attachments/`, formData, {
         headers: {
           'Authorization': `Token ${token}`,
           'Content-Type': 'multipart/form-data'
@@ -191,19 +195,6 @@ const supportSlice = createSlice({
         }
       })
       .addCase(updateTicket.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      })
-      .addCase(uploadAttachments.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(uploadAttachments.fulfilled, (state, action) => {
-        state.loading = false;
-        const { ticketId, files } = action.payload;
-        state.attachments[ticketId] = files;
-      })
-      .addCase(uploadAttachments.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

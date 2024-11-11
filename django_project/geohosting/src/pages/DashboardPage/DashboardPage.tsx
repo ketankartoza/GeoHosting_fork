@@ -1,24 +1,24 @@
 import React from 'react';
 import {
-  ChakraProvider,
   Box,
+  ChakraProvider,
   Flex,
   Heading,
   IconButton,
-  Button,
 } from '@chakra-ui/react';
 import { HamburgerIcon } from '@chakra-ui/icons';
 import customTheme from '../../theme/theme';
-import DashboardSidePanel from "../../components/DashboardSidePanel/DashboardSidePanel";
+import DashboardSidePanel
+  from "../../components/DashboardSidePanel/DashboardSidePanel";
 import { Route, Routes, useLocation } from "react-router-dom";
 import DashboardMainPage from "./DashboardMainPage";
 import SupportPage from "./Support/SupportPage";
 import OrdersList from './Orders/OrderList';
 import OrderDetail from "./Orders/OrderDetail";
 import ProfilePage from './Profile/ProfilePage';
-import AgreementsTab from '../../components/Profile/Agreements';
+import AgreementPage from './AgreementPage';
 
-const DashboardPage = ({ title="Dashboard" }) => {
+const DashboardPage = ({ title = "Dashboard" }) => {
   const [isOpen, setIsOpen] = React.useState(false);
   const toggleSidebar = () => setIsOpen(!isOpen);
   const location = useLocation();
@@ -31,7 +31,10 @@ const DashboardPage = ({ title="Dashboard" }) => {
           onClose={toggleSidebar}
           display={{ base: isOpen ? 'block' : 'none', md: 'block' }}
         />
-        <Box ml={{ base: 0, md: 60 }} transition="0.3s ease" >
+        <Flex
+          ml={{ base: 0, md: 60 }} transition="0.3s ease" minH='100vh'
+          flexDirection={'column'}
+        >
           <Flex
             as="header"
             align="center"
@@ -45,25 +48,26 @@ const DashboardPage = ({ title="Dashboard" }) => {
           >
             <IconButton
               aria-label="Open menu"
-              icon={<HamburgerIcon />}
+              icon={<HamburgerIcon/>}
               display={{ base: 'inline-flex', md: 'none' }}
               onClick={toggleSidebar}
             />
-            <Heading size="md" textAlign="center" color={'#ffffff'}>{ title }</Heading>
+            <Heading size="md" textAlign="center"
+                     color={'#ffffff'}>{title}</Heading>
           </Flex>
 
           {/* Main content area below the header */}
-          <Box p={4} pt={8}>
+          <Box p={8} flexGrow={1} position='relative'>
             <Routes>
-              <Route path="/" element={<DashboardMainPage />} />
-              <Route path='/agreements' element={<AgreementsTab />} />
-              <Route path="/support" element={<SupportPage />} />
-              <Route path="/orders" element={<OrdersList />} />
-              <Route path="/orders/:id" element={<OrderDetail />} />
-              <Route path='/profile' element={<ProfilePage />} />
+              <Route path="/" element={<DashboardMainPage/>}/>
+              <Route path='/agreements' element={<AgreementPage/>}/>
+              <Route path="/support" element={<SupportPage/>}/>
+              <Route path="/orders/:id" element={<OrderDetail/>}/>
+              <Route path="/orders" element={<OrdersList/>}/>
+              <Route path='/profile' element={<ProfilePage/>}/>
             </Routes>
           </Box>
-        </Box>
+        </Flex>
       </Box>
     </ChakraProvider>
   );

@@ -33,8 +33,8 @@ class SalesOrderTests(TestCase):
 
     @patch('geohosting.models.sales_order.add_erp_next_comment')
     @patch('geohosting.models.sales_order.verify_paystack_payment')
-    @patch('geohosting.models.sales_order.put_to_erpnext')
-    @patch('geohosting.models.sales_order.post_to_erpnext')
+    @patch('geohosting.models.erp_model.put_to_erpnext')
+    @patch('geohosting.models.erp_model.post_to_erpnext')
     def test_create_sales_order(
             self, mock_post_to_erpnext, mock_put_to_erpnext,
             mock_verify_paystack_payment, mock_add_erp_next_comment
@@ -85,11 +85,11 @@ class SalesOrderTests(TestCase):
         )
         mock_add_erp_next_comment.assert_has_calls([
             call(
-                self.user, sales_order.doctype,
+                self.user, sales_order.doc_type,
                 sales_order.erpnext_code, 'App name : test'
             ),
             call(
-                self.user, sales_order.doctype,
+                self.user, sales_order.doc_type,
                 sales_order.erpnext_code,
                 'Activity type INSTANCE.CREATE does not exist.'
             )
@@ -108,11 +108,11 @@ class SalesOrderTests(TestCase):
         sales_order.auto_deploy()
         mock_add_erp_next_comment.assert_has_calls([
             call(
-                self.user, sales_order.doctype,
+                self.user, sales_order.doc_type,
                 sales_order.erpnext_code, 'App name : test'
             ),
             call(
-                self.user, sales_order.doctype,
+                self.user, sales_order.doc_type,
                 sales_order.erpnext_code,
                 'Product cluster for region Global does not exist.'
             )
@@ -176,7 +176,7 @@ class SalesOrderTests(TestCase):
             self.assertTrue(sales_order.activity_set.all().count())
             mock_add_erp_next_comment.assert_has_calls([
                 call(
-                    self.user, sales_order.doctype,
+                    self.user, sales_order.doc_type,
                     sales_order.erpnext_code,
                     'Auto deployment: ERROR.\nJENKINS_USER is required.'
                 )
@@ -190,7 +190,7 @@ class SalesOrderTests(TestCase):
             self.assertTrue(sales_order.activity_set.all().count())
             mock_add_erp_next_comment.assert_has_calls([
                 call(
-                    self.user, sales_order.doctype,
+                    self.user, sales_order.doc_type,
                     sales_order.erpnext_code,
                     'Auto deployment: BUILD_ARGO.'
                 )

@@ -15,7 +15,7 @@ export function checkCheckoutUrl(salesOrder: SalesOrder, navigate) {
       targetUrl = `/orders/${salesOrder.id}/deployment`
       break
     case 'Deployed':
-      targetUrl = `/orders/${salesOrder.id}/finish`
+      targetUrl = `/dashboard/orders/${salesOrder.id}`
       break
   }
   if (originalUrl.replace('/#', '') != targetUrl) {

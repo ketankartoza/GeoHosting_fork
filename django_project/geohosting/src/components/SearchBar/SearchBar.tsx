@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
-import { FaTimes, FaSearch } from 'react-icons/fa';
+import { FaTimes } from 'react-icons/fa';
+import { Input, InputGroup, InputRightElement } from "@chakra-ui/react";
+import { SearchIcon } from "@chakra-ui/icons";
 
 interface SearchBarProps {
   showClearButton?: boolean;
   showDateFields?: boolean;
-  onSearch?: (term: string) => void; 
-  placeholder?: string; 
+  onSearch?: (term: string) => void;
+  placeholder?: string;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({
-  showClearButton = false,
-  showDateFields = false,
-  onSearch,
-  placeholder = 'Search Items', // Default placeholder
-}) => {
+const SearchBar: React.FC<SearchBarProps> = (
+  {
+    showClearButton = false,
+    showDateFields = false,
+    onSearch,
+    placeholder = 'Search Items', // Default placeholder
+  }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
@@ -40,16 +43,22 @@ const SearchBar: React.FC<SearchBarProps> = ({
     <div style={styles.container}>
       {/* Search Field */}
       <div style={styles.searchContainer}>
-        <input
-          type="text"
-          placeholder={placeholder}
-          value={searchTerm}
-          onChange={handleSearch}
-          style={styles.searchField}
-          onFocus={(e) => (e.currentTarget.style.borderColor = '#4f9ac0')}
-          onBlur={(e) => (e.currentTarget.style.borderColor = '#ccc')}
-        />
-        <FaSearch style={styles.searchIcon} />
+
+        <InputGroup>
+          <Input
+            type="text"
+            placeholder={placeholder}
+            value={searchTerm}
+            onChange={handleSearch}
+            style={styles.searchField}
+            onFocus={(e) => (e.currentTarget.style.borderColor = '#4f9ac0')}
+            onBlur={(e) => (e.currentTarget.style.borderColor = '#ccc')}
+          />
+          <InputRightElement
+            pointerEvents="none"
+            children={<SearchIcon className="SearchIcon"/>}
+          />
+        </InputGroup>
       </div>
 
       {/* Date Fields: Optional */}
@@ -65,8 +74,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
               style={styles.datePicker}
             />
             {startDate && (
-              <FaTimes 
-                onClick={clearStartDate} 
+              <FaTimes
+                onClick={clearStartDate}
                 style={styles.clearIconOutside}
               />
             )}
@@ -82,8 +91,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
               style={styles.datePicker}
             />
             {endDate && (
-              <FaTimes 
-                onClick={clearEndDate} 
+              <FaTimes
+                onClick={clearEndDate}
                 style={styles.clearIconOutside}
               />
             )}
@@ -104,16 +113,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
 // Styles using a JavaScript object
 const styles: { [key: string]: React.CSSProperties } = {
   container: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
     padding: '0px',
-    gap: '24px',
-    flexWrap: 'wrap',
-    width: '100%',
-    maxWidth: '900px',
     margin: '0',
-    marginBottom: '5px',
+    marginRight: '1rem'
   },
   searchContainer: {
     display: 'flex',
@@ -123,22 +125,15 @@ const styles: { [key: string]: React.CSSProperties } = {
     maxWidth: '400px',
     position: 'relative',
   },
-  searchIcon: {
-    position: 'absolute',
-    right: '20px',
-    bottom: '25px',
-    color: 'gray',
-    fontSize: '16px',
-  },
   searchField: {
     flex: 1,
-    padding: '10px 10px 10px 20px', 
+    padding: '10px 10px 10px 20px',
     height: '100%',
     border: '0px',
     borderRadius: '4px',
     outline: 'none',
     transition: 'border-color 0.2s',
-    marginBottom: '10px',
+    backgroundColor: "white"
   },
   dateContainer: {
     position: 'relative',

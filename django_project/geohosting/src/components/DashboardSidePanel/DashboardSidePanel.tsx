@@ -8,8 +8,7 @@ import React from "react";
 const SidebarItem = ({ label, isSelected, onClick }) => {
   return (
     <Box
-      px={4}
-      py={2}
+      p={4}
       color="white"
       _hover={{ bg: 'gray.600', cursor: 'pointer' }}
       w="full"
@@ -45,16 +44,20 @@ const DashboardSidePanel = ({ selected, onClose, ...rest }) => {
       <Flex h="20" alignItems="center" mx="3" justifyContent="space-between">
         <Heading
           fontSize="xl"
-          fontFamily="monospace"
           fontWeight="bold"
           color="white"
+          cursor="pointer"
+          _hover={{ opacity: 0.5 }}
           onClick={() => navigate('/')}
         >
           GeoSpatialHosting
         </Heading>
-        <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} color="white" />
+        <CloseButton
+          display={{ base: 'flex', md: 'none' }}
+          onClick={onClose}
+          color="white"/>
       </Flex>
-      <VStack spacing={4} align="start" mt={5}>
+      <VStack spacing={0} align="start" mt={5}>
         <SidebarItem
           label="Hosted Services"
           isSelected={selected === 'dashboard'}

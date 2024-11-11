@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import mixins, viewsets
+from rest_framework.permissions import IsAuthenticated
 
 from geohosting.api.payment import (
     PaymentAPI, PaymentStripeSessionAPI, PaymentPaystackSessionAPI
@@ -20,6 +21,8 @@ class SalesOrderSetView(
 ):
     """Sales order viewset."""
 
+    permission_classes = (IsAuthenticated,)
+
     def get_serializer_class(self):
         if self.action == 'retrieve':
             return SalesOrderDetailSerializer
@@ -27,9 +30,7 @@ class SalesOrderSetView(
 
     def get_queryset(self):
         """Return querysets."""
-        if self.request.user.id:
-            return SalesOrder.objects.filter(customer_id=self.request.user.id)
-        return SalesOrder.objects.none()
+        return SalesOrder.objects.filter(customer_id=self.request.user.id)
 
     def get_object(self):
         """Get object."""

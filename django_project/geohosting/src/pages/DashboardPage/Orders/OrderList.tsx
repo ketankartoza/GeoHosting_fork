@@ -3,14 +3,30 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { fetchOrders } from '../../../redux/reducers/ordersSlice';
 import { AppDispatch, RootState } from '../../../redux/store';
-import { Box, Spinner, Table, Thead, Tbody, Tr, Th, Td, Text, Flex } from '@chakra-ui/react';
+import {
+  Box,
+  Flex,
+  Spinner,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr
+} from '@chakra-ui/react';
 import Pagination from '../../../components/Pagination/Pagination';
-import SearchBar from '../../../components/SearchBar/SearchBar';
+import { checkCheckoutUrl } from "../../CheckoutPage/utils";
+import DashboardTitle from "../../../components/DashboardPage/DashboardTitle";
+import TopNavigation from "../../../components/DashboardPage/TopNavigation";
 
 const OrdersList: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { orders, loading, error } = useSelector((state: RootState) => state.orders);
+  const {
+    orders,
+    loading,
+    error
+  } = useSelector((state: RootState) => state.orders);
   const { token } = useSelector((state: RootState) => state.auth);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -33,8 +49,10 @@ const OrdersList: React.FC = () => {
     setFilteredOrders(filtered);
   }, [searchTerm, orders]);
 
-  const handleRowClick = (id: number) => {
-    navigate(`/orders/${id}`);
+  const handleRowClick = (salesOrderDetail: any) => {
+    if (salesOrderDetail && salesOrderDetail.id + '') {
+      checkCheckoutUrl(salesOrderDetail, navigate)
+    }
   };
 
   // Pagination calculations
@@ -44,8 +62,9 @@ const OrdersList: React.FC = () => {
 
   if (loading) {
     return (
-      <Box display={'flex'} justifyContent={'center'} width={'100%'} height={'100%'} alignItems={'center'}>
-        <Spinner size='xl' />
+      <Box display={'flex'} justifyContent={'center'} width={'100%'}
+           height={'100%'} alignItems={'center'}>
+        <Spinner size='xl'/>
       </Box>
     );
   }
@@ -56,62 +75,59 @@ const OrdersList: React.FC = () => {
 
   return (
     <Box>
-    <Box minHeight={{ base: 'auto', md: '80vh' }}> 
-      <Box mb={4} >
-        <Text fontSize="2xl" fontWeight="bold" mb={2} color={'#3e3e3e'}>Orders</Text>
-        <Box height="2px" bg="blue.500" width="100%" mb={4} />
-      </Box>
+      <Box minHeight={{ base: 'auto', md: '80vh' }}>
 
-      {/* Search Bar */}
-      <SearchBar
-        onSearch={setSearchTerm}
-        showDateFields={false}
-        showClearButton={false}
-        placeholder={'Search by Order ID'}
-      />
+        {/* Dashboard title */}
+        <DashboardTitle title={'Orders'}/>
 
-      {/* Orders Table */}
-      <Table variant='simple'>
-        <Thead>
-          <Tr>
-            <Th>Erpnext_code</Th>
-            <Th>Package</Th>
-            <Th>Status</Th>
-            <Th>Payment Method</Th>
-            <Th>Date</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {currentOrders.map((order) => (
-            <Tr
-              key={order.id}
-              onClick={() => handleRowClick(order.id)}
-              style={{ cursor: 'pointer' }}
-              _hover={{ bg: 'gray.100' }}
-            >
-              <Td>{order.erpnext_code}</Td>
-              <Td>{order.package.name}</Td>
-              <Td>{order.order_status}</Td>
-              <Td>{order.payment_method}</Td>
-              <Td>{new Date(order.date).toLocaleDateString()}</Td>
-            </Tr>
-          ))}
-        </Tbody>
-      </Table>
-
-      
-    </Box>
-    {/* Pagination */}
-    {filteredOrders.length > rowsPerPage && (
-      <Flex justifyContent="center" mt={4}>
-        <Pagination
-          totalItems={filteredOrders.length}
-          itemsPerPage={rowsPerPage}
-          currentPage={currentPage}
-          onPageChange={setCurrentPage}
+        {/* Top navigation of dashboard */}
+        <TopNavigation
+          onSearch={setSearchTerm} placeholder='Search by Order ID'
         />
-      </Flex>
-    )}
+
+        {/* Orders Table */}
+        <Table variant='simple'>
+          <Thead>
+            <Tr>
+              <Th>Order ID</Th>
+              <Th>Package</Th>
+              <Th>Status</Th>
+              <Th>Payment Method</Th>
+              <Th>Date</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {currentOrders.map((order) => (
+              <Tr
+                key={order.id}
+                onClick={() => handleRowClick(order)}
+                style={{ cursor: 'pointer' }}
+                background={"white"}
+                _hover={{ bg: 'gray.100' }}
+              >
+                <Td>{order.erpnext_code}</Td>
+                <Td>{order.package.name}</Td>
+                <Td>{order.order_status}</Td>
+                <Td>{order.payment_method}</Td>
+                <Td>{new Date(order.date).toLocaleDateString()}</Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+
+
+      </Box>
+      {/* Pagination */}
+      {filteredOrders.length > rowsPerPage && (
+        <Flex justifyContent="center" mt={4}>
+          <Pagination
+            totalItems={filteredOrders.length}
+            itemsPerPage={rowsPerPage}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+          />
+        </Flex>
+      )}
     </Box>
   );
 };

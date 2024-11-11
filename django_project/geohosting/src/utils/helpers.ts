@@ -50,3 +50,11 @@ export const getCurrencyBasedOnLocation = async () => {
 
   return newCurrency;
 };
+
+/**
+ * Return as a string
+ * If it is null, return as ''
+ */
+export const returnAsString = (input: string) => {
+  return input ? input : ''
+}

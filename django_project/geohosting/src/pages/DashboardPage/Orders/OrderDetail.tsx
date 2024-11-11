@@ -21,6 +21,8 @@ const OrderDetail: React.FC = () => {
   if (loading) {
     return (
       <Box
+        top={0}
+        left={0}
         position='absolute'
         display='flex'
         justifyContent='center'

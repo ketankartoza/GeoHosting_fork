@@ -7,10 +7,10 @@ from django.db import models
 from django.utils.timezone import now
 
 from geohosting.models.activity import name_validator
+from geohosting.models.erp_model import ErpModel
 from geohosting.models.region import Region
 from geohosting.models.user_profile import UserProfile
 from geohosting.utils.erpnext import (
-    post_to_erpnext, put_to_erpnext,
     add_erp_next_comment, download_erp_file
 )
 from geohosting.utils.paystack import verify_paystack_payment
@@ -98,10 +98,10 @@ class SalesOrderPaymentMethod:
     PAYSTACK = 'Paystack'
 
 
-class SalesOrder(models.Model):
+class SalesOrder(ErpModel):
     """Sales Order."""
 
-    doctype = "Sales Order"
+    doc_type = "Sales Order"
     package = models.ForeignKey(
         'geohosting.Package',
         null=False,
@@ -126,11 +126,6 @@ class SalesOrder(models.Model):
     delivery_date = models.DateTimeField(
         default=get_default_delivery_date,
         verbose_name='Delivery Date'
-    )
-
-    erpnext_code = models.CharField(
-        default='',
-        blank=True
     )
 
     # For checkout status
@@ -199,7 +194,7 @@ class SalesOrder(models.Model):
         """Add comment."""
         if self.erpnext_code:
             add_erp_next_comment(
-                self.customer, self.doctype, self.erpnext_code, comment
+                self.customer, self.doc_type, self.erpnext_code, comment
             )
 
     def __str__(self):
@@ -209,14 +204,45 @@ class SalesOrder(models.Model):
             f"{self.package.name}"
         )
 
-    def post_to_erpnext(self):
-        """Create the sales order to erpnext."""
+    @property
+    def erp_payload_for_create(self):
+        """ERP Payload for create request."""
         user_profile = UserProfile.objects.get(
             user=self.customer
         )
-        doctype = self.doctype
         order_status_obj = self.sales_order_status_obj
-        data = {
+        return {
+            # status is not billed
+            'billing_status': order_status_obj.billing_status,
+            # Status waiting bill
+            'status': order_status_obj.erp_status,
+            # Percent billed
+            'per_billed': order_status_obj.percent_billed,
+
+            # For other information
+            "doctype": self.doc_type,
+            'customer': user_profile.erpnext_code,
+            'date': self.date.strftime('%Y-%m-%d'),
+            'selling_price_list': self.package.price_list,
+            'price_list_currency': self.package.currency,
+            'currency': self.package.currency,
+            'items': [
+                {
+                    'name': self.package.erpnext_code,
+                    'item_code': self.package.erpnext_item_code,
+                    'delivery_date': (
+                        self.delivery_date.strftime('%Y-%m-%d')
+                    ),
+                    'qty': 1.0,
+                }
+            ]
+        }
+
+    @property
+    def erp_payload_for_edit(self):
+        """ERP Payload for edit request."""
+        order_status_obj = self.sales_order_status_obj
+        return {
             # status is not billed
             'billing_status': order_status_obj.billing_status,
             # Status waiting bill
@@ -224,37 +250,6 @@ class SalesOrder(models.Model):
             # Percent billed
             'per_billed': order_status_obj.percent_billed
         }
-
-        # If not have erpnext_code, we post it to create the sales order
-        if not self.erpnext_code:
-            data.update(
-                {
-                    "doctype": doctype,
-                    'customer': user_profile.erpnext_code,
-                    'date': self.date.strftime('%Y-%m-%d'),
-                    'selling_price_list': self.package.price_list,
-                    'price_list_currency': self.package.currency,
-                    'currency': self.package.currency,
-                    'items': [
-                        {
-                            'name': self.package.erpnext_code,
-                            'item_code': self.package.erpnext_item_code,
-                            'delivery_date': (
-                                self.delivery_date.strftime('%Y-%m-%d')
-                            ),
-                            'qty': 1.0,
-                        }
-                    ]
-                }
-            )
-            result = post_to_erpnext(data, doctype)
-            if result['status'] == 'success':
-                self.erpnext_code = result['id']
-                self.save()
-        else:
-            # If have erpnext_code, update the existing sales order on erp next
-            result = put_to_erpnext(data, doctype, self.erpnext_code)
-        return result
 
     @property
     def sales_order_status_obj(self) -> _SalesOrderStatusObject:
