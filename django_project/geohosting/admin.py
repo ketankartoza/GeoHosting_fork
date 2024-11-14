@@ -64,7 +64,7 @@ class ActivityAdmin(admin.ModelAdmin):
         'id', 'instance', 'activity_type', 'triggered_at',
         'status', 'jenkins_queue_url', 'note'
     )
-    list_filter = ('instance', 'triggered_at', 'triggered_by')
+    list_filter = ('instance', 'status')
     readonly_fields = (
         'activity_type', 'instance', 'triggered_at', 'triggered_by',
         'client_data', 'post_data', 'note', 'jenkins_queue_url'
