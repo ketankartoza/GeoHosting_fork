@@ -13,18 +13,11 @@ class NoClusterException(Exception):
         super().__init__('No cluster found.')
 
 
-class NoJenkinsUserException(Exception):
-    """No User exception."""
+class NoProxyApiKeyException(Exception):
+    """No Api Key to proxy exception."""
 
     def __init__(self):  # noqa
-        super().__init__('JENKINS_USER is required.')
-
-
-class NoJenkinsTokenException(Exception):
-    """No token exception."""
-
-    def __init__(self):  # noqa
-        super().__init__('JENKINS_TOKEN is required.')
+        super().__init__('PROXY_API_KEY is required.')
 
 
 class ActivityException(Exception):

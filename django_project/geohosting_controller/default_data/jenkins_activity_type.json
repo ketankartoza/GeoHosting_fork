@@ -1,7 +1,7 @@
 {
   "geonode": {
     "identifier": "INSTANCE.CREATE",
-    "jenkins_url": "https://jenkins.do.kartoza.com/job/kartoza/job/devops/job/geohosting/job/geonode_create/buildWithParameters",
+    "jenkins_url": "https://api.do.kartoza.com/jenkins/job/kartoza/job/devops/job/geohosting/job/geonode_create/buildWithParameters",
     "mapping": {
       "cluster": "k8s_cluster",
       "environment": "geonode_env",

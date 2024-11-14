@@ -17,7 +17,7 @@ from geohosting_controller.variables import ActivityTypeTerm
 class SalesOrderTests(TestCase):
     """Sales order tests."""
 
-    jenkins_url = 'https://jenkins.example.com'
+    proxy_url = 'https://api.example.com'
 
     def setUp(self):
         """Setup test case."""
@@ -100,7 +100,7 @@ class SalesOrderTests(TestCase):
         ActivityType.objects.create(
             identifier=ActivityTypeTerm.CREATE_INSTANCE.value,
             jenkins_url=(
-                'https://jenkins.example.com/job/kartoza/job/devops/job/'
+                'https://api.example.com/job/kartoza/job/devops/job/'
                 'geohosting/job/geonode_create/buildWithParameters'
             ),
             product=self.package.product
@@ -122,29 +122,29 @@ class SalesOrderTests(TestCase):
         with requests_mock.Mocker() as requests_mocker:
             # Mock requests
             requests_mocker.get(
-                f'{self.jenkins_url}/crumbIssuer/api/json',
+                f'{self.proxy_url}/crumbIssuer/api/json',
                 status_code=200,
                 json={
                     "crumb": "crumb"
                 }
             )
             requests_mocker.post(
-                f'{self.jenkins_url}/job/kartoza/job/devops/'
+                f'{self.proxy_url}/job/kartoza/job/devops/'
                 'job/geohosting/job/geonode_create/buildWithParameters',
                 status_code=201,
                 headers={
-                    'Location': f'{self.jenkins_url}/queue/item/1/'
+                    'Location': f'{self.proxy_url}/queue/item/1/'
                 },
             )
             requests_mocker.get(
-                f'{self.jenkins_url}/queue/item/1/api/json',
+                f'{self.proxy_url}/queue/item/1/api/json',
                 status_code=200,
                 json={
                     "id": 1,
                     "url": "queue/item/1/",
                     "executable": {
                         "url": (
-                            f'{self.jenkins_url}/job/kartoza/job/'
+                            f'{self.proxy_url}/job/kartoza/job/'
                             "devops/job/geohosting/job/geonode_create/1/"
                         )
                     }
@@ -152,7 +152,7 @@ class SalesOrderTests(TestCase):
             )
             requests_mocker.get(
                 (
-                    f'{self.jenkins_url}/job/kartoza/job/'
+                    f'{self.proxy_url}/job/kartoza/job/'
                     'devops/job/geohosting/job/geonode_create/1/api/json'
                 ),
                 status_code=200,
@@ -162,7 +162,8 @@ class SalesOrderTests(TestCase):
                 }
             )
 
-            # Create cluster but no JENKINS USER
+            # Create cluster but no PROXY API KEY
+            os.environ['PROXY_API_KEY'] = ''
             cluster = Cluster.objects.create(
                 code='test',
                 region=Region.default_region()
@@ -178,14 +179,13 @@ class SalesOrderTests(TestCase):
                 call(
                     self.user, sales_order.doc_type,
                     sales_order.erpnext_code,
-                    'Auto deployment: ERROR.\nJENKINS_USER is required.'
+                    'Auto deployment: ERROR.\nPROXY_API_KEY is required.'
                 )
             ])
 
-            # Has JENKINS USER
+            # Has PROXY API KEY
             mock_add_erp_next_comment.reset_mock()
-            os.environ['JENKINS_USER'] = 'user@example.com'
-            os.environ['JENKINS_TOKEN'] = 'token'
+            os.environ['PROXY_API_KEY'] = 'token'
             sales_order.auto_deploy()
             self.assertTrue(sales_order.activity_set.all().count())
             mock_add_erp_next_comment.assert_has_calls([

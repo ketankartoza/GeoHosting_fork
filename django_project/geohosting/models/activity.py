@@ -147,10 +147,6 @@ class Activity(models.Model):
         max_length=256,
         null=True, blank=True, editable=False
     )
-    jenkins_build_url = models.CharField(
-        max_length=256,
-        null=True, blank=True, editable=False
-    )
 
     # The sales order of the activity
     sales_order = models.ForeignKey(

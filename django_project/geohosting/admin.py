@@ -40,7 +40,7 @@ class TicketAdmin(admin.ModelAdmin):
 
 
 def send_attachment(modeladmin, request, queryset):
-    """Return jenkins status."""
+    """Send attachment to erpnext."""
     for config in queryset:
         config.post_to_erpnext()
 
@@ -61,14 +61,13 @@ class ActivityAdmin(admin.ModelAdmin):
     """Activity admin."""
 
     list_display = (
-        'id', 'instance', 'activity_type', 'triggered_at', 'triggered_by',
-        'status', 'note'
+        'id', 'instance', 'activity_type', 'triggered_at',
+        'status', 'jenkins_queue_url', 'note'
     )
     list_filter = ('instance', 'triggered_at', 'triggered_by')
     readonly_fields = (
         'activity_type', 'instance', 'triggered_at', 'triggered_by',
-        'client_data', 'post_data', 'note', 'jenkins_queue_url',
-        'jenkins_build_url'
+        'client_data', 'post_data', 'note', 'jenkins_queue_url'
     )
 
     def has_add_permission(*args, **kwargs):
@@ -96,7 +95,7 @@ class ClusterAdmin(admin.ModelAdmin):
 
 
 def send_credentials(modeladmin, request, queryset):
-    """Return jenkins status."""
+    """Send credentials ."""
     for config in queryset:
         config.send_credentials()
 
@@ -182,7 +181,7 @@ def auto_deploy(modeladmin, request, queryset):
 class SalesOrderAdmin(admin.ModelAdmin):
     list_display = (
         'date', 'package', 'customer', 'order_status', 'payment_method',
-        'erpnext_code', 'activities'
+        'erpnext_code', 'activities', 'app_name'
     )
     list_filter = ('order_status', 'payment_method')
     search_fields = ('erpnext_code',)

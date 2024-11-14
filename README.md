@@ -2,23 +2,23 @@
 
 ![image](https://github.com/user-attachments/assets/ad257a1d-ade0-4f60-a65f-dcbd6f166e2b)
 
-
-GeoHosting website. 
+GeoHosting website.
 
 Environment:</br>
 
 ```
-JENKINS_TOKEN=
+PROXY_BASE_URL=
 ```
 
-The token of user of jenkins. Can be created on jenkins.
+The base url of proxy url of Kartoza. Default: https://api.do.kartoza.com/
 
 ```
-JENKINS_USER=
+PROXY_API_KEY=
 ```
 
-The username on the jenkins that has token.
-We need to make sure the user has permission with job/build.
+The API Key of proxy.
+The proxy is being used for calling jenkins.
+We need to make sure the proxy has permission with job/build on jenkins.
 
 # GeoHosting Controller - Client
 

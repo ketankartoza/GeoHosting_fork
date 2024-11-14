@@ -21,7 +21,7 @@ from geohosting_controller.default_data import (
     generate_cluster, generate_regions
 )
 from geohosting_controller.exceptions import (
-    ConnectionErrorException, NoJenkinsUserException, NoJenkinsTokenException,
+    ConnectionErrorException, NoProxyApiKeyException,
     ActivityException
 )
 from geohosting_controller.variables import ActivityTypeTerm
@@ -84,29 +84,29 @@ class ControllerTest(TestCase):
         with requests_mock.Mocker() as requests_mocker:
             # Mock requests
             requests_mocker.get(
-                ' https://jenkins.do.kartoza.com/crumbIssuer/api/json',
+                ' https://api.do.kartoza.com/jenkins/crumbIssuer/api/json',
                 status_code=200,
                 json={
                     "crumb": "crumb"
                 }
             )
             requests_mocker.post(
-                'https://jenkins.do.kartoza.com/job/kartoza/job/devops/'
+                'https://api.do.kartoza.com/jenkins/job/kartoza/job/devops/'
                 'job/geohosting/job/geonode_create/buildWithParameters',
                 status_code=201,
                 headers={
-                    'Location': ' https://jenkins.do.kartoza.com/queue/item/1/'
+                    'Location': ' https://api.do.kartoza.com/queue/item/1/'
                 },
             )
             requests_mocker.get(
-                ' https://jenkins.do.kartoza.com/queue/item/1/api/json',
+                ' https://api.do.kartoza.com/queue/item/1/api/json',
                 status_code=200,
                 json={
                     "id": 1,
                     "url": "queue/item/1/",
                     "executable": {
                         "url": (
-                            " https://jenkins.do.kartoza.com/job/kartoza/job/"
+                            " https://api.do.kartoza.com/job/kartoza/job/"
                             "devops/job/geohosting/job/geonode_create/1/"
                         )
                     }
@@ -114,7 +114,7 @@ class ControllerTest(TestCase):
             )
             requests_mocker.get(
                 (
-                    ' https://jenkins.do.kartoza.com/job/kartoza/job/'
+                    ' https://api.do.kartoza.com/job/kartoza/job/'
                     'devops/job/geohosting/job/geonode_create/1/api/json'
                 ),
                 status_code=200,
@@ -124,25 +124,17 @@ class ControllerTest(TestCase):
                 }
             )
 
-            os.environ['JENKINS_USER'] = ''
-            os.environ['JENKINS_TOKEN'] = ''
+            os.environ['PROXY_API_KEY'] = ''
             self.assertEqual(
                 self.create_function('error-app').note,
-                NoJenkinsUserException().__str__()
-            )
-
-            os.environ['JENKINS_USER'] = 'user@example.com'
-            self.create_function('error-app-2')
-            self.assertEqual(
-                self.create_function(self.app_name).note,
-                NoJenkinsTokenException().__str__()
+                NoProxyApiKeyException().__str__()
             )
 
             # ---------------------------------------------
             # WORKING FLOW
             # ---------------------------------------------
             try:
-                os.environ['JENKINS_TOKEN'] = 'Token'
+                os.environ['PROXY_API_KEY'] = 'Token'
 
                 # If the name is not correct
                 with self.assertRaises(ActivityException):
@@ -157,7 +149,7 @@ class ControllerTest(TestCase):
                 # Get jenkins build url
                 self.assertEqual(
                     activity_obj.jenkins_queue_url,
-                    ' https://jenkins.do.kartoza.com/queue/item/1/'
+                    ' https://api.do.kartoza.com/queue/item/1/'
                 )
 
                 # Create another activity

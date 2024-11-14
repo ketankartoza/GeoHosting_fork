@@ -17,7 +17,7 @@ except NotRegistered:
 
 test_fields = (
     'erp_next_test',
-    'jenkins_test',
+    'proxy_test',
     'stripe_test',
     'paystack_test',
     'vault_test'

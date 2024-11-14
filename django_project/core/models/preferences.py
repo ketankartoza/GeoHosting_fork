@@ -16,7 +16,7 @@ from geohosting.utils.erpnext import test_connection
 from geohosting.utils.paystack import test_connection as paystack_connection
 from geohosting.utils.stripe import test_connection as strip_connection
 from geohosting.utils.vault import get_token as vault_connection
-from geohosting_controller.connection import get_crumb
+from geohosting_controller.connection import get_jenkins_crumb
 
 
 class Preferences(SingletonModel):
@@ -54,13 +54,13 @@ class Preferences(SingletonModel):
                 return f'{e}'
 
     @property
-    def jenkins_test(self):
-        """Jenkins test."""
-        JENKINS_BASE_URL = os.environ.get('JENKINS_BASE_URL', None)
-        if not JENKINS_BASE_URL:
-            return 'JENKINS_BASE_URL is not setup yet'
+    def proxy_test(self):
+        """Proxy test."""
+        proxy_base_url = os.environ.get('PROXY_BASE_URL', None)
+        if not proxy_base_url:
+            return 'PROXY_BASE_URL is not setup yet'
         try:
-            get_crumb(JENKINS_BASE_URL)
+            get_jenkins_crumb(proxy_base_url)
             return 'OK'
         except Exception as e:
             return f'{e}'
