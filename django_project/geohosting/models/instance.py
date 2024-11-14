@@ -73,8 +73,8 @@ class Instance(models.Model):
 
     def online(self):
         """Make instance online."""
-        self.send_credentials()
         self.status = InstanceStatus.ONLINE
+        self.send_credentials()
         self.save()
 
     def offline(self):
@@ -84,6 +84,8 @@ class Instance(models.Model):
 
     def send_credentials(self):
         """Send credentials."""
+        if self.status != InstanceStatus.ONLINE:
+            return
         name = f'{self.owner.first_name} {self.owner.last_name}'
         if not self.price.package_group.vault_url:
             html_content = render_to_string(

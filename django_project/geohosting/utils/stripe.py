@@ -9,7 +9,7 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 def test_connection():
     """Test connection to Stripe API."""
-    stripe.Customer.list()
+    stripe.Customer.list()['data']
 
 
 def create_stripe_price(

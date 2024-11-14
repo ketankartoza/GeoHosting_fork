@@ -47,8 +47,7 @@ export const MainCheckoutPageComponent: React.FC<CheckoutPageModalProps> = (
 ) => {
   /** For the payment component **/
   const columns = useBreakpointValue({ base: 1, md: 2 });
-  const [paymentMethod, setPaymentMethod] = useState<string | null>(null);
-  const [paymentMethods, setPaymentMethods] = useState<[string] | null>(null);
+  const [paymentMethods, setPaymentMethods] = useState<Array<string> | null>(null);
   const stripePaymentModalRef = useRef(null);
   const paystackPaymentModalRef = useRef(null);
 
@@ -57,10 +56,8 @@ export const MainCheckoutPageComponent: React.FC<CheckoutPageModalProps> = (
       async () => {
         const userLocation = await getUserLocation()
         if (userLocation === 'ZA') {
-          setPaymentMethod(PaymentMethods.PAYSTACK)
           setPaymentMethods([PaymentMethods.PAYSTACK])
         } else {
-          setPaymentMethod(PaymentMethods.STRIPE)
           setPaymentMethods([PaymentMethods.STRIPE])
         }
       }
@@ -68,8 +65,8 @@ export const MainCheckoutPageComponent: React.FC<CheckoutPageModalProps> = (
   }, []);
 
   // Checkout function
-  async function checkout() {
-    switch (paymentMethod) {
+  async function checkout(method) {
+    switch (method) {
       case PaymentMethods.STRIPE: {
         if (stripePaymentModalRef?.current) {
           // @ts-ignore
@@ -112,9 +109,9 @@ export const MainCheckoutPageComponent: React.FC<CheckoutPageModalProps> = (
                     paymentMethods?.includes(PaymentMethods.STRIPE) ?
                       <Button
                         mt={4} leftIcon={<FaCcStripe/>} mr={1}
-                        colorScheme={paymentMethod === PaymentMethods.STRIPE ? "blue" : "blackAlpha"}
+                        colorScheme='blue'
                         size="lg"
-                        onClick={() => setPaymentMethod(PaymentMethods.STRIPE)}
+                        onClick={() => checkout(PaymentMethods.STRIPE)}
                       >
                         Pay with Stripe
                       </Button> : null
@@ -123,9 +120,9 @@ export const MainCheckoutPageComponent: React.FC<CheckoutPageModalProps> = (
                     paymentMethods?.includes(PaymentMethods.PAYSTACK) ?
                       <Button
                         mt={4}
-                        colorScheme={paymentMethod === PaymentMethods.PAYSTACK ? "blue" : "blackAlpha"}
+                        colorScheme='blue'
                         size="lg"
-                        onClick={() => setPaymentMethod(PaymentMethods.PAYSTACK)}
+                        onClick={() => checkout(PaymentMethods.PAYSTACK)}
                       >
                         Pay with Paystack
                       </Button> : null
@@ -145,18 +142,6 @@ export const MainCheckoutPageComponent: React.FC<CheckoutPageModalProps> = (
         </GridItem>
         <OrderSummary product={product} pkg={pkg}/>
       </Grid>
-      {
-        paymentMethod ?
-          <Box mt={4}>
-            <Button
-              w='100%'
-              colorScheme="orange"
-              onClick={checkout}
-            >
-              Pay with {paymentMethod.toLowerCase()}
-            </Button>
-          </Box> : null
-      }
       <StripePaymentModal
         ref={stripePaymentModalRef}
         url={stripeUrl}
