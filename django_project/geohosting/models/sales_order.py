@@ -276,10 +276,13 @@ class SalesOrder(ErpModel):
                     )
             elif self.payment_method == SalesOrderPaymentMethod.PAYSTACK:
                 response = verify_paystack_payment(self.payment_id)
-                if response['data']['status'] == 'success':
-                    self.set_order_status(
-                        SalesOrderStatus.WAITING_CONFIGURATION
-                    )
+                try:
+                    if response['data']['status'] == 'success':
+                        self.set_order_status(
+                            SalesOrderStatus.WAITING_CONFIGURATION
+                        )
+                except KeyError:
+                    pass
 
     @property
     def invoice_url(self):

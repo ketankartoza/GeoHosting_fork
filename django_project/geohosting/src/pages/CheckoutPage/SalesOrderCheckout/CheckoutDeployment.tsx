@@ -48,7 +48,8 @@ const CheckoutDeployment: React.FC<Props> = ({ salesOrderDetail }) => {
           <Box padding={8} backgroundColor="gray.100" borderRadius={10}>
             <Box>
               Sit tight, your service is being deployed. Please hold on
-              as the deployment process is underway.
+              as the deployment process is underway and we will
+              notify you via email once it is complete.
               <br/>
               <br/>
               <Box animation={spinAnimation} width='fit-content'>
