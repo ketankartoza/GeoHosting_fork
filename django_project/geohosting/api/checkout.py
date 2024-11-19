@@ -1,13 +1,16 @@
 """Checkout API."""
 
-from django.http import HttpResponseServerError
+from django.core.exceptions import ValidationError
+from django.http import HttpResponseServerError, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 
 from geohosting.api.payment import (
     PaymentAPI, PaymentStripeSessionAPI, PaymentPaystackSessionAPI
 )
 from geohosting.models import Package
+from geohosting.models.activity import name_validator
 from geohosting.models.sales_order import SalesOrder
+from geohosting.validators import app_name_validator
 
 
 class CheckoutAPI(PaymentAPI):
@@ -15,11 +18,18 @@ class CheckoutAPI(PaymentAPI):
 
     def post(self, request, pk):
         """Post to create checkout session."""
+        try:
+            app_name = request.data['app_name']
+            name_validator(app_name)
+            app_name_validator(app_name)
+        except (ValueError, ValidationError) as e:
+            return HttpResponseBadRequest(e)
         package = get_object_or_404(Package, pk=pk)
         try:
             order = SalesOrder.objects.create(
                 package=package,
-                customer=request.user
+                customer=request.user,
+                app_name=app_name
             )
             return self.get_post(order=order)
         except Exception as e:

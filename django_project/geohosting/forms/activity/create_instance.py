@@ -96,9 +96,7 @@ class CreateInstanceForm(forms.ModelForm):
 
             # Check product cluster
             product = package.product
-            product_cluster = product.productcluster_set.get(
-                cluster__region=region
-            )
+            product_cluster = product.get_product_cluster(region)
 
             data = {
                 'app_name': app_name,

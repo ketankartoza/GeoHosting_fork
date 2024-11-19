@@ -74,7 +74,7 @@ const LoginForm: React.FC<LoginFormProps> = (
       if (result.meta.requestStatus === 'fulfilled') {
         onClose();
         if (!onSuccess) {
-          navigate('/dashboard');
+          location.reload();
         } else {
           onSuccess()
         }
@@ -95,8 +95,11 @@ const LoginForm: React.FC<LoginFormProps> = (
       lastName
     })).then((result: any) => {
       if (result.meta.requestStatus === 'fulfilled') {
-        onClose();
-        navigate('/dashboard');
+        if (!onSuccess) {
+          location.reload();
+        } else {
+          onSuccess()
+        }
       } else if (result.meta.requestStatus === 'rejected') {
         const errorMessages = result.payload
           ? Object.entries(result.payload).map(([key, value]) => `${value}`).join('\n')

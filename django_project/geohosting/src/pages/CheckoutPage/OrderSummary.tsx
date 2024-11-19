@@ -17,10 +17,11 @@ export interface OrderSummaryProps {
   product: Product;
   pkg: Package;
   invoice_url?: string | null;
+  appName: string;
 }
 
 export const OrderSummary: React.FC<OrderSummaryProps> = (
-  { product, pkg, invoice_url }
+  { product, pkg, invoice_url, appName }
 ) => {
   return (
     <GridItem>
@@ -60,6 +61,12 @@ export const OrderSummary: React.FC<OrderSummaryProps> = (
               ))
             }
           </List>
+          {
+            appName &&
+            <Box mt={8}>
+              <b>Application Name</b> = {appName}
+            </Box>
+          }
 
           {
             invoice_url ?

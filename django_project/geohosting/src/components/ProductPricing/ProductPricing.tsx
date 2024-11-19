@@ -35,7 +35,7 @@ const ProductPricing: React.FC<PackageProps> = ({ product, pkg }) => {
       pkg
     }));
     if (token) {
-      navigate('/checkout', { state: { product, pkg } });
+      navigate('/checkout/configuration', { state: { product, pkg } });
     } else {
       onOpen()
     }
@@ -158,7 +158,7 @@ const ProductPricing: React.FC<PackageProps> = ({ product, pkg }) => {
         isOpen={isOpen}
         onClose={onClose}
         onSuccess={() => {
-          navigate('/checkout', { state: { product, pkg } });
+          navigate('/checkout/configuration', { state: { product, pkg } });
         }}
       />
     </Box>

@@ -24,6 +24,7 @@ const CheckoutFinish: React.FC<Props> = ({ salesOrderDetail }) => {
   return (
     <Grid gap={6} templateColumns={`repeat(${columns}, 1fr)`}>
       <OrderSummary
+        appName={salesOrderDetail.app_name}
         product={salesOrderDetail.product}
         pkg={salesOrderDetail.package}
         invoice_url={salesOrderDetail.invoice_url}

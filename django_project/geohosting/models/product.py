@@ -100,6 +100,12 @@ class Product(models.Model):
         except (KeyError, Cluster.DoesNotExist):
             pass
 
+    def get_product_cluster(self, region):
+        """Return product cluster."""
+        return self.productcluster_set.get(
+            cluster__region=region
+        )
+
 
 class ProductMetadata(models.Model):
     """Product metadata."""

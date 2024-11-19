@@ -48,24 +48,11 @@ const HomePage: React.FC = () => {
           <Container maxW="container.xl" textAlign="center" mt="80px" mb="80px" bg="transparent">
             <Flex justify="center" align="center" flexDirection={{ base: 'column', md: 'row' }}>
               <Img
-                src={'/static/images/logos/geohosting.svg'}
-                width={{ base: '120px', md: '120px', xl: '200px' }}
+                src={'/static/images/logos/geohosting-full.svg'}
+                width={{ base: '620px', md: '620px', xl: '700px' }}
                 mb={{ base: 4, md: 0 }}
                 mr={{ base: 0, md: 4 }}
               />
-              <Box textAlign={{ base: 'center', md: 'left' }}>
-                <Heading
-                  as="h1"
-                  fontSize={{ base: '4xl', sm: '5xl', md: '6xl', xl: '7xl' }}
-                  fontWeight="500"
-                  color="blue.500"
-                >
-                  GeoSpatialHosting
-                </Heading>
-                <Text fontSize={{ base: '15px', sm: '20px', md: '2xl', xl: '3xl' }} color="blue.500">
-                  YOUR ONLINE GEOSPATIAL WORKSPACE
-                </Text>
-              </Box>
             </Flex>
             <Container maxW="container.lg">
               <Text

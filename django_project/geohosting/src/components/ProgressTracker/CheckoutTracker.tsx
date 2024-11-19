@@ -1,8 +1,8 @@
 import ProgressTracker from "./ProgressTracker";
 
 const steps = [
+  { title: "Configuration", description: "Configure your application" },
   { title: "Payment", description: "Choose your payment method" },
-  { title: "Configuration", description: "Configure your deployment" },
   { title: "Deployment", description: "Deploying your service" },
   { title: "Finish", description: "Your service is up" },
 ];

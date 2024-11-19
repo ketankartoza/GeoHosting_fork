@@ -25,11 +25,6 @@ import CheckoutTracker
 import { OrderSummary } from "../OrderSummary"
 import { getUserLocation } from "../../../utils/helpers";
 
-interface LocationState {
-  productName: string;
-  pkg: Package;
-}
-
 const PaymentMethods = {
   STRIPE: 'STRIPE',
   PAYSTACK: 'PAYSTACK',
@@ -40,10 +35,12 @@ interface CheckoutPageModalProps {
   pkg: Package;
   stripeUrl: string;
   paystackUrl: string;
+  appName: string;
+  activeStep?: number;
 }
 
 export const MainCheckoutPageComponent: React.FC<CheckoutPageModalProps> = (
-  { product, pkg, stripeUrl, paystackUrl }
+  { product, pkg, stripeUrl, paystackUrl, appName }
 ) => {
   /** For the payment component **/
   const columns = useBreakpointValue({ base: 1, md: 2 });
@@ -87,6 +84,7 @@ export const MainCheckoutPageComponent: React.FC<CheckoutPageModalProps> = (
   return (
     <>
       <Grid gap={6} templateColumns={`repeat(${columns}, 1fr)`}>
+        <OrderSummary product={product} pkg={pkg} appName={appName}/>
         <GridItem>
           <Box>
             <Text fontSize={22} color={'black'}>
@@ -104,7 +102,7 @@ export const MainCheckoutPageComponent: React.FC<CheckoutPageModalProps> = (
                   terms</Link>, electronic document delivery, and
                   acknowledge the <Link href="#">privacy policy</Link>.
                 </Text>
-                <Box style={{ minHeight: "106px" }}>
+                <Box>
                   {
                     paymentMethods?.includes(PaymentMethods.STRIPE) ?
                       <Button
@@ -127,10 +125,12 @@ export const MainCheckoutPageComponent: React.FC<CheckoutPageModalProps> = (
                         Pay with Paystack
                       </Button> : null
                   }
-                  {!paymentMethods ?
-                    <Box paddingTop={5} fontStyle={"italic"} color={"gray"}>
-                      Loading payment methods
-                    </Box> : null}
+                  {
+                    !paymentMethods ?
+                      <Box paddingTop={5} fontStyle={"italic"} color={"gray"}>
+                        Loading payment methods
+                      </Box> : null
+                  }
                 </Box>
                 <Divider mt={4}/>
                 <Text mt={2} fontSize="sm">Payments are processed
@@ -140,22 +140,26 @@ export const MainCheckoutPageComponent: React.FC<CheckoutPageModalProps> = (
             </VStack>
           </Box>
         </GridItem>
-        <OrderSummary product={product} pkg={pkg}/>
       </Grid>
       <StripePaymentModal
         ref={stripePaymentModalRef}
         url={stripeUrl}
+        appName={appName}
       />
       <PaystackPaymentModal
         ref={paystackPaymentModalRef}
         url={paystackUrl}
+        appName={appName}
       />
     </>
   )
 }
 
 const MainCheckoutPage: React.FC<CheckoutPageModalProps> = (
-  { product, pkg, stripeUrl, paystackUrl }
+  {
+    product, pkg, stripeUrl,
+    paystackUrl, appName, activeStep = 0
+  }
 ) => {
   return (
     <ChakraProvider theme={customTheme}>
@@ -165,12 +169,15 @@ const MainCheckoutPage: React.FC<CheckoutPageModalProps> = (
           <Background/>
           <Container maxW='container.xl' mt="80px" mb="80px" bg="transparent">
             <Box mb={10}>
-              <CheckoutTracker activeStep={0}/>
+              <CheckoutTracker activeStep={activeStep}/>
             </Box>
             <MainCheckoutPageComponent
-              product={product} pkg={pkg}
+              appName={appName}
+              product={product}
+              pkg={pkg}
               stripeUrl={stripeUrl}
-              paystackUrl={paystackUrl}/>
+              paystackUrl={paystackUrl}
+            />
           </Container>
         </Box>
         <Box

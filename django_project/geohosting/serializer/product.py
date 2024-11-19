@@ -1,6 +1,8 @@
 from rest_framework import serializers
 
-from geohosting.models import Product, ProductMedia, Package, ProductMetadata
+from geohosting.models import (
+    Product, ProductMedia, Package, ProductMetadata, Region, ProductCluster
+)
 
 
 class ProductMediaSerializer(serializers.ModelSerializer):
@@ -34,6 +36,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     images = ProductMediaSerializer(many=True, read_only=True)
     packages = serializers.SerializerMethodField()
     product_meta = serializers.SerializerMethodField()
+    domain = serializers.SerializerMethodField()
 
     def __init__(self, *args, **kwargs):
         self.currency = kwargs.pop('currency', None)
@@ -65,6 +68,15 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     def get_product_meta(self, obj: Product):
         metadata = ProductMetadata.objects.filter(product=obj)
         return ProductMetadataSerializer(metadata, many=True).data
+
+    def get_domain(self, obj: Product):
+        """Return domain of product."""
+        try:
+            return obj.get_product_cluster(
+                Region.default_region()
+            ).cluster.domain
+        except ProductCluster.DoesNotExist:
+            return None
 
     class Meta:
         model = Product

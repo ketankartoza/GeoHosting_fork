@@ -32,6 +32,7 @@ interface EmbeddedCheckoutProviderProps {
 
 interface StripePaymentModalProps {
   url: string;
+  appName: string;
 }
 
 export const StripePaymentModal = forwardRef(
@@ -55,9 +56,15 @@ export const StripePaymentModal = forwardRef(
                 })
                 setStripePromise(loadStripe(setting.data))
               }
-              const response = await axios.post(props.url, {}, {
-                headers: { Authorization: `Token ${token}` }
-              });
+              const response = await axios.post(
+                props.url,
+                {
+                  app_name: props.appName
+                },
+                {
+                  headers: { Authorization: `Token ${token}` }
+                }
+              );
               setStripeOptions(
                 { clientSecret: response.data.key }
               )

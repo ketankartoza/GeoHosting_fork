@@ -4,6 +4,9 @@ export function checkCheckoutUrl(salesOrder: SalesOrder, navigate) {
   // Check checkout url
   const originalUrl = location.href.replace(location.origin, '')
   let targetUrl = originalUrl;
+  if (salesOrder.app_name) {
+    localStorage.setItem('appName', '');
+  }
   switch (salesOrder.order_status) {
     case 'Waiting Payment':
       targetUrl = `/orders/${salesOrder.id}/payment`

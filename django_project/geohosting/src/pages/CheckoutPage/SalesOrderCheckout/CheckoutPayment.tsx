@@ -25,6 +25,7 @@ const CheckoutPayment: React.FC<Props> = ({ salesOrderDetail }) => {
   }
   return (
     <MainCheckoutPageComponent
+      appName={salesOrderDetail.app_name}
       product={salesOrderDetail.product}
       pkg={salesOrderDetail.package}
       stripeUrl={`/api/orders/${salesOrderDetail.id}/payment/stripe`}

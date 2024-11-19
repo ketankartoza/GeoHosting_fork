@@ -1,14 +1,20 @@
+from django.core.exceptions import ValidationError
+from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from rest_framework import mixins, viewsets
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from geohosting.api.payment import (
     PaymentAPI, PaymentStripeSessionAPI, PaymentPaystackSessionAPI
 )
+from geohosting.models.activity import name_validator
 from geohosting.models.sales_order import SalesOrder
 from geohosting.serializer.sales_order import (
     SalesOrderSerializer, SalesOrderDetailSerializer
 )
+from geohosting.validators import app_name_validator
 
 
 class SalesOrderSetView(
@@ -44,7 +50,14 @@ class SalesOrderPaymentAPI(PaymentAPI):
 
     def post(self, request, pk):
         """Post to create checkout session."""
+        try:
+            app_name = request.data['app_name']
+            name_validator(app_name)
+            app_name_validator(app_name)
+        except (ValueError, ValidationError) as e:
+            return HttpResponseBadRequest(e)
         order = get_object_or_404(SalesOrder, pk=pk)
+        order.app_name = app_name
         order.payment_id = None
         order.payment_method = self.payment_method
         order.save()
@@ -67,3 +80,19 @@ class SalesOrderPaymentPaystackSessionAPI(
     """API creating paystack checkout session."""
 
     pass
+
+
+class CheckAppNameAPI(APIView):
+    """Check validity of app name."""
+
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        """Create token for logged in user."""
+        try:
+            app_name = request.data['app_name']
+            name_validator(app_name)
+            app_name_validator(app_name)
+            return Response('OK')
+        except (ValueError, ValidationError) as e:
+            return HttpResponseBadRequest(e)

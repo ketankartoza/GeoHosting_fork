@@ -13,7 +13,7 @@ const DashboardPage = lazy(() => import('./pages/DashboardPage/DashboardPage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const SalesOrderCheckout = lazy(() => import('./pages/CheckoutPage/SalesOrderCheckout'));
 const CheckoutPayment = lazy(() => import('./pages/CheckoutPage/SalesOrderCheckout/CheckoutPayment'));
-const CheckoutConfiguration = lazy(() => import('./pages/CheckoutPage/SalesOrderCheckout/CheckoutConfiguration'));
+const CheckoutConfigurationPage = lazy(() => import('./pages/CheckoutPage/CheckoutConfigurationPage'));
 const CheckoutDeployment = lazy(() => import('./pages/CheckoutPage/SalesOrderCheckout/CheckoutDeployment'));
 const CheckoutFinish = lazy(() => import('./pages/CheckoutPage/SalesOrderCheckout/CheckoutFinish'));
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage/ResetPasswordPage'));
@@ -35,22 +35,31 @@ const App: React.FC = () => {
                 </PrivateRoute>
               }
             />
+
+            {/* ----------------------------- */}
+            {/* ---------- CHECKOUT --------- */}
+            <Route
+              path="/checkout/configuration"
+              element={
+                <PrivateRoute>
+                  <CheckoutConfigurationPage/>
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/checkout"
+              element={
+                <PrivateRoute>
+                  <CheckoutPage/>
+                </PrivateRoute>
+              }
+            />
             <Route
               path="/orders/:id/payment"
               element={
                 <PrivateRoute>
                   <SalesOrderCheckout activeStep={0}>
                     <CheckoutPayment salesOrderDetail={null}/>
-                  </SalesOrderCheckout>
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/orders/:id/configuration"
-              element={
-                <PrivateRoute>
-                  <SalesOrderCheckout activeStep={1}>
-                    <CheckoutConfiguration salesOrderDetail={null}/>
                   </SalesOrderCheckout>
                 </PrivateRoute>
               }
@@ -75,14 +84,7 @@ const App: React.FC = () => {
                 </PrivateRoute>
               }
             />
-            <Route
-              path="/checkout"
-              element={
-                <PrivateRoute>
-                  <CheckoutPage/>
-                </PrivateRoute>
-              }
-            />
+            {/* ----------------------------- */}
             <Route path="/app/:appName" element={<OverviewPage/>}/>
           </Routes>
         </Suspense>

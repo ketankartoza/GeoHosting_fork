@@ -1,4 +1,8 @@
-import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
+import {
+  createAsyncThunk,
+  createSlice,
+  PayloadAction
+} from '@reduxjs/toolkit';
 import axios from 'axios';
 import { getCurrencyBasedOnLocation } from '../../utils/helpers';
 
@@ -11,6 +15,7 @@ export interface Product {
   images: ProductMedia[];
   packages: Package[];
   product_meta: { key: string; value: string; }[];
+  domain: string;
 }
 
 export interface ProductMedia {

@@ -39,7 +39,7 @@ class PaymentAPI(APIView):
         """Get post response."""
         domain = self.request.build_absolute_uri('/')
         try:
-            callback_url = f'{domain}#/orders/{order.id}/configuration'
+            callback_url = f'{domain}#/orders/{order.id}/deployment'
             _id, payload = self.create_payload(
                 self.request.user.email, order.package, callback_url
             )
@@ -62,7 +62,7 @@ class PaymentAPI(APIView):
                 package=package,
                 customer=request.user
             )
-            callback_url = f'{domain}#/orders/{order.id}/configuration'
+            callback_url = f'{domain}#/orders/{order.id}/deployment'
             _id, payload = self.create_payload(
                 request.user.email, package, callback_url
             )

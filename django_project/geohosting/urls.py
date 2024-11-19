@@ -14,7 +14,7 @@ from geohosting.api.instance import InstanceViewSet
 from geohosting.api.product import ProductViewSet
 from geohosting.api.sales_order import (
     SalesOrderSetView, SalesOrderPaymentStripeSessionAPI,
-    SalesOrderPaymentPaystackSessionAPI
+    SalesOrderPaymentPaystackSessionAPI, CheckAppNameAPI
 )
 from geohosting.api.support import TicketSetView, AttachmentSetView
 from geohosting.api.token import CreateToken
@@ -108,6 +108,10 @@ api = [
         name='password_reset_confirm'),
     path('auth/validate-token/',
          ValidateTokenView.as_view(), name='validate-token'),
+    path(
+        'test-app-name/',
+        CheckAppNameAPI.as_view(), name='test-app-name'
+    ),
     path('package/<pk>/', include(package)),
     path('orders/<pk>/', include(order_payment)),
     path('user/profile/', include(user_profile)),

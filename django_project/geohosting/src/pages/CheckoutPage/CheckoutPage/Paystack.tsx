@@ -17,6 +17,7 @@ import { RootState } from "../../../redux/store";
 
 interface StripePaymentModalProps {
   url: string,
+  appName: string;
 }
 
 export const PaystackPaymentModal = forwardRef(
@@ -30,9 +31,15 @@ export const PaystackPaymentModal = forwardRef(
         (
           async () => {
             try {
-              const response = await axios.post(props.url, {}, {
-                headers: { Authorization: `Token ${token}` }
-              });
+              const response = await axios.post(
+                props.url,
+                {
+                  app_name: props.appName
+                },
+                {
+                  headers: { Authorization: `Token ${token}` }
+                }
+              );
               onClose()
               const paystackInstance = new PaystackPop();
               const transaction = paystackInstance.resumeTransaction(response.data.key);
