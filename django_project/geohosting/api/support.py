@@ -5,7 +5,7 @@ GeoHosting Controller.
 """
 
 from rest_framework import mixins, viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
 
 from geohosting.models.support import Ticket, Attachment
 from geohosting.serializer.support import (
@@ -23,16 +23,20 @@ class TicketSetView(
     """Sales order viewset."""
 
     serializer_class = TicketSerializer
-    permission_classes = (IsAuthenticated,)
+    authentication_classes = []
+    permission_classes = (AllowAny,)
 
     # TODO: We need to enable this after the frontend has been paginated
     pagination_class = None
 
     def get_queryset(self):
         """Return querysets."""
-        user_email = self.request.user.email
-        Ticket.fetch_ticket_from_erp(user_email)
-        return Ticket.objects.filter(customer=user_email)
+        try:
+            user_email = self.request.user.email
+            Ticket.fetch_ticket_from_erp(user_email)
+            return Ticket.objects.filter(customer=user_email)
+        except AttributeError:
+            return Ticket.objects.none()
 
 
 class AttachmentSetView(
@@ -44,7 +48,8 @@ class AttachmentSetView(
     """Sales order viewset."""
 
     serializer_class = AttachmentSerializer
-    permission_classes = (IsAuthenticated,)
+    authentication_classes = []
+    permission_classes = (AllowAny,)
 
     # TODO: We need to enable this after the frontend has been paginated
     pagination_class = None

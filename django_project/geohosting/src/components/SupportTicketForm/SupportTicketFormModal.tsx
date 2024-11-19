@@ -14,6 +14,10 @@ interface Props {
   ticket: any
 }
 
+export interface SupportTicketFormModalHandle {
+  open: () => void;
+}
+
 export const SupportTicketFormModal = forwardRef(
   (props: Props, ref
   ) => {

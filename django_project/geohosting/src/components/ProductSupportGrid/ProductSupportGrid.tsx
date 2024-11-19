@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Box, Text, Button, Flex, Icon } from '@chakra-ui/react';
 import { FaGithub, FaHeadset } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { SupportTicketFormModal ,SupportTicketFormModalHandle } from '../SupportTicketForm/SupportTicketFormModal';
 
 const Card = ({ icon, title, description, buttonText, descriptionMb = "4", definedWidth, onButtonClick }) => (
   <Box
@@ -81,16 +81,18 @@ const Card = ({ icon, title, description, buttonText, descriptionMb = "4", defin
 );
 
 const ProductSupportGrid = ({ product }) => {
-  const navigate = useNavigate();
+  const modalRef = useRef<SupportTicketFormModalHandle>(null);
 
   const handleSupportClick = () => {
-    navigate('/dashboard/support');
+    if (modalRef.current) {
+      modalRef.current.open();
+    }
   };
 
   const handleGithubClick = () => {
-    const github_link = product.product_meta.find((meta) => meta.key === "github_link")?.value || "#";
-    if (github_link && github_link !== "#") {
-      window.location.href = github_link;
+    const githubLink = product.product_meta.find((meta) => meta.key === "github_link")?.value || "#";
+    if (githubLink && githubLink !== "#") {
+      window.location.href = githubLink;
     }
   };
 
@@ -107,9 +109,7 @@ const ProductSupportGrid = ({ product }) => {
       <Card
         icon={FaGithub}
         title="Download"
-        description={
-          "The source code of " + product.name + " is freely available on GitHub"
-        }
+        description={"The source code of " + product.name + " is freely available on GitHub"}
         buttonText="GitHub"
         descriptionMb="10"
         onButtonClick={handleGithubClick}
@@ -126,6 +126,9 @@ const ProductSupportGrid = ({ product }) => {
         onButtonClick={handleSupportClick}
         definedWidth={{ base: '100%', md: '150%' }}
       />
+      
+      {/* Support Ticket Modal */}
+      <SupportTicketFormModal ref={modalRef} onClose={() => {}} ticket={null} />
     </Flex>
   );
 };

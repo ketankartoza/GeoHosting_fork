@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   FormControl,
+  FormErrorMessage,
   FormLabel,
   HStack,
   IconButton,
@@ -69,6 +70,7 @@ const SupportTicketForm: React.FC<SupportTicketFormProps> = (
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [customerEmail, setCustomerEmail] = useState<string>('');
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const [errors, setErrors] = useState<any>({});
 
   useEffect(() => {
     const email = localStorage.getItem('email') || '';
@@ -153,7 +155,7 @@ const SupportTicketForm: React.FC<SupportTicketFormProps> = (
       customer,
       issue_type: issueType
     };
-
+    setErrors({})
     if (isEditMode && ticket) {
       // TODO update tickets should also upload any new attachments added
       dispatch(updateTicket({
@@ -199,21 +201,31 @@ const SupportTicketForm: React.FC<SupportTicketFormProps> = (
             }
           )()
         } else {
+          setErrors(result.payload)
           toast.error('Failed to create ticket.');
         }
       });
     }
   };
-
+  console.log(errors)
   return (
     <FormContainer p={4}>
       <VStack spacing={4}>
-        <FormControl id="customer" isReadOnly>
-          <FormLabel>Customer</FormLabel>
-          <Input type="text" value={customerEmail} isReadOnly bg="gray.100"/>
+        <FormControl id="customer" isRequired isInvalid={errors.customer}>
+          <FormLabel>Email</FormLabel>
+          <Input
+            type="email"
+            placeholder="Enter email address"
+            value={customerEmail}
+            onChange={(e) => setCustomerEmail(e.target.value)}
+          />
+          {
+            errors.customer &&
+            <FormErrorMessage>{errors.customer}</FormErrorMessage>
+          }
         </FormControl>
 
-        <FormControl id="subject" isRequired>
+        <FormControl id="subject" isRequired isInvalid={errors.subject}>
           <FormLabel>Subject</FormLabel>
           <Input
             type="text"
@@ -221,9 +233,13 @@ const SupportTicketForm: React.FC<SupportTicketFormProps> = (
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
           />
+          {
+            errors.subject &&
+            <FormErrorMessage>{errors.subject}</FormErrorMessage>
+          }
         </FormControl>
 
-        <FormControl id="issueType" isRequired>
+        <FormControl id="issueType" isRequired isInvalid={errors.issue_type}>
           <FormLabel>Issue Type</FormLabel>
           <Select
             placeholder="Select issue type"
@@ -234,9 +250,13 @@ const SupportTicketForm: React.FC<SupportTicketFormProps> = (
             <option value="Feature Request">Feature Request</option>
             <option value="Support">Support</option>
           </Select>
+          {
+            errors.issue_type &&
+            <FormErrorMessage>{errors.issue_type}</FormErrorMessage>
+          }
         </FormControl>
 
-        <FormControl id="issueDetails" isRequired>
+        <FormControl id="issueDetails" isRequired isInvalid={errors.details}>
           <FormLabel>Issue Details</FormLabel>
           <EditorContainer>
             <Textarea
@@ -244,6 +264,10 @@ const SupportTicketForm: React.FC<SupportTicketFormProps> = (
               onChange={(event) => setEditorData(event.target.value)}
             />
           </EditorContainer>
+          {
+            errors.details &&
+            <FormErrorMessage>{errors.details}</FormErrorMessage>
+          }
         </FormControl>
 
         <FormControl id="attachments" position={"relative"}>
