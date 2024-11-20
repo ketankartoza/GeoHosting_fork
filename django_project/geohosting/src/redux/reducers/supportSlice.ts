@@ -1,7 +1,10 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { PaginationResult } from "../types/paginationTypes";
+import { headerWithToken } from "../../utils/helpers";
+import { ReduxState } from "../types/reduxState";
 
-interface Ticket {
+export interface Ticket {
   id: number;
   subject: string;
   details: string;
@@ -10,25 +13,66 @@ interface Ticket {
   updated_at: string;
 }
 
+interface TicketPaginationResult extends PaginationResult {
+  results: Ticket[]
+}
+
+interface ListState extends ReduxState {
+  data: TicketPaginationResult | null
+}
+
+interface NonReturnState extends ReduxState {
+  data: null
+}
+
+interface DetailState extends ReduxState {
+  data: Ticket | null
+}
+
 interface AttachmentsState {
   [key: number]: File[];
 }
 
 interface SupportState {
-  tickets: Ticket[];
-  selectedTicket: Ticket | null;
-  attachments: AttachmentsState;
-  loading: boolean;
-  error: string | { detail?: string } | null;
+  list: ListState;
+  create: NonReturnState;
+  detail: DetailState;
+  edit: DetailState;
+  delete: NonReturnState;
 }
 
 // Initial state
 const initialState: SupportState = {
-  tickets: [],
-  selectedTicket: null,
-  attachments: {},
-  loading: false,
-  error: null,
+  list: {
+    data: {
+      count: 0,
+      next: null,
+      previous: null,
+      results: []
+    },
+    loading: false,
+    error: null,
+  },
+  create: {
+    data: null,
+    loading: false,
+    error: null,
+  },
+  edit: {
+    data: null,
+    loading: false,
+    error: null,
+  },
+  detail: {
+    data: null,
+    loading: false,
+    error: null,
+  },
+  delete: {
+    data: null,
+    loading: false,
+    error: null,
+  },
 };
 
 interface CreateTicketData {
@@ -42,26 +86,12 @@ interface CreateTicketData {
 // Async thunk for fetching tickets
 export const fetchTickets = createAsyncThunk(
   'support/fetchTickets',
-  async (_, thunkAPI) => {
+  async (url: string, thunkAPI) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('/api/tickets/', {
-        headers: { Authorization: `Token ${token}` }
+      const response = await axios.get(url, {
+        headers: headerWithToken()
       });
-      return response.data;
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.response?.data || 'An unknown error occurred');
-    }
-  }
-);
-
-
-// Async thunk for fetching a single ticket
-export const fetchTicket = createAsyncThunk(
-  'support/fetchTicket',
-  async (id: number, thunkAPI) => {
-    try {
-      const response = await axios.get(`/api/tickets/${id}/`);
       return response.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(error.response?.data || 'An unknown error occurred');
@@ -74,8 +104,7 @@ export const createTicket = createAsyncThunk(
   'support/createTicket',
   async (ticketData: CreateTicketData, thunkAPI) => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.post('/api/tickets/', ticketData, { headers: { Authorization: `Token ${token}` } });
+      const response = await axios.post('/api/tickets/', ticketData, { headers: headerWithToken() });
       return response.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(error.response?.data || 'An unknown error occurred');
@@ -105,15 +134,16 @@ export const uploadAttachment = createAsyncThunk(
   'support/uploadAttachments',
   async ({ ticketId, file }: { ticketId: number; file: File }, thunkAPI) => {
     const formData = new FormData();
-    const token = localStorage.getItem('token');
     formData.append('file', file);
     formData.append('ticket', ticketId.toString());
 
     try {
       const response = await axios.post(`/api/tickets/${ticketId}/attachments/`, formData, {
         headers: {
-          'Authorization': `Token ${token}`,
-          'Content-Type': 'multipart/form-data'
+          ...{
+            'Content-Type': 'multipart/form-data'
+          },
+          ...headerWithToken()
         }
       });
       return response.data;
@@ -126,86 +156,41 @@ export const uploadAttachment = createAsyncThunk(
 const supportSlice = createSlice({
   name: 'support',
   initialState,
-  reducers: {
-    setSelectedTicket: (state, action) => {
-      state.selectedTicket = action.payload;
-    },
-    clearSelectedTicket: (state) => {
-      state.selectedTicket = null;
-    },
-    setAttachments: (state, action) => {
-      const { ticketId, files } = action.payload;
-      state.attachments[ticketId] = files;
-    },
-    clearAttachments: (state, action) => {
-      const ticketId = action.payload;
-      delete state.attachments[ticketId];
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchTickets.pending, (state) => {
-        state.loading = true;
-        state.error = null;
+        state.list.data = {
+          count: 0,
+          next: null,
+          previous: null,
+          results: []
+        };
+        state.list.loading = true;
+        state.list.error = null;
       })
       .addCase(fetchTickets.fulfilled, (state, action) => {
-        state.loading = false;
-        state.tickets = action.payload;
+        state.list.data = action.payload;
+        state.list.loading = false;
       })
       .addCase(fetchTickets.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      })
-      .addCase(fetchTicket.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchTicket.fulfilled, (state, action) => {
-        state.loading = false;
-        state.selectedTicket = action.payload;
-      })
-      .addCase(fetchTicket.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
+        state.list.loading = false;
+        state.list.error = action.payload as string;
       })
       .addCase(createTicket.pending, (state) => {
-        state.loading = true;
-        state.error = null;
+        state.create.loading = true;
+        state.create.error = null;
       })
       .addCase(createTicket.fulfilled, (state, action) => {
-        state.loading = false;
-        state.tickets.push(action.payload);
+        state.create.loading = false;
       })
       .addCase(createTicket.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      })
-      .addCase(updateTicket.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(updateTicket.fulfilled, (state, action) => {
-        state.loading = false;
-        const updatedTicket = action.payload;
-        state.tickets = state.tickets.map(ticket =>
-          ticket.id === updatedTicket.id ? updatedTicket : ticket
-        );
-        if (state.selectedTicket?.id === updatedTicket.id) {
-          state.selectedTicket = updatedTicket;
-        }
-      })
-      .addCase(updateTicket.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
+        state.create.loading = false;
+        state.create.error = action.payload as string;
       });
   },
 });
 
-export const {
-  setSelectedTicket,
-  clearSelectedTicket,
-  setAttachments,
-  clearAttachments,
-} = supportSlice.actions;
+export const {} = supportSlice.actions;
 
 export default supportSlice.reducer;

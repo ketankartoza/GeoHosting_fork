@@ -58,3 +58,14 @@ export const getCurrencyBasedOnLocation = async () => {
 export const returnAsString = (input: string) => {
   return input ? input : ''
 }
+
+
+/** Header with token */
+export const headerWithToken = () => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    return { Authorization: `Token ${token}` }
+  }
+  return {}
+
+}

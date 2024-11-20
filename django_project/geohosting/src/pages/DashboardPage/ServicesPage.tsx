@@ -2,11 +2,14 @@ import React, { useEffect, useState } from 'react';
 import {
   Box,
   Flex,
+  Grid,
+  GridItem,
   Image,
   keyframes,
   Link,
   Spinner,
-  Text
+  Text,
+  useBreakpointValue
 } from '@chakra-ui/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../redux/store';
@@ -31,6 +34,7 @@ const spin = keyframes`
 const spinAnimation = `${spin} infinite 2s linear`;
 
 const ServicesPage: React.FC = () => {
+  const columns = useBreakpointValue({ base: 1, md: 2 });
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredInstances, setFilteredInstances] = useState<any[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -133,7 +137,6 @@ const ServicesPage: React.FC = () => {
       default:
         return null
     }
-
   }
 
   return (
@@ -220,19 +223,27 @@ const ServicesPage: React.FC = () => {
                     </Flex>
 
                     {/* Package details */}
-                    {instance.product.feature_list && (
-                      <Flex direction="column">
-                        <Text fontSize="sm">
-                          Storage: {instance.product.feature_list.spec[0]?.split(' ')[0]}
-                        </Text>
-                        <Text fontSize="sm" textAlign="right">
-                          Memory: {instance.product.feature_list.spec[2]?.split(' ')[1]}
-                        </Text>
-                        <Text fontSize="sm" mt={2}>
-                          CPUs: {instance.product.feature_list.spec[1]?.split(' ')[2]}
-                        </Text>
-                      </Flex>
-                    )}
+                    {
+                      instance.package.feature_list && (
+                        <Grid templateColumns={`repeat(${columns}, 1fr)`}>
+                          <GridItem>
+                            <Text fontSize="sm">
+                              Storage: {instance.package.feature_list.spec[0]?.split(' ')[0]}
+                            </Text>
+                          </GridItem>
+                          <GridItem>
+                            <Text fontSize="sm" textAlign="right">
+                              Memory: {instance.package.feature_list.spec[2]?.split(' ')[1]}
+                            </Text>
+                          </GridItem>
+                          <GridItem>
+                            <Text fontSize="sm">
+                              CPUs: {instance.package.feature_list.spec[1]?.split(' ')[2]}
+                            </Text>
+                          </GridItem>
+                        </Grid>
+                      )
+                    }
                   </Box>
                 ))}
               </Flex>

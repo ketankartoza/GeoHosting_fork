@@ -77,10 +77,10 @@ class GetTicketsTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Verify that the returned data matches the serialized ticket data
-        self.assertEqual(response.data, serializer.data)
+        self.assertEqual(response.data['results'], serializer.data)
 
         # Ensure only the tickets belonging to the authenticated user are returned
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(len(response.data['results']), 2)
         self.assertNotIn(self.ticket3, tickets)
 
     def tearDown(self):

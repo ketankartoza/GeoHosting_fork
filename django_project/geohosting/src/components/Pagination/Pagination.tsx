@@ -1,5 +1,6 @@
 import React from 'react';
 import { Flex, Button, Box } from '@chakra-ui/react';
+import { DisabledButton } from "../../Styles";
 
 interface PaginationProps {
   totalItems: number; 
@@ -31,7 +32,7 @@ const Pagination: React.FC<PaginationProps> = ({ totalItems, itemsPerPage, curre
   return (
     <Box width="100%">
       {/* Blue line */}
-      <Box height="2px" bg="blue.500" width="100%" mb={4} />
+      <Box height="2px" bg="blue.500" width="100%" />
 
       {/* Pagination controls */}
       <Flex justify="space-between" align="center" mt="auto" py={6} width="100%">
@@ -40,7 +41,7 @@ const Pagination: React.FC<PaginationProps> = ({ totalItems, itemsPerPage, curre
           onClick={handlePrevPage}
           isDisabled={currentPage === 1}
           colorScheme="orange"
-          _disabled={{ bg: 'orange.300', cursor: 'not-allowed' }}
+          _disabled={DisabledButton}
         >
           Back
         </Button>
@@ -68,7 +69,7 @@ const Pagination: React.FC<PaginationProps> = ({ totalItems, itemsPerPage, curre
           onClick={handleNextPage}
           isDisabled={currentPage === totalPages}
           colorScheme="orange"
-          _disabled={{ bg: 'orange.300', cursor: 'not-allowed' }}
+          _disabled={DisabledButton}
         >
           Next
         </Button>
