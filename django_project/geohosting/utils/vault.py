@@ -29,11 +29,12 @@ def get_token():
     return response.json()['auth']['client_token']
 
 
-def get_credentials(url, params=None):
+def get_credentials(url, appname: str, params=None):
     """Return credentials on vault."""
     token = get_token()
     response = requests.get(
-        url, params=params if params else {},
+        url + appname,
+        params=params if params else {},
         headers={
             'X-Vault-Token': token
         },

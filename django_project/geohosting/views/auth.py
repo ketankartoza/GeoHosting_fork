@@ -2,7 +2,8 @@ import threading
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
-from django.core.mail import send_mail
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
 from django.utils.crypto import get_random_string
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -12,6 +13,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core.models.preferences import Preferences
 from core.settings.base import FRONTEND_URL, DEFAULT_FROM_EMAIL
 from geohosting.models import UserProfile
 from geohosting.serializer.email_auth_token import EmailAuthTokenSerializer
@@ -82,6 +84,7 @@ class PasswordResetView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
+        pref = Preferences.load()
         email = request.data.get('email')
         if not email:
             return Response({'error': 'Email is required.'},
@@ -100,19 +103,24 @@ class PasswordResetView(APIView):
         user_profile.save()
 
         reset_link = f"{FRONTEND_URL}/#/reset-password?token={reset_token}"
-        message = (
-            'Please use the following link to reset your password: '
-            f'{reset_link}'
+        reset_link = reset_link.replace('#/#', '#')
+        html_content = render_to_string(
+            template_name='emails/GeoHosting_Reset Password.html',
+            context={
+                'url': reset_link,
+                'support_email': pref.support_email,
+            }
         )
 
-        # TODO @Juanique to create a proper email template
-        send_mail(
-            'Password Reset Request',
-            message,
-            DEFAULT_FROM_EMAIL,
-            [email],
-            fail_silently=False,
+        # Create the email message
+        email = EmailMessage(
+            subject='Password Reset Request',
+            body=html_content,
+            from_email=DEFAULT_FROM_EMAIL,
+            to=[email]
         )
+        email.content_subtype = 'html'
+        email.send()
 
         return Response(
             {'message': 'Password reset link sent.'},

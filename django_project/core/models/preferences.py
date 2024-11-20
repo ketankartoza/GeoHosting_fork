@@ -35,6 +35,11 @@ class Preferences(SingletonModel):
         choices=SiteType.choices,
         default=SiteType.STAGING
     )
+    support_email = models.EmailField(
+        max_length=255,
+        default='info@kartoza.com'
+
+    )
 
     class Meta:  # noqa: D106
         verbose_name_plural = "preferences"

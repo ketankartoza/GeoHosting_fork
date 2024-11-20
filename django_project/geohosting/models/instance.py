@@ -11,6 +11,7 @@ from django.core.mail import EmailMessage
 from django.db import models
 from django.template.loader import render_to_string
 
+from core.models.preferences import Preferences
 from geohosting.models.cluster import Cluster
 from geohosting.models.package import Package
 from geohosting.models.product import ProductCluster
@@ -86,10 +87,11 @@ class Instance(models.Model):
         """Send credentials."""
         if self.status != InstanceStatus.ONLINE:
             return
+        pref = Preferences.load()
         name = f'{self.owner.first_name} {self.owner.last_name}'
         if not self.price.package_group.vault_url:
             html_content = render_to_string(
-                template_name='credential_email_not_found.html',
+                template_name='emails/GeoHosting_Product is Error.html',
                 context={
                     'name': name,
                 }
@@ -97,24 +99,33 @@ class Instance(models.Model):
         else:
             try:
                 credentials = get_credentials(
-                    self.price.package_group.vault_url
+                    self.price.package_group.vault_url,
+                    self.name
                 )
                 html_content = render_to_string(
-                    template_name='credential_email.html',
+                    template_name='emails/GeoHosting_Product is Ready.html',
                     context={
                         'name': name,
                         'url': self.url,
+                        'app_name': self.name,
                         'credentials': [
-                            {"key": key, "value": value} for key, value in
+                            {
+                                "key": key.lower().replace('_', ' ').title(),
+                                "value": value
+                            } for key, value in
                             credentials.items()
-                        ]
+                        ],
+                        'support_email': pref.support_email,
                     }
                 )
             except Exception:
                 html_content = render_to_string(
-                    template_name='credential_email_not_found.html',
+                    template_name='emails/GeoHosting_Product is Error.html',
                     context={
                         'name': name,
+                        'app_name': self.name,
+                        'url': self.url,
+                        'support_email': pref.support_email,
                     }
                 )
 

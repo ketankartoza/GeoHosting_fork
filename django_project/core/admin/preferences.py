@@ -31,7 +31,7 @@ class PreferencesAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {
-            'fields': ('site_type',)
+            'fields': ('site_type', 'support_email')
         }),
         ('Tests', {
             'fields': test_fields
