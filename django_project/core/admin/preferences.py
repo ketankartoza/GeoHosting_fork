@@ -5,6 +5,7 @@ GeoHosting.
 .. note:: Admin Preferences
 
 """
+
 from django.contrib import admin
 from django.contrib.admin.sites import NotRegistered
 
@@ -29,10 +30,11 @@ class PreferencesAdmin(admin.ModelAdmin):
     """Preferences Admin."""
 
     fieldsets = (
-        (
-            None, {
-                'fields': test_fields
-            }
-        ),
+        (None, {
+            'fields': ('site_type',)
+        }),
+        ('Tests', {
+            'fields': test_fields
+        }),
     )
     readonly_fields = test_fields

@@ -58,6 +58,8 @@ const Footer: React.FC = () => {
             <Text color="#b4b6b0" fontSize={{ base: "md", md: "md" , xl: 'md' }} >
               We are a South Africa-based Free and Open Source GIS service provider. We develop and maintain geographic information systems and train teams to use geospatial software to its full potential.
             </Text>
+
+            <Box mt={4} color='white' opacity={0.2}>Version {window.app_version}</Box>
           </Box>
 
           {/* Navigation Links */}
@@ -125,7 +127,7 @@ const Footer: React.FC = () => {
                   color="white"
                   _hover={{ bg: '#57a0c7' }}
                   onClick={handleOpenLoginForm}
-                  width="220px" 
+                  width="220px"
                   height="54px"
                 >
                   Sign Up
@@ -144,7 +146,7 @@ const Footer: React.FC = () => {
             bg="#f8b54b"
             color="white"
             fontSize="2.5rem"
-            _hover={{ bg: '#57a0c7' }} 
+            _hover={{ bg: '#57a0c7' }}
             aria-label="Scroll to top"
             icon={<ChevronUpIcon />}
             onClick={scrollToTop}

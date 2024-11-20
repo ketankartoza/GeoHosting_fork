@@ -10,6 +10,7 @@ import os
 
 from django.conf import settings
 from django.contrib.gis.db import models
+from django.utils.translation import gettext_lazy as _
 
 from core.models.singleton import SingletonModel
 from geohosting.utils.erpnext import test_connection
@@ -19,14 +20,20 @@ from geohosting.utils.vault import get_token as vault_connection
 from geohosting_controller.connection import get_jenkins_crumb
 
 
+class SiteType(models.TextChoices):
+    """Choices of site type."""
+
+    STAGING = 'Staging', _('Staging')
+    PRODUCTION = 'Production', _('Production')
+
+
 class Preferences(SingletonModel):
     """Preference settings specifically for gap."""
 
-    # Vault token
-    vault_token = models.CharField(
-        max_length=256,
-        null=True,
-        blank=True
+    site_type = models.CharField(
+        max_length=255,
+        choices=SiteType.choices,
+        default=SiteType.STAGING
     )
 
     class Meta:  # noqa: D106

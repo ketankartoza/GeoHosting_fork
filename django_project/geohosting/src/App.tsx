@@ -19,6 +19,13 @@ const CheckoutFinish = lazy(() => import('./pages/CheckoutPage/SalesOrderCheckou
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage/ResetPasswordPage'));
 const OverviewPage = lazy(() => import('./pages/OverviewPage/OverviewPage'));
 
+/** Global decalrations **/
+declare global {
+  interface Window {
+    app_version: string;
+  }
+}
+
 const App: React.FC = () => {
   return (
     <Provider store={store}>

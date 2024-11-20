@@ -102,7 +102,8 @@ TEMPLATES = [
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.sentry_dsn',
-                'core.context_processors.stripe'
+                'core.context_processors.stripe',
+                'core.context_processors.project_version'
             ],
         },
     },
