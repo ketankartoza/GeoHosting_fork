@@ -70,7 +70,9 @@ class GetTicketsTestCase(APITestCase):
         response = self.client.get(url)
 
         # Fetch the tickets for the authenticated user directly from the database
-        tickets = Ticket.objects.filter(customer=self.user.email)
+        tickets = Ticket.objects.filter(customer=self.user.email).order_by(
+            '-updated_at'
+        )
         serializer = TicketSerializer(tickets, many=True)
 
         # Verify that the status code is 200 OK

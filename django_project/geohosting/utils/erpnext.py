@@ -55,7 +55,9 @@ def fetch_erpnext_detail_data(doctype, filters=None):
         return f"Exception occurred: {str(e)}"
 
 
-def fetch_erpnext_data(doctype, filters=None):
+def fetch_erpnext_data(
+        doctype, filters: list = None, fields: list = None
+):
     """
     Fetch data from ERPNext.
 
@@ -73,8 +75,11 @@ def fetch_erpnext_data(doctype, filters=None):
         }
 
     url = f"{settings.ERPNEXT_BASE_URL}/api/resource/{doctype}"
+
+    if not fields:
+        fields = ["*"]
     params = {
-        'fields': '["*"]'
+        'fields': json.dumps(fields)
     }
 
     if filters:

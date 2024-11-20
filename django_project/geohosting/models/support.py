@@ -1,4 +1,6 @@
 # models.py
+from datetime import datetime
+
 from django.db import models
 
 from geohosting.models.erp_model import ErpModel
@@ -11,6 +13,7 @@ status_erp = {
     'On Hold': 'pending',
     'Replied': 'pending',
     'Closed': 'closed',
+    'Resolved': 'resolved',
 }
 
 
@@ -21,6 +24,7 @@ class Ticket(ErpModel):
         ('open', 'Open'),
         ('closed', 'Closed'),
         ('pending', 'Pending'),
+        ('resolved', 'Resolved'),
     ]
     ISSUE_CHOICES = [
         ('Bug', 'Bug'),
@@ -32,13 +36,13 @@ class Ticket(ErpModel):
     subject = models.CharField(max_length=255)
     details = models.TextField()
     status = models.CharField(
-        max_length=7, choices=STATUS_CHOICES, default='open'
+        max_length=8, choices=STATUS_CHOICES, default='open'
     )
     issue_type = models.CharField(
         max_length=15, choices=ISSUE_CHOICES, default='Support'
     )
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
 
     @property
     def doc_type(self):
@@ -66,13 +70,23 @@ class Ticket(ErpModel):
         }
 
     @staticmethod
-    def fetch_ticket_from_erp(user_email):
+    def fetch_ticket_from_erp(user_email, ids=None):
         """Fetch ticket from erp."""
-        filters = [["owner", "=", user_email]]
+        filters = [
+            ["raised_by", "=", user_email]
+        ]
+        if ids:
+            filters.append(
+                ["name", "in", ids]
+            )
 
         try:
             erp_tickets = fetch_erpnext_data(
-                doctype="Issue", filters=filters
+                doctype="Issue", filters=filters,
+                fields=[
+                    "name", "subject", "description", "status", "owner",
+                    "modified"
+                ]
             )
             if not isinstance(erp_tickets, list):
                 raise ValueError("Failed to fetch data from ERPNext")
@@ -81,12 +95,18 @@ class Ticket(ErpModel):
                 django_status = status_erp.get(
                     erp_ticket.get('status'), 'open'
                 )
-                if erp_ticket.get('id'):
+                if erp_ticket.get('name'):
                     Ticket.objects.update_or_create(
                         customer=user_email,
-                        erpnext_code=erp_ticket.get('id'),
+                        erpnext_code=erp_ticket.get('name'),
                         defaults={
-                            'status': django_status
+                            'status': django_status,
+                            'subject': erp_ticket.get('subject'),
+                            'details': erp_ticket.get('description'),
+                            'updated_at': datetime.strptime(
+                                erp_ticket.get('modified'),
+                                "%Y-%m-%d %H:%M:%S.%f"
+                            ),
                         }
                     )
         except Exception as e:

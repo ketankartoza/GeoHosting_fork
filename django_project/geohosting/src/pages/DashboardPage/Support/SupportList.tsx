@@ -37,16 +37,18 @@ const Card = (ticket: Ticket) => {
         <Box
           width="12px"
           height="12px"
-          bg={ticket.status === 'open' ? 'blue.500' : ticket.status === 'closed' ? 'red.500' : 'orange.500'}
+          bg={ticket.status === 'open' ? 'blue.500' : ticket.status === 'closed' ? 'red.500' : ticket.status === 'resolved' ? 'gray.500' : 'orange.500'}
           borderRadius="full"
         />
         <Text
           fontFamily="'Roboto', sans-serif"
           fontWeight="300"
           fontSize="16px"
-          color={ticket.status === 'open' ? 'blue.500' : ticket.status === 'closed' ? 'red.500' : 'orange.500'}
+          color={ticket.status === 'open' ? 'blue.500' : ticket.status === 'closed' ? 'red.500' : ticket.status === 'resolved' ? 'gray.500' : 'orange.500'}
         >
-          {ticket.status === 'open' ? 'Open' : ticket.status === 'closed' ? 'Closed' : 'Pending'}
+          {
+            ticket.status === 'open' ? 'Open' : ticket.status === 'closed' ? 'Closed' : ticket.status === 'resolved' ? 'Resolved' : 'Pending'
+          }
         </Text>
       </Flex>
     </Box>
