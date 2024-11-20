@@ -28,6 +28,9 @@ export const OrderSummary: React.FC<OrderSummaryProps> = (
       <Box>
         <Text fontSize={22} color={'black'}>
           Order Summary
+          {
+            appName && <Text as='span' color='orange.500'>&nbsp;&nbsp;[{appName}]</Text>
+          }
         </Text>
       </Box>
       <Box padding={8} backgroundColor="gray.100" borderRadius={10}>
@@ -61,18 +64,14 @@ export const OrderSummary: React.FC<OrderSummaryProps> = (
               ))
             }
           </List>
-          {
-            appName &&
-            <Box mt={8}>
-              <b>Application Name</b> = {appName}
-            </Box>
-          }
 
           {
             invoice_url ?
-              <Box marginTop={5}>
-                <a href={invoice_url} target='_blank'>
-                  Invoice <FaPrint style={{ display: "inline-block" }}/>
+              <Box marginTop={5} color='orange.500'>
+                <a href={invoice_url} target='_blank'
+                   style={{ display: "flex", alignItems: "center" }}>
+                  <FaPrint style={{ display: "inline-block" }}/>&nbsp;&nbsp;
+                  <b>Invoice</b>
                 </a>
               </Box> : null
           }

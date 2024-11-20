@@ -35,11 +35,21 @@ class DjangoSettingAPI(APIView):
 class FilteredAPI(object):
     """Return User list."""
 
-    ignored_fields = ['page', 'page_size']
+    ignored_fields = ['page', 'page_size', 'q']
+    default_query_filter = []
 
     def filter_query(self, request, query, fields: list = None):
         """Return filter query."""
-        for param, value in request.GET.items():
+        # This is for default query
+        parameters = request.GET.copy()
+        try:
+            if self.default_query_filter and parameters['q']:
+                for field in self.default_query_filter:
+                    parameters[field] = parameters['q']
+        except KeyError:
+            pass
+
+        for param, value in parameters.items():
             field = param.split('__')[0]
             if field in self.ignored_fields:
                 continue

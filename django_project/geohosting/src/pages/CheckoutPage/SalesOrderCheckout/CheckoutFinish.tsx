@@ -6,7 +6,7 @@ import {
   Text,
   useBreakpointValue
 } from '@chakra-ui/react';
-import { SalesOrder } from "../../../redux/reducers/salesOrdersSlice";
+import { SalesOrder } from "../../../redux/reducers/ordersSlice";
 import OrderSummary from "../../CheckoutPage/OrderSummary";
 
 

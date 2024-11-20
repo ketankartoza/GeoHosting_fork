@@ -1,4 +1,4 @@
-import { SalesOrder } from "../../redux/reducers/salesOrdersSlice";
+import { SalesOrder } from "../../redux/reducers/ordersSlice";
 
 export function checkCheckoutUrl(salesOrder: SalesOrder, navigate) {
   // Check checkout url

@@ -17,7 +17,7 @@ interface Props {
   url: string;
   leftNavigation?: React.ReactElement;
   rightNavigation?: React.ReactElement;
-  renderCard: (data: any) => React.ReactElement;
+  renderCards: (data: any[]) => React.ReactElement;
 }
 
 let lastSearchTerm: string | null = null;
@@ -27,7 +27,7 @@ let session: string | null = null;
 export const PaginationPage: React.FC<Props> = (
   {
     title, searchPlaceholder, stateKey, action, url,
-    leftNavigation, rightNavigation, renderCard
+    leftNavigation, rightNavigation, renderCards
   }
 ) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -68,7 +68,7 @@ export const PaginationPage: React.FC<Props> = (
     _url.searchParams.set('page_size', rowsPerPage.toString());
     _url.searchParams.set('page', currentPage.toString());
     if (searchTerm) {
-      _url.searchParams.set('subject__icontains', searchTerm);
+      _url.searchParams.set('q', searchTerm);
     }
 
     const urlRequest = _url.toString().replace(exampleDomain, '')
@@ -107,6 +107,11 @@ export const PaginationPage: React.FC<Props> = (
   }, [searchTerm]);
 
   const data = listData?.results
+
+  /** Rendering contents **/
+  const RenderContent = () => {
+    return renderCards(data)
+  }
   return (
     <Box>
       <Box minHeight={{ base: 'auto', md: '80vh' }}>
@@ -131,13 +136,7 @@ export const PaginationPage: React.FC<Props> = (
                 >
                   <Spinner size='xl'/>
                 </Box> :
-                <Box>
-                  {
-                    data.map((_data) => {
-                      return renderCard(_data)
-                    })
-                  }
-                </Box>
+                <RenderContent/>
           }
         </Box>
 

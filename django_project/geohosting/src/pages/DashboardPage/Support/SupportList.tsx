@@ -11,8 +11,12 @@ const stripHtmlTags = (html: string) => {
   return doc.body.textContent || '';
 };
 
+interface CardProps {
+  ticket: Ticket;
+}
+
 /** Card for support **/
-const Card = (ticket: Ticket) => {
+const Card: React.FC<CardProps> = ({ ticket }) => {
   return <Box
     key={ticket.id}
     p={4}
@@ -71,6 +75,16 @@ const Card = (ticket: Ticket) => {
   </Box>
 }
 
+const renderCards = (tickets: Ticket[]) => {
+  return <Box>
+    {
+      tickets.map((ticket) => {
+        return <Card ticket={ticket}/>
+      })
+    }
+  </Box>
+}
+
 /** Support List Page in pagination */
 const SupportList: React.FC = () => {
   const [currentTicket, setCurrentTicket] = useState<any>(null);
@@ -100,7 +114,7 @@ const SupportList: React.FC = () => {
         action={fetchTickets}
         stateKey='support'
         searchPlaceholder='Search by Title'
-        renderCard={Card}
+        renderCards={renderCards}
         rightNavigation={
           <Button colorScheme="blue" onClick={handleCreateIssue}>
             Create Issue

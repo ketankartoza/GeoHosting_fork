@@ -3,7 +3,7 @@ import authReducer from './reducers/authSlice';
 import productsReducer from './reducers/productsSlice';
 import supportSlice from './reducers/supportSlice';
 import ordersSlice from './reducers/ordersSlice';
-import salesOrdersReducer from './reducers/salesOrdersSlice';
+import salesOrdersReducer from './reducers/ordersSlice';
 import instanceSlice from './reducers/instanceSlice';
 import profileSlice from './reducers/profileSlice';
 

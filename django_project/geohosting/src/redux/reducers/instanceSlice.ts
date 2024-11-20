@@ -1,8 +1,17 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 
+export interface Instance {
+  id: number,
+  url: string,
+  name: string,
+  price: number,
+  cluster: number,
+  owner: number
+}
+
 interface InstanceState {
-  instances: any[];
+  instances: Instance[];
   loading: boolean;
   error: string | null;
 }

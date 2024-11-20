@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Spinner } from '@chakra-ui/react';
-import { SalesOrder } from "../../../redux/reducers/salesOrdersSlice";
+import { SalesOrder } from "../../../redux/reducers/ordersSlice";
 import { MainCheckoutPageComponent } from "../CheckoutPage";
 
 interface Props {

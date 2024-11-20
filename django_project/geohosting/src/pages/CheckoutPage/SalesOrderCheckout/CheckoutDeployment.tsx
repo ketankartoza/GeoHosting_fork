@@ -8,7 +8,7 @@ import {
   useBreakpointValue
 } from '@chakra-ui/react';
 import { FaGear } from "react-icons/fa6";
-import { SalesOrder } from "../../../redux/reducers/salesOrdersSlice";
+import { SalesOrder } from "../../../redux/reducers/ordersSlice";
 import OrderSummary from "../../CheckoutPage/OrderSummary";
 
 

@@ -29,10 +29,6 @@ interface DetailState extends ReduxState {
   data: Ticket | null
 }
 
-interface AttachmentsState {
-  [key: number]: File[];
-}
-
 interface SupportState {
   list: ListState;
   create: NonReturnState;

@@ -17,7 +17,7 @@ import CheckoutTracker
 import { AppDispatch, RootState } from "../../../redux/store";
 import {
   fetchSalesOrderDetail
-} from "../../../redux/reducers/salesOrdersSlice";
+} from "../../../redux/reducers/ordersSlice";
 import { checkCheckoutUrl } from "../utils";
 
 
@@ -34,9 +34,10 @@ const Index: React.FC<Props> = (
   const dispatch: AppDispatch = useDispatch();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { salesOrderDetail, detailError } = useSelector(
+  const { detail } = useSelector(
     (state: RootState) => state.salesOrders
   );
+  const { data: salesOrderDetail, error: detailError } = detail;
 
   useEffect(() => {
     if (detailError) {
@@ -62,18 +63,6 @@ const Index: React.FC<Props> = (
     }
   }, [id, salesOrderDetail, dispatch]);
 
-
-  if (!salesOrderDetail || salesOrderDetail?.id != id) {
-    return (
-      <Box
-        position={'absolute'} display={'flex'}
-        justifyContent={'center'} width={'100%'} height={'100%'}
-        alignItems={'center'}>
-        <Spinner size='xl'/>
-      </Box>
-    )
-  }
-
   return (
     <ChakraProvider theme={customTheme}>
       <Flex direction="column" minHeight="100vh">
@@ -85,11 +74,15 @@ const Index: React.FC<Props> = (
               <CheckoutTracker activeStep={activeStep}/>
             </Box>
             {
-              salesOrderDetail ? React.Children.map(children, child => {
+              salesOrderDetail?.id == id ? React.Children.map(children, child => {
                 return React.cloneElement(child, {
                   salesOrderDetail: salesOrderDetail
                 })
-              }) : null
+              }) : <Box display={'flex'}
+                        justifyContent={'center'} width={'100%'}
+                        alignItems={'center'}>
+                <Spinner size='xl'/>
+              </Box>
             }
           </Container>
         </Box>

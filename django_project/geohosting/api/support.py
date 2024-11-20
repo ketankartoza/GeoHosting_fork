@@ -25,6 +25,7 @@ class TicketSetView(
     """Sales order viewset."""
 
     serializer_class = TicketSerializer
+    default_query_filter = ['subject__icontains']
 
     def get_queryset(self):
         """Return querysets."""

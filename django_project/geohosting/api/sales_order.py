@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core.api import FilteredAPI
 from geohosting.api.payment import (
     PaymentAPI, PaymentStripeSessionAPI, PaymentPaystackSessionAPI
 )
@@ -18,6 +19,7 @@ from geohosting.validators import app_name_validator
 
 
 class SalesOrderSetView(
+    FilteredAPI,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
@@ -28,6 +30,7 @@ class SalesOrderSetView(
     """Sales order viewset."""
 
     permission_classes = (IsAuthenticated,)
+    default_query_filter = ['erpnext_code__icontains']
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -36,7 +39,8 @@ class SalesOrderSetView(
 
     def get_queryset(self):
         """Return querysets."""
-        return SalesOrder.objects.filter(customer_id=self.request.user.id)
+        query = SalesOrder.objects.filter(customer_id=self.request.user.id)
+        return self.filter_query(self.request, query).order_by('-date')
 
     def get_object(self):
         """Get object."""
