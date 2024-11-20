@@ -8,6 +8,7 @@ import DashboardTitle from "../../components/DashboardPage/DashboardTitle";
 import TopNavigation from "../../components/DashboardPage/TopNavigation";
 import Pagination from "../../components/Pagination/Pagination";
 import { AsyncThunk } from "@reduxjs/toolkit";
+import { Instance } from "../../redux/reducers/instanceSlice";
 
 interface Props {
   title: string;
@@ -22,6 +23,19 @@ interface Props {
 
 let lastSearchTerm: string | null = null;
 let session: string | null = null;
+
+interface RenderContentProps {
+  data: Instance[],
+  renderCards: (data: any[]) => React.ReactElement;
+
+}
+
+/** Rendering contents **/
+const RenderContent: React.FC<RenderContentProps> = (
+  { data, renderCards }
+) => {
+  return renderCards(data)
+}
 
 /** Abstract for pagination page */
 export const PaginationPage: React.FC<Props> = (
@@ -107,11 +121,6 @@ export const PaginationPage: React.FC<Props> = (
   }, [searchTerm]);
 
   const data = listData?.results
-
-  /** Rendering contents **/
-  const RenderContent = () => {
-    return renderCards(data)
-  }
   return (
     <Box>
       <Box minHeight={{ base: 'auto', md: '80vh' }}>
@@ -136,7 +145,7 @@ export const PaginationPage: React.FC<Props> = (
                 >
                   <Spinner size='xl'/>
                 </Box> :
-                <RenderContent/>
+                <RenderContent data={data} renderCards={renderCards}/>
           }
         </Box>
 

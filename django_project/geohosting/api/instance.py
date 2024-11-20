@@ -1,25 +1,27 @@
-from rest_framework import viewsets
+from rest_framework import mixins, viewsets
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.decorators import action
+
+from core.api import FilteredAPI
 from geohosting.models import Instance
 from geohosting.serializer.instance import InstanceSerializer
 
 
-class InstanceViewSet(viewsets.ModelViewSet):
+class InstanceViewSet(
+    FilteredAPI,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet
+):
     """ViewSet for fetching user instances."""
 
-    queryset = Instance.objects.all()
     serializer_class = InstanceSerializer
     permission_classes = [IsAuthenticated]
+    default_query_filter = ['name__icontains']
 
     def get_queryset(self):
         """Return instances for the authenticated user."""
-        return Instance.objects.filter(owner=self.request.user)
-
-    @action(detail=False, methods=['get'])
-    def my_instances(self, request):
-        """Return instances for the current user."""
-        user_instances = self.get_queryset()
-        serializer = self.get_serializer(user_instances, many=True)
-        return Response(serializer.data)
+        query = Instance.objects.filter(owner=self.request.user)
+        return self.filter_query(self.request, query)

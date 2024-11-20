@@ -84,7 +84,6 @@ export const fetchTickets = createAsyncThunk(
   'support/fetchTickets',
   async (url: string, thunkAPI) => {
     try {
-      const token = localStorage.getItem('token');
       const response = await axios.get(url, {
         headers: headerWithToken()
       });

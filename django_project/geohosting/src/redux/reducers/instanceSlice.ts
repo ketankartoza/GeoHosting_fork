@@ -1,36 +1,88 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { PaginationResult } from "../types/paginationTypes";
+import { ReduxState } from "../types/reduxState";
+import { headerWithToken } from "../../utils/helpers";
+import { Package, Product } from "./productsSlice";
 
 export interface Instance {
   id: number,
   url: string,
   name: string,
+  status: string,
   price: number,
   cluster: number,
-  owner: number
+  owner: number,
+  product: Product,
+  package: Package,
 }
+
+interface InstancePaginationResult extends PaginationResult {
+  results: Instance[]
+}
+
+interface ListState extends ReduxState {
+  data: InstancePaginationResult | null
+}
+
+interface NonReturnState extends ReduxState {
+  data: null
+}
+
+interface DetailState extends ReduxState {
+  data: Instance | null
+}
+
 
 interface InstanceState {
-  instances: Instance[];
-  loading: boolean;
-  error: string | null;
+  list: ListState;
+  create: NonReturnState;
+  detail: DetailState;
+  edit: DetailState;
+  delete: NonReturnState;
 }
 
+// Initial state
 const initialState: InstanceState = {
-  instances: [],
-  loading: false,
-  error: null,
+  list: {
+    data: {
+      count: 0,
+      next: null,
+      previous: null,
+      results: []
+    },
+    loading: false,
+    error: null,
+  },
+  create: {
+    data: null,
+    loading: false,
+    error: null,
+  },
+  edit: {
+    data: null,
+    loading: false,
+    error: null,
+  },
+  detail: {
+    data: null,
+    loading: false,
+    error: null,
+  },
+  delete: {
+    data: null,
+    loading: false,
+    error: null,
+  },
 };
 
 // Async thunk to fetch user instances
 export const fetchUserInstances = createAsyncThunk(
   'instance/fetchUserInstances',
-  async (token: string, { rejectWithValue }) => {
+  async (url: string, { rejectWithValue }) => {
     try {
-      const response = await axios.get('/api/instances/my_instances/', {
-        headers: {
-          Authorization: `Token ${token}`,
-        },
+      const response = await axios.get(url, {
+        headers: headerWithToken()
       });
       return response.data;
     } catch (error: any) {
@@ -48,16 +100,16 @@ const instanceSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchUserInstances.pending, (state) => {
-        state.loading = true;
-        state.error = null;
+        state.list.loading = true;
+        state.list.error = null;
       })
       .addCase(fetchUserInstances.fulfilled, (state, action) => {
-        state.loading = false;
-        state.instances = action.payload;
+        state.list.loading = false;
+        state.list.data = action.payload;
       })
       .addCase(fetchUserInstances.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string; // Ensure error is string
+        state.list.loading = false;
+        state.list.error = action.payload as string; // Ensure error is string
       });
   },
 });

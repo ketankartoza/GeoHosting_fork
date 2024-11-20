@@ -79,7 +79,7 @@ const renderCards = (tickets: Ticket[]) => {
   return <Box>
     {
       tickets.map((ticket) => {
-        return <Card ticket={ticket}/>
+        return <Card key={ticket.id} ticket={ticket}/>
       })
     }
   </Box>

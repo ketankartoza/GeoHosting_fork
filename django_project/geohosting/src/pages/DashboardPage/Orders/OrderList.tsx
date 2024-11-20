@@ -49,7 +49,7 @@ const renderCards = (orders: SalesOrder[]) => {
     </Thead>
     <Tbody>
       {orders.map((order) => (
-        <Card order={order}/>
+        <Card key={order.id} order={order}/>
       ))}
     </Tbody>
   </Table>

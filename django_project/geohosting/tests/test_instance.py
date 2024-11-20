@@ -1,9 +1,9 @@
-from rest_framework.test import APITestCase
-from rest_framework import status
 from django.contrib.auth.models import User
-from geohosting.models import Instance, Package, Cluster, Region
+from rest_framework import status
+from rest_framework.test import APITestCase
 
-from geohosting.models import Product
+from geohosting.models import Instance, Package, Cluster, Region, Product
+
 
 class InstanceViewSetTests(APITestCase):
     def setUp(self):
@@ -21,7 +21,9 @@ class InstanceViewSetTests(APITestCase):
         self.region = Region.objects.create(name='Test Region')
 
         # Create test Cluster object with 'code' and 'region'
-        self.cluster = Cluster.objects.create(code='Cluster Code', region=self.region, domain='example.com')
+        self.cluster = Cluster.objects.create(code='Cluster Code',
+                                              region=self.region,
+                                              domain='example.com')
 
         # Create a test Product object
         self.product = Product.objects.create(
@@ -31,7 +33,7 @@ class InstanceViewSetTests(APITestCase):
             description='Test Description',
             available=True
         )
-        
+
         # Create test Package with a valid product
         self.package = Package.objects.create(
             product=self.product,  # Assign a valid Product
@@ -49,7 +51,6 @@ class InstanceViewSetTests(APITestCase):
             owner=self.user
         )
 
-
     def test_get_queryset(self):
         """Test that get_queryset returns instances for the authenticated user."""
         response = self.client.get('/api/instances/')
@@ -59,9 +60,9 @@ class InstanceViewSetTests(APITestCase):
 
     def test_my_instances(self):
         """Test the custom action to return instances for the current user."""
-        response = self.client.get('/api/instances/my_instances/')
+        response = self.client.get('/api/instances/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        data = response.json()
+        data = response.json()['results']
         self.assertEqual(len(data), 1)  # Check that we have one instance
         self.assertEqual(data[0]['name'], self.instance.name)
 
@@ -70,6 +71,6 @@ class InstanceViewSetTests(APITestCase):
         self.client.logout()  # Log out the user
         response = self.client.get('/api/instances/')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        
+
         response = self.client.get('/api/instances/my_instances/')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)

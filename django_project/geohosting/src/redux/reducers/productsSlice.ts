@@ -31,7 +31,9 @@ export interface Package {
   id: number;
   name: string;
   price: string;
-  feature_list: object;
+  feature_list: {
+    spec: string[]
+  };
   order: number;
   created_at: string;
   updated_at: string;
