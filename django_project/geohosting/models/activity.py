@@ -92,8 +92,10 @@ class ActivityStatus:
     ERROR = 'ERROR'
 
 
-regex_name = r'^[a-zA-Z0-9-]*$'
-regex_name_error = 'Name may only contain letters, numbers or dashes.'
+regex_name = r'^[a-z0-9-]*$'
+regex_name_error = (
+    'Name may only contain lowercase letters, numbers or dashes.'
+)
 name_validator = RegexValidator(regex_name, regex_name_error)
 
 
