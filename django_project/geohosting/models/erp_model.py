@@ -7,11 +7,15 @@ GeoHosting.
 
 from django.db import models
 
-from geohosting.utils.erpnext import post_to_erpnext, put_to_erpnext
+from geohosting.utils.erpnext import (
+    fetch_erpnext_data, post_to_erpnext, put_to_erpnext
+)
 
 
 class ErpModel(models.Model):
     """Abstract erp model."""
+
+    id_field_in_erpnext = 'id'
 
     erpnext_code = models.CharField(
         max_length=100, blank=True, null=True
@@ -43,7 +47,7 @@ class ErpModel(models.Model):
                 self.doc_type
             )
             if result['status'] == 'success':
-                self.erpnext_code = result['id']
+                self.erpnext_code = result[self.id_field_in_erpnext]
                 self.save()
         else:
             result = put_to_erpnext(
@@ -52,3 +56,25 @@ class ErpModel(models.Model):
                 self.erpnext_code
             )
         return result
+
+    @classmethod
+    def sync_data(cls):
+        """Sync data from erpnext to django that has erpnext code."""
+        try:
+            data = fetch_erpnext_data(cls().doc_type)
+            field_names = [
+                field.name for field in cls._meta.get_fields() if
+                field.editable and not field.auto_created
+                and field.name != 'erpnext_code'
+            ]
+            for _data in data:
+                cls.objects.update_or_create(
+                    erpnext_code=_data[cls.id_field_in_erpnext],
+                    defaults={
+                        key: value for key, value in _data.items() if
+                        key in field_names
+                    }
+                )
+        except Exception as e:
+            print(e)
+            pass

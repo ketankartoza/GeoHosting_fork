@@ -4,19 +4,20 @@ import {
   SerializedError
 } from '@reduxjs/toolkit';
 import axios from "axios";
+import { headerWithToken } from "../../utils/helpers";
 
 export interface Profile {
   avatar: string;
 }
 
 export interface BillingInformation {
-  name: string
-  address: string
-  postal_code: string
-  country: string
-  city: string
-  region: string
-  tax_number: string
+  name: string;
+  address: string;
+  postal_code: string;
+  country: string;
+  city: string;
+  region: string;
+  tax_number: string;
 }
 
 export interface User {
@@ -56,8 +57,7 @@ export const updateUserProfile = createAsyncThunk(
   async ({ profileData, files }: {
     profileData: any,
     files: Array<{ name: string, file: File | null }>
-  }) => {
-    const token = localStorage.getItem('token');
+  }, thunkAPI) => {
     const data = new FormData();
     data.append("payload", JSON.stringify(profileData));
     files.map(file => {
@@ -65,10 +65,14 @@ export const updateUserProfile = createAsyncThunk(
         data.append(file.name, file.file);
       }
     })
-    const response = await axios.put('/api/user/profile/', data, {
-      headers: { Authorization: `Token ${token}` }
-    });
-    return response.data;
+    try {
+      const response = await axios.put('/api/user/profile/', data, {
+        headers: headerWithToken()
+      });
+      return response.data;
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(error.response?.data || 'An unknown error occurred');
+    }
   }
 );
 

@@ -7,6 +7,9 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from geohosting.models import UserProfile, UserBillingInformation
+from geohosting.serializer.billing_information import (
+    BillingInformationSerializer
+)
 
 User = get_user_model()
 
@@ -26,7 +29,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         exclude = ('erpnext_code', 'reset_token', 'user', 'id')
 
 
-class UserBillingInformationSerializer(serializers.ModelSerializer):
+class UserBillingInformationSerializer(BillingInformationSerializer):
     """User UserBillingInformation serializer."""
 
     class Meta:  # noqa: D106

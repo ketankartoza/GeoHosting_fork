@@ -4,6 +4,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from geohosting.models.country import Country
 from geohosting.models.user_profile import UserProfile
 
 
@@ -23,6 +24,7 @@ class ChangeUserProfileTests(TestCase):
         )
         self.url = reverse('user-profile')
         self.client = APIClient()
+        Country.objects.create(name='country', code='ct')
 
     def tearDown(self):
         """Clean up after each test."""
@@ -55,7 +57,7 @@ class ChangeUserProfileTests(TestCase):
             response.data['billing_information']['postal_code'], None
         )
         self.assertEqual(
-            response.data['billing_information']['country'], None
+            response.data['billing_information']['country'], ''
         )
         self.assertEqual(
             response.data['billing_information']['city'], None

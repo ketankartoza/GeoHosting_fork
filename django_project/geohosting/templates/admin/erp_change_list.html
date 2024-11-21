@@ -1,0 +1,38 @@
+{% extends "admin/change_list.html" %}
+{% load static %}
+
+{% block extrahead %}
+    {{ block.super }}
+{% endblock %}
+
+{% block object-tools %}
+    {{ block.super }}
+    <div class="button-group" style="width: 100%; text-align: right">
+        <button id="fetch-data-button" class="button" style="right: 0;">
+            Fetch from ERPNext
+        </button>
+    </div>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const fetchDataButton = document.getElementById('fetch-data-button');
+        if (fetchDataButton) {
+          fetchDataButton.addEventListener('click', function () {
+            fetchDataButton.disabled = true;
+            fetch('/api/sync-erp-data/?class-name={{ class_name }}', {
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              },
+              credentials: 'include'
+            })
+              .then(response => {
+                window.location.reload()
+              })
+              .catch(error => {
+                console.error(error);
+              });
+          });
+        }
+      });
+    </script>
+{% endblock %}
