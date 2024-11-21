@@ -38,7 +38,7 @@ interface InstanceState {
   list: ListState;
   create: NonReturnState;
   detail: DetailState;
-  edit: DetailState;
+  update: DetailState;
   delete: NonReturnState;
 }
 
@@ -59,7 +59,7 @@ const initialState: InstanceState = {
     loading: false,
     error: null,
   },
-  edit: {
+  update: {
     data: null,
     loading: false,
     error: null,

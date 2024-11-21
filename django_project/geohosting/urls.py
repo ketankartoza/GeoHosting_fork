@@ -10,6 +10,7 @@ from geohosting.api.activity import (
 from geohosting.api.checkout import (
     CheckoutStripeSessionAPI, CheckoutPaystackSessionAPI
 )
+from geohosting.api.company import CompanyViewSet
 from geohosting.api.country import CountryViewSet
 from geohosting.api.erp import ERPApiView
 from geohosting.api.instance import InstanceViewSet
@@ -37,6 +38,7 @@ from geohosting.views.reset_password import ResetPasswordView
 router = DefaultRouter()
 router.register(r'activities', ActivityViewSet, basename='activities')
 router.register(r'products', ProductViewSet)
+router.register(r'companies', CompanyViewSet, basename='companies')
 router.register(r'countries', CountryViewSet, basename='countries')
 router.register(r'instances', InstanceViewSet, basename='instance')
 router.register(r'orders', SalesOrderSetView, basename='orders')

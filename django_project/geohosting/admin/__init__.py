@@ -1,6 +1,7 @@
 from geohosting.admin.activity import *
 from geohosting.admin.attachment import *
 from geohosting.admin.cluster import *
+from geohosting.admin.company import *
 from geohosting.admin.country import *
 from geohosting.admin.erp import *
 from geohosting.admin.instance import *

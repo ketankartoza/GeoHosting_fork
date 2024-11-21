@@ -59,7 +59,7 @@ export const PaginationPage: React.FC<Props> = (
   const {
     loading: editLoading,
     error: editError
-  } = useSelector((state: RootState) => state[stateKey]['edit']);
+  } = useSelector((state: RootState) => state[stateKey]['update']);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');

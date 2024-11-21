@@ -33,7 +33,7 @@ interface SupportState {
   list: ListState;
   create: NonReturnState;
   detail: DetailState;
-  edit: DetailState;
+  update: DetailState;
   delete: NonReturnState;
 }
 
@@ -54,7 +54,7 @@ const initialState: SupportState = {
     loading: false,
     error: null,
   },
-  edit: {
+  update: {
     data: null,
     loading: false,
     error: null,

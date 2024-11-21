@@ -7,6 +7,7 @@ GeoHosting.
 
 from geohosting.models.activity import *
 from geohosting.models.cluster import *
+from geohosting.models.company import *
 from geohosting.models.country import *
 from geohosting.models.erp import *
 from geohosting.models.instance import *
