@@ -2,7 +2,10 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { PaginationResult } from "../types/paginationTypes";
 import { headerWithToken } from "../../utils/helpers";
-import { ReduxState } from "../types/reduxState";
+import { ReduxState, ReduxStateInit } from "../types/reduxState";
+
+let _lastAbortController: AbortController | null = null;
+const ABORTED = 'Aborted';
 
 export interface Ticket {
   id: number;
@@ -49,26 +52,10 @@ const initialState: SupportState = {
     loading: false,
     error: null,
   },
-  create: {
-    data: null,
-    loading: false,
-    error: null,
-  },
-  update: {
-    data: null,
-    loading: false,
-    error: null,
-  },
-  detail: {
-    data: null,
-    loading: false,
-    error: null,
-  },
-  delete: {
-    data: null,
-    loading: false,
-    error: null,
-  },
+  create: ReduxStateInit,
+  update: ReduxStateInit,
+  detail: ReduxStateInit,
+  delete: ReduxStateInit,
 };
 
 interface CreateTicketData {
@@ -84,11 +71,24 @@ export const fetchTickets = createAsyncThunk(
   'support/fetchTickets',
   async (url: string, thunkAPI) => {
     try {
+      if (_lastAbortController) {
+        _lastAbortController.abort();
+      }
+      const abortController = new AbortController();
+      _lastAbortController = abortController;
+
       const response = await axios.get(url, {
-        headers: headerWithToken()
+        headers: headerWithToken(),
+        signal: abortController.signal
       });
       return response.data;
     } catch (error: any) {
+
+      // Handle cancel errors
+      if (axios.isCancel(error)) {
+        return thunkAPI.rejectWithValue(ABORTED);
+      }
+
       return thunkAPI.rejectWithValue(error.response?.data || 'An unknown error occurred');
     }
   }
@@ -155,12 +155,6 @@ const supportSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchTickets.pending, (state) => {
-        state.list.data = {
-          count: 0,
-          next: null,
-          previous: null,
-          results: []
-        };
         state.list.loading = true;
         state.list.error = null;
       })
@@ -169,6 +163,9 @@ const supportSlice = createSlice({
         state.list.loading = false;
       })
       .addCase(fetchTickets.rejected, (state, action) => {
+        if (action.payload === ABORTED) {
+          return
+        }
         state.list.loading = false;
         state.list.error = action.payload as string;
       })

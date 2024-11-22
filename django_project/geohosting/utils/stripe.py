@@ -62,4 +62,7 @@ def create_stripe_price(
 
 def get_checkout_detail(checkout_id):
     """Return checkout checkout detail."""
-    return stripe.checkout.Session.retrieve(checkout_id)
+    try:
+        return stripe.checkout.Session.retrieve(checkout_id)
+    except Exception:
+        return None

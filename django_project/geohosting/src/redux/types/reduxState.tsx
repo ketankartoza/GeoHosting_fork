@@ -3,3 +3,9 @@ export interface ReduxState {
   loading: boolean;
   error: string | null;
 }
+
+export const ReduxStateInit = {
+  data: null,
+  loading: false,
+  error: null
+}

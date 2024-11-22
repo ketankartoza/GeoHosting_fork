@@ -20,6 +20,7 @@ const CheckoutPage: React.FC = () => {
   const state = location.state as LocationState;
   const localStorageData = localStorage.getItem('selectedProduct');
   const appName = localStorage.getItem('appName');
+  const companyName = localStorage.getItem('companyName');
   const selectedData = localStorageData ? JSON.parse(localStorageData) : state;
 
   useEffect(() => {
@@ -47,6 +48,7 @@ const CheckoutPage: React.FC = () => {
   return (
     <MainCheckoutPage
       appName={appName}
+      companyName={companyName}
       activeStep={1}
       product={product}
       pkg={pkg}

@@ -66,6 +66,8 @@ class UserProfile(ErpModel):
         """Post data to erp."""
         super().post_to_erpnext()
         self.user.userbillinginformation.post_to_erpnext()
+        for contact in self.user.companycontact_set.all():
+            contact.post_to_erpnext()
 
     def __str__(self):
         return self.user.username

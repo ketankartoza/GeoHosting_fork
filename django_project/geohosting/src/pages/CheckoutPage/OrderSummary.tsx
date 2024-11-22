@@ -17,11 +17,15 @@ export interface OrderSummaryProps {
   product: Product;
   pkg: Package;
   invoice_url?: string | null;
-  appName: string;
+  appName?: string;
+  companyName?: string | null;
 }
 
 export const OrderSummary: React.FC<OrderSummaryProps> = (
-  { product, pkg, invoice_url, appName }
+  {
+    product, pkg, invoice_url,
+    appName, companyName
+  }
 ) => {
   return (
     <GridItem>
@@ -29,7 +33,8 @@ export const OrderSummary: React.FC<OrderSummaryProps> = (
         <Text fontSize={22} color={'black'}>
           Order Summary
           {
-            appName && <Text as='span' color='orange.500'>&nbsp;&nbsp;[{appName}]</Text>
+            appName &&
+            <Text as='span' color='orange.500'>&nbsp;&nbsp;[{appName}]</Text>
           }
         </Text>
       </Box>
@@ -64,6 +69,9 @@ export const OrderSummary: React.FC<OrderSummaryProps> = (
               ))
             }
           </List>
+          <Box mt={4}>
+            {companyName !== undefined ? (!companyName ? 'Purchase in personal capacity' : `Purchase for ${companyName}`) : null}
+          </Box>
 
           {
             invoice_url ?

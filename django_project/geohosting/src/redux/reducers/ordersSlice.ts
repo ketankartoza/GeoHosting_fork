@@ -6,10 +6,13 @@ import {
 import axios from 'axios';
 import { Package, Product } from "./productsSlice";
 import { PaginationResult } from "../types/paginationTypes";
-import { ReduxState } from "../types/reduxState";
+import { ReduxState, ReduxStateInit } from "../types/reduxState";
 import { Instance } from "./instanceSlice";
 import { headerWithToken } from "../../utils/helpers";
 
+
+let _lastAbortController: AbortController | null = null;
+const ABORTED = 'Aborted';
 
 export interface SalesOrder {
   id: string,
@@ -22,6 +25,7 @@ export interface SalesOrder {
   product: Product,
   package: Package,
   app_name: string,
+  company_name: string,
   instance: Instance
 }
 
@@ -62,26 +66,10 @@ const initialState: SalesOrderState = {
     loading: false,
     error: null,
   },
-  create: {
-    data: null,
-    loading: false,
-    error: null,
-  },
-  update: {
-    data: null,
-    loading: false,
-    error: null,
-  },
-  detail: {
-    data: null,
-    loading: false,
-    error: null,
-  },
-  delete: {
-    data: null,
-    loading: false,
-    error: null,
-  },
+  create: ReduxStateInit,
+  update: ReduxStateInit,
+  detail: ReduxStateInit,
+  delete: ReduxStateInit
 };
 
 // Async thunk to fetch sales order
@@ -89,12 +77,24 @@ export const fetchSalesOrders = createAsyncThunk(
   'salesOrder/fetchSalesOrders',
   async (url: string, thunkAPI) => {
     try {
-      const token = localStorage.getItem('token');
+      if (_lastAbortController) {
+        _lastAbortController.abort();
+      }
+      const abortController = new AbortController();
+      _lastAbortController = abortController;
+
       const response = await axios.get(url, {
-        headers: headerWithToken()
+        headers: headerWithToken(),
+        signal: abortController.signal,
       });
       return response.data;
     } catch (error: any) {
+
+      // Handle cancel errors
+      if (axios.isCancel(error)) {
+        return thunkAPI.rejectWithValue(ABORTED);
+      }
+
       const errorData = error.response.data;
       return thunkAPI.rejectWithValue(errorData);
     }
@@ -150,6 +150,9 @@ const handleFulfilled = (state: SalesOrderState, action: PayloadAction<any>) => 
 const handleRejected = (state: SalesOrderState, action: PayloadAction<any>) => {
   switch (action.type) {
     case fetchSalesOrders.rejected.type: {
+      if (action.payload === ABORTED) {
+        return
+      }
       state.list.loading = false;
       state.list.error = action.payload as string;
       break

@@ -38,7 +38,8 @@ const CheckoutConfiguration: React.FC = () => {
 
   // App name is ok
   const [appName, setAppName] = useState<string>('');
-  const [appNameIsOk, setAppNameIsOk] = useState<boolean>(false);
+  const [companyName, setCompanyName] = useState<string | null>(null);
+  const [configurationOK, setConfigurationOK] = useState<boolean>(false);
 
   return (
     <ChakraProvider theme={customTheme}>
@@ -52,13 +53,14 @@ const CheckoutConfiguration: React.FC = () => {
             </Box>
             <>
               <Grid gap={6} templateColumns={`repeat(${columns}, 1fr)`}>
-                <OrderSummary product={product} pkg={pkg} appName={appName}/>
+                <OrderSummary product={product} pkg={pkg}/>
                 <OrderConfiguration
                   product={product}
                   appName={appName}
                   setAppName={setAppName}
-                  appNameIsOk={appNameIsOk}
-                  setAppNameIsOk={setAppNameIsOk}
+                  setConfigurationOK={setConfigurationOK}
+                  companyName={companyName}
+                  setCompanyName={setCompanyName}
                 />
               </Grid>
 
@@ -66,10 +68,11 @@ const CheckoutConfiguration: React.FC = () => {
                 <Button
                   w='100%'
                   colorScheme="orange"
-                  isDisabled={!appNameIsOk}
+                  isDisabled={!configurationOK}
                   onClick={() => {
                     navigate('/checkout');
                     localStorage.setItem('appName', appName);
+                    localStorage.setItem('companyName', companyName ? companyName : '');
                   }}
                 >
                   Next

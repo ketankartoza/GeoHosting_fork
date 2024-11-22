@@ -50,7 +50,8 @@ const OrderDetail: React.FC = () => {
           <Text mb={2}>You ordered at: {orderDetail.date}</Text>
           <Text mb={2}><b>Package</b>: {orderDetail.package.name}</Text>
           <Text mb={2}><b>Status</b>: {orderDetail.order_status}</Text>
-          <Text mb={2}><b>Payment method</b>: {orderDetail.payment_method}
+          <Text mb={2}><b>Payment method</b>: {orderDetail.payment_method}</Text>
+          <Text mb={2}><b>Company</b>: {orderDetail.company_name}
           </Text>
           <Text
             mb={4}><b>Spec</b>: {orderDetail.package.feature_list['spec'].join(', ')}

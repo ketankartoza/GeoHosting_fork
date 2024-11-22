@@ -1,9 +1,10 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { PaginationResult } from "../types/paginationTypes";
-import { ReduxState } from "../types/reduxState";
+import { ReduxState, ReduxStateInit } from "../types/reduxState";
 import { headerWithToken } from "../../utils/helpers";
 import { BillingInformation } from "./profileSlice";
+
 
 export interface Company {
   id: number,
@@ -48,26 +49,10 @@ const initialState: CompanyState = {
     loading: false,
     error: null,
   },
-  create: {
-    data: null,
-    loading: false,
-    error: null,
-  },
-  update: {
-    data: null,
-    loading: false,
-    error: null,
-  },
-  detail: {
-    data: null,
-    loading: false,
-    error: null,
-  },
-  delete: {
-    data: null,
-    loading: false,
-    error: null,
-  },
+  create: ReduxStateInit,
+  update: ReduxStateInit,
+  detail: ReduxStateInit,
+  delete: ReduxStateInit,
 };
 
 // Async thunk to fetch user companies

@@ -1,8 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import { Box, Button, } from '@chakra-ui/react';
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../../redux/store";
-import { fetchUserCompanies } from "../../../redux/reducers/companySlice";
+import { EditIcon } from "@chakra-ui/icons";
+import { AppDispatch, RootState } from "../../redux/store";
+import { fetchUserCompanies } from "../../redux/reducers/companySlice";
 import CompanyForm from "./CompanyForm";
 
 /** Company controller */
@@ -47,7 +48,7 @@ const CompanyList: React.FC = () => {
                   }
                 }
               >
-                {company.name}
+                {company.name}&nbsp;&nbsp; <EditIcon/>
               </Box>
             )
           }

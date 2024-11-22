@@ -16,7 +16,7 @@ export const BillingInformationForm: React.FC<Props> = (
   return (
     <>
       <FormControl>
-        <FormLabel>Name</FormLabel>
+        <FormLabel>Billing name</FormLabel>
         <Input
           disabled={disable}
           value={data.name}

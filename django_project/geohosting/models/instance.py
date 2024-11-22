@@ -13,6 +13,7 @@ from django.template.loader import render_to_string
 
 from core.models.preferences import Preferences
 from geohosting.models.cluster import Cluster
+from geohosting.models.company import Company
 from geohosting.models.package import Package
 from geohosting.models.product import ProductCluster
 from geohosting.utils.vault import get_credentials
@@ -49,6 +50,13 @@ class Instance(models.Model):
             (InstanceStatus.DEPLOYING, InstanceStatus.DEPLOYING),
             (InstanceStatus.ONLINE, InstanceStatus.ONLINE),
             (InstanceStatus.OFFLINE, InstanceStatus.OFFLINE),
+        )
+    )
+    company = models.ForeignKey(
+        Company, on_delete=models.SET_NULL,
+        null=True, blank=True,
+        help_text=(
+            'Keep blank if instance is for individual capacity..'
         )
     )
 

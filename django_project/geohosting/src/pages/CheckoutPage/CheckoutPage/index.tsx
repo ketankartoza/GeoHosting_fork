@@ -36,11 +36,15 @@ interface CheckoutPageModalProps {
   stripeUrl: string;
   paystackUrl: string;
   appName: string;
+  companyName?: string | null;
   activeStep?: number;
 }
 
 export const MainCheckoutPageComponent: React.FC<CheckoutPageModalProps> = (
-  { product, pkg, stripeUrl, paystackUrl, appName }
+  {
+    product, pkg, stripeUrl, paystackUrl,
+    appName, companyName
+  }
 ) => {
   /** For the payment component **/
   const columns = useBreakpointValue({ base: 1, md: 2 });
@@ -84,7 +88,10 @@ export const MainCheckoutPageComponent: React.FC<CheckoutPageModalProps> = (
   return (
     <>
       <Grid gap={6} templateColumns={`repeat(${columns}, 1fr)`}>
-        <OrderSummary product={product} pkg={pkg} appName={appName}/>
+        <OrderSummary
+          product={product} pkg={pkg} appName={appName}
+          companyName={companyName}
+        />
         <GridItem>
           <Box>
             <Text fontSize={22} color={'black'}>
@@ -145,11 +152,13 @@ export const MainCheckoutPageComponent: React.FC<CheckoutPageModalProps> = (
         ref={stripePaymentModalRef}
         url={stripeUrl}
         appName={appName}
+        companyName={companyName}
       />
       <PaystackPaymentModal
         ref={paystackPaymentModalRef}
         url={paystackUrl}
         appName={appName}
+        companyName={companyName}
       />
     </>
   )
@@ -158,7 +167,7 @@ export const MainCheckoutPageComponent: React.FC<CheckoutPageModalProps> = (
 const MainCheckoutPage: React.FC<CheckoutPageModalProps> = (
   {
     product, pkg, stripeUrl,
-    paystackUrl, appName, activeStep = 0
+    paystackUrl, appName, companyName, activeStep = 0
   }
 ) => {
   return (
@@ -173,6 +182,7 @@ const MainCheckoutPage: React.FC<CheckoutPageModalProps> = (
             </Box>
             <MainCheckoutPageComponent
               appName={appName}
+              companyName={companyName}
               product={product}
               pkg={pkg}
               stripeUrl={stripeUrl}

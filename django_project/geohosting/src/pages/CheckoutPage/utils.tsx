@@ -6,6 +6,7 @@ export function checkCheckoutUrl(salesOrder: SalesOrder, navigate) {
   let targetUrl = originalUrl;
   if (salesOrder.app_name) {
     localStorage.setItem('appName', '');
+    localStorage.setItem('companyName', '');
   }
   switch (salesOrder.order_status) {
     case 'Waiting Payment':

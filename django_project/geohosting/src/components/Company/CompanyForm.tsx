@@ -20,19 +20,19 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../../redux/store";
-import { BillingInformation } from "../../../redux/reducers/profileSlice";
-import { returnAsString } from "../../../utils/helpers";
-import BillingInformationForm from "../../../components/BillingInformation";
-import { thunkAPIFulfilled, thunkAPIRejected } from "../../../utils/utils";
+import { AppDispatch, RootState } from "../../redux/store";
+import { BillingInformation } from "../../redux/reducers/profileSlice";
+import { returnAsString } from "../../utils/helpers";
+import BillingInformationForm from "../../components/BillingInformation";
+import { thunkAPIFulfilled, thunkAPIRejected } from "../../utils/utils";
 import { toast } from "react-toastify";
 import {
   createUserCompany,
   fetchUserCompanies,
   fetchUserCompany,
   updateUserCompany
-} from "../../../redux/reducers/companySlice";
-import LoadingSpinner from "../../../components/LoadingSpinner/LoadingSpinner";
+} from "../../redux/reducers/companySlice";
+import LoadingSpinner from "../../components/LoadingSpinner/LoadingSpinner";
 
 /** Company controller */
 

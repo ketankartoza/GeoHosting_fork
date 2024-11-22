@@ -7,6 +7,7 @@ from django.db import models
 from django.utils.timezone import now
 
 from geohosting.models.activity import name_validator
+from geohosting.models.company import Company
 from geohosting.models.erp_model import ErpModel
 from geohosting.models.region import Region
 from geohosting.models.user_profile import UserProfile
@@ -162,7 +163,7 @@ class SalesOrder(ErpModel):
         null=True,
     )
 
-    # This is configuration for create
+    # This is configuration for application
     app_name = models.CharField(
         blank=True,
         null=True,
@@ -171,6 +172,13 @@ class SalesOrder(ErpModel):
             'It will also be used for sub domain.'
         ),
         validators=[name_validator, app_name_validator]
+    )
+    company = models.ForeignKey(
+        Company, on_delete=models.SET_NULL,
+        null=True, blank=True,
+        help_text=(
+            'Keep blank if purchase for individual capacity..'
+        )
     )
 
     class Meta:
@@ -211,6 +219,12 @@ class SalesOrder(ErpModel):
             user=self.customer
         )
         order_status_obj = self.sales_order_status_obj
+        customer = user_profile.erpnext_code
+        try:
+            if self.company.erpnext_code:
+                customer = self.company.erpnext_code
+        except Exception:
+            pass
         return {
             # status is not billed
             'billing_status': order_status_obj.billing_status,
@@ -221,7 +235,7 @@ class SalesOrder(ErpModel):
 
             # For other information
             "doctype": self.doc_type,
-            'customer': user_profile.erpnext_code,
+            'customer': customer,
             'date': self.date.strftime('%Y-%m-%d'),
             'selling_price_list': self.package.price_list,
             'price_list_currency': self.package.currency,
@@ -270,12 +284,16 @@ class SalesOrder(ErpModel):
         ):
             if self.payment_method == SalesOrderPaymentMethod.STRIPE:
                 detail = get_checkout_detail(self.payment_id)
+                if not detail:
+                    return
                 if detail.invoice:
                     self.set_order_status(
                         SalesOrderStatus.WAITING_CONFIGURATION
                     )
             elif self.payment_method == SalesOrderPaymentMethod.PAYSTACK:
                 response = verify_paystack_payment(self.payment_id)
+                if not response:
+                    return
                 try:
                     if response['data']['status'] == 'success':
                         self.set_order_status(

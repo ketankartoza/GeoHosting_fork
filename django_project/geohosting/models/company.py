@@ -12,7 +12,7 @@ class Company(ErpModel):
     """Company profile model."""
 
     name = models.CharField(
-        max_length=255,
+        max_length=255, unique=True
     )
     avatar = models.ImageField(
         upload_to='avatars/', blank=True, null=True
@@ -46,8 +46,13 @@ class Company(ErpModel):
 
     def post_to_erpnext(self):
         """Post data to erp."""
+        erpnext_code = self.erpnext_code
         output = super().post_to_erpnext()
         self.companybillinginformation.post_to_erpnext()
+        if not erpnext_code:
+            for contact in self.companycontact_set.all():
+                contact.post_to_erpnext()
+
         return output
 
     def __str__(self):

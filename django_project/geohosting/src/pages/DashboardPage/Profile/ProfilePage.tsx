@@ -32,7 +32,7 @@ import { returnAsString } from "../../../utils/helpers";
 import {
   BillingInformationForm
 } from "../../../components/BillingInformation";
-import CompanyList from "./CompanyList";
+import CompanyList from "../../../components/Company/CompanyList";
 
 const ProfilePage: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
