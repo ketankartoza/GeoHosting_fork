@@ -54,6 +54,29 @@ const CheckoutDeployment: React.FC<Props> = ({ salesOrderDetail }) => {
               notify you via email once it is complete.
               <br/>
               <br/>
+              You can close this browser window.
+              <br/>
+              Alternatively, you may view your application
+              <Text
+                as='a'
+                ml={1}
+                mr={1}
+                href={`/#/dashboard?q=${salesOrderDetail.instance?.name}`}
+                color='blue.500'
+                target='_blank'>
+                here
+              </Text>
+              or check your order
+              <Text
+                as='a'
+                ml={1}
+                href={`/#/dashboard/orders?q=${salesOrderDetail.erpnext_code}`}
+                color='blue.500'
+                target='_blank'>
+                here
+              </Text>.
+              <br/>
+              <br/>
               <Box animation={spinAnimation} width='fit-content'>
                 <FaGear/>
               </Box>

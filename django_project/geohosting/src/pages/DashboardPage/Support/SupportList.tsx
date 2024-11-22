@@ -1,5 +1,12 @@
 import React, { useRef, useState } from 'react';
-import { Box, Button, Flex, Text, useColorModeValue } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Flex,
+  Select,
+  Text,
+  useColorModeValue
+} from '@chakra-ui/react';
 import { fetchTickets, Ticket } from "../../../redux/reducers/supportSlice";
 import { PaginationPage } from "../PaginationPage";
 import {
@@ -89,6 +96,9 @@ const renderCards = (tickets: Ticket[]) => {
 const SupportList: React.FC = () => {
   const [currentTicket, setCurrentTicket] = useState<any>(null);
   const supportTicketModalRef = useRef(null);
+  const [filters, setFilters] = useState({
+    status: ''
+  });
 
   /**
    * Handling when create issue.
@@ -115,6 +125,25 @@ const SupportList: React.FC = () => {
         stateKey='support'
         searchPlaceholder='Search by Title'
         renderCards={renderCards}
+        leftNavigation={
+          <Select
+            placeholder="Filter by status"
+            backgroundColor='white'
+            width={250}
+            value={filters.status}
+            onChange={
+              (e) => setFilters(
+                { ...filters, status: e.target.value }
+              )
+            }
+          >
+            <option value="open">Open</option>
+            <option value="pending">Pending</option>
+            <option value="closed">Closed</option>
+            <option value="resolved">Resolved</option>
+          </Select>
+        }
+        additionalFilters={filters}
         rightNavigation={
           <Button colorScheme="blue" onClick={handleCreateIssue}>
             Create Issue

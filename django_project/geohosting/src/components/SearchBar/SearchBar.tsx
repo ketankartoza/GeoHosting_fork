@@ -6,6 +6,7 @@ import { SearchIcon } from "@chakra-ui/icons";
 interface SearchBarProps {
   showClearButton?: boolean;
   showDateFields?: boolean;
+  initSearch?: string;
   onSearch?: (term: string) => void;
   placeholder?: string;
 }
@@ -14,10 +15,11 @@ const SearchBar: React.FC<SearchBarProps> = (
   {
     showClearButton = false,
     showDateFields = false,
+    initSearch,
     onSearch,
     placeholder = 'Search Items', // Default placeholder
   }) => {
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState<string>(initSearch ? initSearch : '');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
 

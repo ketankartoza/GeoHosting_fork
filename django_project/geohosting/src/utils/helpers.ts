@@ -69,3 +69,23 @@ export const headerWithToken = () => {
   return {}
 
 }
+
+/*** Return url params */
+export const urlParameters = (url?: string | null) => {
+  if (!url) {
+    url = window.location.href
+  }
+  const urls = url.split('?')
+
+  if (urls[1]) {
+    const parameters = urls[1].split('#')[0].split('&')
+    const paramDict = {}
+    parameters.map(param => {
+      const splitParam = param.split('=')
+      paramDict[splitParam[0]] = decodeURI(splitParam.slice(1).join('='))
+    })
+    return paramDict
+  } else {
+    return {}
+  }
+}

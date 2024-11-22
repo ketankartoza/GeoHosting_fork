@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Flex,
@@ -7,6 +7,7 @@ import {
   Image,
   keyframes,
   Link,
+  Select,
   Text,
   useBreakpointValue
 } from '@chakra-ui/react';
@@ -195,6 +196,9 @@ const renderCards = (instances: Instance[]) => {
 
 /** Service List Page in pagination */
 const ServiceList: React.FC = () => {
+  const [filters, setFilters] = useState({
+    status: ''
+  });
   return (
     <>
       <PaginationPage
@@ -204,6 +208,24 @@ const ServiceList: React.FC = () => {
         stateKey='instance'
         searchPlaceholder='Search by name'
         renderCards={renderCards}
+        additionalFilters={filters}
+        leftNavigation={
+          <Select
+            placeholder="Filter by status"
+            backgroundColor='white'
+            width={250}
+            value={filters.status}
+            onChange={
+              (e) => setFilters(
+                { ...filters, status: e.target.value }
+              )
+            }
+          >
+            <option value="Deploying">Deploying</option>
+            <option value="Online">Online</option>
+            <option value="Offline">Offline</option>
+          </Select>
+        }
       />
     </>
   );

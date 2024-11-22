@@ -5,8 +5,9 @@ import SearchBar from "../../components/SearchBar/SearchBar";
 interface Props {
   onSearch?: (term: string) => void;
   placeholder?: string;
-  leftElement?: React.ReactElement,
-  rightElement?: React.ReactElement,
+  leftElement?: React.ReactElement;
+  rightElement?: React.ReactElement;
+  initSearch?: string;
 }
 
 const TopNavigation: React.FC<Props> = (
@@ -14,7 +15,8 @@ const TopNavigation: React.FC<Props> = (
     onSearch,
     placeholder = 'Search Items',
     leftElement,
-    rightElement
+    rightElement,
+    initSearch
   }) => {
   return (
     <Flex mb={6} alignItems="center" width={'100%'}>
@@ -23,6 +25,7 @@ const TopNavigation: React.FC<Props> = (
         showDateFields={false}
         showClearButton={false}
         placeholder={placeholder}
+        initSearch={initSearch}
       />
       {leftElement}
       <Box flexGrow={1}/>

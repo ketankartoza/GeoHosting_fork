@@ -1,6 +1,7 @@
 import { SalesOrder } from "../../redux/reducers/ordersSlice";
+import { NavigateFunction } from "react-router/dist/lib/hooks";
 
-export function checkCheckoutUrl(salesOrder: SalesOrder, navigate) {
+export function checkCheckoutUrl(salesOrder: SalesOrder, navigate?: NavigateFunction) {
   // Check checkout url
   const originalUrl = location.href.replace(location.origin, '')
   let targetUrl = originalUrl;
@@ -22,7 +23,8 @@ export function checkCheckoutUrl(salesOrder: SalesOrder, navigate) {
       targetUrl = `/dashboard`
       break
   }
-  if (originalUrl.replace('/#', '') != targetUrl) {
+  if (navigate && originalUrl.replace('/#', '') != targetUrl) {
     navigate(targetUrl)
   }
+  return targetUrl
 }

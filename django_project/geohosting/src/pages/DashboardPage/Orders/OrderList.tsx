@@ -1,12 +1,21 @@
-import React from 'react';
-import { Box, Table, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
+import React, { useState } from 'react';
+import {
+  Box,
+  Link,
+  Select,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr
+} from '@chakra-ui/react';
 import { PaginationPage } from "../PaginationPage";
 import {
   fetchSalesOrders,
   SalesOrder
 } from "../../../redux/reducers/ordersSlice";
 import { checkCheckoutUrl } from "../../CheckoutPage/utils";
-import { useNavigate } from "react-router-dom";
 import { FaPrint } from "react-icons/fa";
 
 
@@ -16,35 +25,34 @@ interface CardProps {
 
 /** Card for order **/
 const Card: React.FC<CardProps> = ({ order }) => {
-  const navigate = useNavigate();
-  const handleRowClick = (salesOrderDetail: any) => {
-    if (salesOrderDetail && salesOrderDetail.id + '') {
-      checkCheckoutUrl(salesOrderDetail, navigate)
-    }
-  };
   return <Tr
     key={order.id}
-
-    style={{ cursor: 'pointer' }}
     background={"white"}
     _hover={{ bg: 'gray.100' }}
   >
-    <Td onClick={() => handleRowClick(order)}>
-      {order.erpnext_code}
+    <Td>
+      <Link
+        href={`/#${checkCheckoutUrl(order)}`}
+        target='_blank'
+        as="a"
+        color='blue.500'
+      >
+        {order.erpnext_code}
+      </Link>
     </Td>
-    <Td onClick={() => handleRowClick(order)}>
+    <Td>
       {order.package.name}
     </Td>
-    <Td onClick={() => handleRowClick(order)}>
+    <Td>
       {order.app_name}
     </Td>
-    <Td onClick={() => handleRowClick(order)}>
+    <Td>
       {order.order_status}
     </Td>
-    <Td onClick={() => handleRowClick(order)}>
+    <Td>
       {order.company_name}
     </Td>
-    <Td onClick={() => handleRowClick(order)}>
+    <Td>
       {new Date(order.date).toLocaleDateString()}</Td>
     <Td>
       {
@@ -65,7 +73,7 @@ const renderCards = (orders: SalesOrder[]) => {
   return <Table variant='simple'>
     <Thead>
       <Tr>
-        <Th>Order ID</Th>
+        <Th>ID</Th>
         <Th>Package</Th>
         <Th>App Name</Th>
         <Th>Status</Th>
@@ -83,6 +91,10 @@ const renderCards = (orders: SalesOrder[]) => {
 }
 /** Support List Page in pagination */
 const OrderList: React.FC = () => {
+  const [filters, setFilters] = useState({
+    order_status: ''
+  });
+
   return (
     <>
       <PaginationPage
@@ -90,8 +102,26 @@ const OrderList: React.FC = () => {
         url='/api/orders/'
         action={fetchSalesOrders}
         stateKey='orders'
-        searchPlaceholder='Search by order id'
+        searchPlaceholder='Search by id or app name'
         renderCards={renderCards}
+        additionalFilters={filters}
+        leftNavigation={
+          <Select
+            placeholder="Filter by status"
+            backgroundColor='white'
+            width={250}
+            value={filters.order_status}
+            onChange={
+              (e) => setFilters(
+                { ...filters, order_status: e.target.value }
+              )
+            }
+          >
+            <option value="Waiting Payment">Waiting Payment</option>
+            <option value="Waiting Deployment">Waiting Deployment</option>
+            <option value="Deployed">Deployed</option>
+          </Select>
+        }
       />
     </>
   );

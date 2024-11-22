@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from rest_framework import mixins, viewsets
@@ -30,7 +31,7 @@ class SalesOrderSetView(
     """Sales order viewset."""
 
     permission_classes = (IsAuthenticated,)
-    default_query_filter = ['erpnext_code__icontains']
+    default_query_filter = []
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -40,6 +41,11 @@ class SalesOrderSetView(
     def get_queryset(self):
         """Return querysets."""
         query = SalesOrder.objects.filter(customer_id=self.request.user.id)
+        q = self.request.GET.get('q')
+        if q:
+            query = query.filter(
+                Q(erpnext_code__icontains=q) | Q(app_name__icontains=q)
+            )
         return self.filter_query(self.request, query).order_by('-date')
 
     def get_object(self):
