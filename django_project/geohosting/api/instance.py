@@ -23,5 +23,7 @@ class InstanceViewSet(
 
     def get_queryset(self):
         """Return instances for the authenticated user."""
-        query = Instance.objects.filter(owner=self.request.user)
+        query = Instance.objects.filter(owner=self.request.user).order_by(
+            'name'
+        )
         return self.filter_query(self.request, query)

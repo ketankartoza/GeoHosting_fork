@@ -70,7 +70,6 @@ export const PaginationPage: React.FC<Props> = (
   const parameters = urlParameters();
   const [searchTerm, setSearchTerm] = useState(parameters['q'] ? parameters['q'] : '');
 
-
   /** Check app name */
   const debouncedSearchTerm = debounce((inputValue) => {
     if (lastSearchTerm === inputValue) {

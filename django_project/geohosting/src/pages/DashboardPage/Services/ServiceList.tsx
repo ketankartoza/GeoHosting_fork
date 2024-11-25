@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Flex,
@@ -11,6 +11,8 @@ import {
   Text,
   useBreakpointValue
 } from '@chakra-ui/react';
+import { FaGear } from "react-icons/fa6";
+import axios from "axios";
 import { PaginationPage } from "../PaginationPage";
 import {
   fetchUserInstances,
@@ -19,7 +21,7 @@ import {
 import { FaLink } from "react-icons/fa";
 import Geoserver from "../../../assets/images/GeoServer.svg";
 import Geonode from "../../../assets/images/GeoNode.svg";
-import { FaGear } from "react-icons/fa6";
+import { headerWithToken } from "../../../utils/helpers";
 
 const spin = keyframes`
   from {
@@ -29,16 +31,21 @@ const spin = keyframes`
     transform: rotate(360deg)
   }
 `;
+
+let currentIds: number[] = []
 const spinAnimation = `${spin} infinite 2s linear`;
 
 interface CardProps {
-  instance: Instance;
+  instanceInput: Instance;
 }
 
 /** Card for support **/
-const Card: React.FC<CardProps> = ({ instance }) => {
+const Card: React.FC<CardProps> = ({ instanceInput }) => {
   const columns = useBreakpointValue({ base: 1, md: 2 });
   const Placeholder = 'https://via.placeholder.com/60';
+
+  const [instance, setInstance] = useState(instanceInput);
+
   // Function to determine the correct image based on package name
   const getImageForPackage = (packageName: string) => {
     if (packageName.toLowerCase().includes('geoserver')) {
@@ -49,6 +56,40 @@ const Card: React.FC<CardProps> = ({ instance }) => {
       return Placeholder;
     }
   };
+
+  const request = (_instance) => {
+    let instance = _instance
+    if (!currentIds.includes(instance.id)) {
+      return
+    }
+    (
+      async () => {
+        try {
+          const response = await axios.get(
+            `/api/instances/${instance.id}/`,
+            {
+              headers: headerWithToken()
+            }
+          );
+          if (JSON.stringify(response.data) !== JSON.stringify(instance)) {
+            instance = response.data
+            setInstance(response.data);
+          }
+        } catch (err) {
+
+        }
+        setTimeout(() => {
+          request(instance)
+        }, 5000);
+      }
+    )()
+  }
+  /** Check app name */
+  useEffect(() => {
+    setTimeout(() => {
+      request(instance)
+    }, 5000);
+  }, [instanceInput]);
 
   // Render instance status
   const RenderInstanceStatus = (props) => {
@@ -180,6 +221,8 @@ const Card: React.FC<CardProps> = ({ instance }) => {
 }
 
 const renderCards = (instances: Instance[]) => {
+  currentIds = instances.map(instance => instance.id)
+
   return <Flex
     wrap="wrap"
     justify="flex-start" gap={6}
@@ -188,7 +231,7 @@ const renderCards = (instances: Instance[]) => {
   >
     {
       instances.map((instance: Instance) => {
-        return <Card key={instance.name} instance={instance}/>
+        return <Card key={instance.name} instanceInput={instance}/>
       })
     }
   </Flex>
