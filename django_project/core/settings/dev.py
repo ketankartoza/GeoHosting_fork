@@ -19,7 +19,7 @@ CRISPY_FAIL_SILENTLY = not DEBUG
 
 ALLOWED_HOSTS = ['*']
 
-EMAIL_BACKEND = 'geohosting.resend_email_backend.ResendBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

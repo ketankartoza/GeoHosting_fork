@@ -89,19 +89,17 @@ def fetch_products_from_erpnext():
             image_path = product_detail.get('image', '')
             available = product_detail.get(
                 'available_in_geohosting', 0) == 1
-            image_file = None
 
+            defaults = {
+                'name': name,
+                'description': description,
+                'available': available
+            }
             if image_path:
-                image_file = download_erp_file(image_path)
-
+                defaults['image'] = download_erp_file(image_path)
             product_obj, created = Product.objects.update_or_create(
                 upstream_id=upstream_id,
-                defaults={
-                    'name': name,
-                    'description': description,
-                    'image': image_file,
-                    'available': available
-                }
+                defaults=defaults
             )
             save_product_image(
                 product_obj, desc, 'overview_header',

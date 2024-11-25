@@ -13,7 +13,7 @@
                 {% include "emails/logo.html" %}
             </td>
         </tr>
-    </table> 
+    </table>
     <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #ffffff; padding: 0px; border: 1px solid #dddddd;">
         <tr>
             <td style="padding: 10px 0; text-align: center; background-color: #57A0C7; color: #ffffff;">
@@ -27,25 +27,18 @@
                 <p>Dear {{ name }},</p>
                 <br>
                 <p>We would like to inform you that your, <strong>{{ app_name }}</strong> instance, is now ready for you to access.</p>
-                
-                <p>Please use the following credentials to log in and start using your product:</p>
+
+                <p>Please start using your product:</p>
 
                 <table border="0" cellpadding="5" cellspacing="0" width="100%" style="font-size: 16px; color: #333333; margin-left: 1rem;">
-                    <tr>
-                        <td style="font-weight: bold; width: 30%;">Username:</td>
-                        <td>admin</td>
-                    </tr>
-                    {% for credential in credentials %}
-                        <tr>
-                            <td style="font-weight: bold;">{{ credential.key }}:</td>
-                            <td>{{ credential.value }}</td>
-                        </tr>
-                    {% endfor %}
                     <tr>
                         <td style="font-weight: bold;">Product URL:</td>
                         <td><a href="{{ url }}" style="color: #2f5c4a;">Access your product here</a></td>
                     </tr>
                 </table>
+
+                <p>You can view the details of your instance and access your credentials through the link below:</p>
+                <a href="{{ instance_url }}" style="color: #2f5c4a;">Access your instance detail</a>
 
                 <p>If you encounter any issues accessing the product, please don't hesitate to reach out to our support team at <a href="mailto:{{ support_email }}" style="color: #FFA500;">{{ support_email }}</a>.</p>
 
