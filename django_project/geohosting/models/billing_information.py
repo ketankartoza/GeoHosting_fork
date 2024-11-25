@@ -37,6 +37,17 @@ class BillingInformation(ErpModel):
     class Meta:  # noqa: D106
         abstract = True
 
+    def emptying(self):
+        """Empty data."""
+        self.name = None
+        self.postal_code = None
+        self.address = None
+        self.country = None
+        self.city = None
+        self.region = None
+        self.tax_number = None
+        self.save()
+
     @property
     def country_name(self):
         """Return the country name."""

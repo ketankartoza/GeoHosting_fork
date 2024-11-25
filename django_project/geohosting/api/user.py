@@ -64,16 +64,18 @@ class UserProfileView(APIView):
                     return HttpResponseBadRequest('payload is invalid json')
             user = request.user
             serializer = UserSerializer(user, data=data)
-            if serializer.is_valid():
-                serializer.save()
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
 
-                try:
-                    user.userprofile.avatar = request.FILES['avatar']
-                    user.userprofile.save()
-                except KeyError:
-                    pass
+            try:
+                user.userprofile.avatar = request.FILES['avatar']
+                user.userprofile.save()
+            except KeyError:
+                pass
 
-                billing_data = data['billing_information']
+            # Save billing information
+            billing_data = data.get('billing_information', None)
+            if billing_data:
                 country = billing_data.get('country', None)
                 country_obj = None
                 if country:
@@ -91,19 +93,17 @@ class UserProfileView(APIView):
                 billing_serializer = UserBillingInformationSerializer(
                     billing, data=billing_data
                 )
-                if billing_serializer.is_valid():
-                    billing_serializer.save()
-                    billing.country = country_obj
-                    billing.save()
-                    threading.Thread(
-                        target=user.userprofile.post_to_erpnext
-                    ).start()
-                    return Response(serializer.data)
-                else:
-                    raise Exception(billing_serializer.errors)
+                billing_serializer.is_valid(raise_exception=True)
+                billing_serializer.save()
+                billing.country = country_obj
+                billing.save()
             else:
-                raise Exception(serializer.errors)
+                billing = user.userbillinginformation
+                billing.emptying()
+
+            threading.Thread(
+                target=user.userprofile.post_to_erpnext
+            ).start()
+            return Response(serializer.data)
         except KeyError as e:
             return HttpResponseBadRequest(f'{e} is required')
-        except Exception as e:
-            return HttpResponseBadRequest(f'{e}')

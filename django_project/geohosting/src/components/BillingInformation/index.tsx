@@ -1,5 +1,11 @@
 import React from 'react';
-import { Box, FormControl, FormLabel, Input, } from '@chakra-ui/react';
+import {
+  Box,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  Input,
+} from '@chakra-ui/react';
 import { BillingInformation } from "../../redux/reducers/profileSlice";
 import CountrySelector from "../CountrySelector";
 
@@ -7,15 +13,16 @@ import CountrySelector from "../CountrySelector";
 interface Props {
   disable: boolean;
   data: BillingInformation;
+  errors: any;
   setData: (data: BillingInformation) => void;
 }
 
 export const BillingInformationForm: React.FC<Props> = (
-  { disable, data, setData }
+  { disable, data, setData, errors }
 ) => {
   return (
     <>
-      <FormControl>
+      <FormControl isInvalid={errors.name && !data.name}>
         <FormLabel>Billing name</FormLabel>
         <Input
           disabled={disable}
@@ -29,8 +36,12 @@ export const BillingInformationForm: React.FC<Props> = (
           bg="white"
           width={'100%'}
         />
+        {
+          errors.name && !data.name &&
+          <FormErrorMessage>{errors.name}</FormErrorMessage>
+        }
       </FormControl>
-      <FormControl>
+      <FormControl isInvalid={errors.address}>
         <FormLabel>Billing Address</FormLabel>
         <Input
           disabled={disable}
@@ -44,8 +55,12 @@ export const BillingInformationForm: React.FC<Props> = (
           bg="white"
           width={'100%'}
         />
+        {
+          errors.address &&
+          <FormErrorMessage>{errors.address}</FormErrorMessage>
+        }
       </FormControl>
-      <FormControl>
+      <FormControl isInvalid={errors.postal_code}>
         <FormLabel>Postal Code</FormLabel>
         <Input
           disabled={disable}
@@ -59,8 +74,12 @@ export const BillingInformationForm: React.FC<Props> = (
           bg="white"
           width={'100%'}
         />
+        {
+          errors.postal_code &&
+          <FormErrorMessage>{errors.postal_code}</FormErrorMessage>
+        }
       </FormControl>
-      <FormControl>
+      <FormControl isInvalid={errors.country}>
         <FormLabel>Country</FormLabel>
         <Box display='flex' alignItems='center' height='40px'>
           <CountrySelector
@@ -72,8 +91,12 @@ export const BillingInformationForm: React.FC<Props> = (
             })}
           />
         </Box>
+        {
+          errors.country &&
+          <FormErrorMessage>{errors.country}</FormErrorMessage>
+        }
       </FormControl>
-      <FormControl>
+      <FormControl isInvalid={errors.city}>
         <FormLabel>City</FormLabel>
         <Input
           disabled={disable}
@@ -87,6 +110,10 @@ export const BillingInformationForm: React.FC<Props> = (
           bg="white"
           width={'100%'}
         />
+        {
+          errors.city &&
+          <FormErrorMessage>{errors.city}</FormErrorMessage>
+        }
       </FormControl>
       <FormControl>
         <FormLabel>Region</FormLabel>

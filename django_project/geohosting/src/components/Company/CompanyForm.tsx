@@ -162,7 +162,6 @@ export const CompanyForm = forwardRef(
         });
       }
     };
-
     return (
       <Modal
         isOpen={isOpen}
@@ -176,10 +175,9 @@ export const CompanyForm = forwardRef(
             loading ? <LoadingSpinner/> :
               <ModalBody m={4}>
                 <Box width={{ base: '100%' }}>
-                  <FormControl isInvalid={errors.name}>
+                  <FormControl isInvalid={errors.name && !info.name}>
                     <FormLabel>Company Name</FormLabel>
                     <Input
-                      isInvalid={errors.name}
                       isDisabled={loading || createLoading}
                       value={info.name}
                       onChange={
@@ -192,7 +190,7 @@ export const CompanyForm = forwardRef(
                       width={'100%'}
                     />
                     {
-                      errors.subject &&
+                      errors.name && !info.name &&
                       <FormErrorMessage>{errors.name}</FormErrorMessage>
                     }
                   </FormControl>
@@ -203,6 +201,7 @@ export const CompanyForm = forwardRef(
                     <BillingInformationForm
                       disable={loading || createLoading}
                       data={billingInfo} setData={setBillingInfo}
+                      errors={errors}
                     />
                   </Box>
                 </Box>

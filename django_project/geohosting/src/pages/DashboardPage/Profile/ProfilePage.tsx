@@ -42,6 +42,7 @@ const ProfilePage: React.FC = () => {
     loading,
     error
   } = useSelector((state: RootState) => state.profile);
+  const [errors, setErrors] = useState<any>({});
 
   const [avataSrc, setAvatarSrc] = useState<string>('');
 
@@ -106,18 +107,22 @@ const ProfilePage: React.FC = () => {
 
   // Handle profile update
   const handleProfileUpdate = () => {
+    setErrors({});
+    const payload = {
+      profileData: { ...personalInfo },
+      files: [{ name: 'avatar', file: profile.avatar }]
+    }
+    for (const [key, value] of Object.entries(billingInfo)) {
+      if (value) {
+        payload.profileData['billing_information'] = billingInfo
+      }
+    }
     dispatch(
-      updateUserProfile(
-        {
-          profileData: { ...personalInfo, billing_information: billingInfo },
-          files: [{ name: 'avatar', file: profile.avatar }]
-        }
-      )
+      updateUserProfile(payload)
     ).then((result: any) => {
       if (thunkAPIRejected(result)) {
-        toast.error(
-          result.payload
-        );
+        setErrors(result.payload)
+        toast.error('Failed to update your profile.');
       } else if (thunkAPIFulfilled(result)) {
         toast.success(
           'Your profile has been successfully updated.'
@@ -253,6 +258,7 @@ const ProfilePage: React.FC = () => {
                     <BillingInformationForm
                       disable={loading}
                       data={billingInfo} setData={setBillingInfo}
+                      errors={errors}
                     />
                   </SimpleGrid>
                 </Box>
