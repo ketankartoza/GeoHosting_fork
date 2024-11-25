@@ -215,6 +215,7 @@ class SalesOrder(ErpModel):
     @property
     def erp_payload_for_create(self):
         """ERP Payload for create request."""
+        from geohosting.models.erp_company import ErpCompany
         user_profile = UserProfile.objects.get(
             user=self.customer
         )
@@ -225,6 +226,15 @@ class SalesOrder(ErpModel):
                 customer = self.company.erpnext_code
         except Exception:
             pass
+
+        company = None
+        try:
+            company = ErpCompany.objects.get(
+                payment_method=self.payment_method
+            ).erpnext_code
+        except ErpCompany.DoesNotExist:
+            pass
+
         return {
             # status is not billed
             'billing_status': order_status_obj.billing_status,
@@ -249,7 +259,8 @@ class SalesOrder(ErpModel):
                     ),
                     'qty': 1.0,
                 }
-            ]
+            ],
+            'company': company
         }
 
     @property

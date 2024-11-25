@@ -36,7 +36,8 @@ class CheckoutAPI(PaymentAPI):
                 package=package,
                 customer=request.user,
                 app_name=app_name,
-                company=company
+                company=company,
+                payment_method=self.payment_method
             )
             return self.get_post(order=order)
         except Exception as e:

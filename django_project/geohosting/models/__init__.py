@@ -10,6 +10,7 @@ from geohosting.models.cluster import *
 from geohosting.models.company import *
 from geohosting.models.country import *
 from geohosting.models.erp import *
+from geohosting.models.erp_company import *
 from geohosting.models.instance import *
 from geohosting.models.package import *
 from geohosting.models.product import *

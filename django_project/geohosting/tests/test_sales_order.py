@@ -6,7 +6,9 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-from geohosting.factories import PackageFactory, SalesOrderFactory
+from geohosting.factories import (
+    PackageFactory, SalesOrderFactory, ErpCompanyFactory
+)
 from geohosting.models import (
     SalesOrderStatus, SalesOrderPaymentMethod, ActivityType, Cluster,
     Region, ProductCluster, Instance, InstanceStatus
@@ -30,6 +32,7 @@ class SalesOrderTests(TestCase):
         # Authenticate the client
         self.client.force_authenticate(user=self.user)
         self.package = PackageFactory()
+        ErpCompanyFactory(erpnext_code='Test Company')
 
     @patch('geohosting.models.sales_order.add_erp_next_comment')
     @patch('geohosting.models.sales_order.verify_paystack_payment')
@@ -59,6 +62,10 @@ class SalesOrderTests(TestCase):
         self.assertEqual(sales_order.package, self.package)
         self.assertEqual(sales_order.customer, self.user)
         self.assertEqual(sales_order.erpnext_code, 'erpnext_1')
+
+        # Check payload
+        payload = sales_order.erp_payload_for_create
+        self.assertEqual(payload['company'], 'Test Company')
 
         # Waiting payment
         self.assertEqual(
