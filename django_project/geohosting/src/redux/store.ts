@@ -3,6 +3,7 @@ import authReducer from './reducers/authSlice';
 import productsReducer from './reducers/productsSlice';
 import supportSlice from './reducers/supportSlice';
 import ordersSlice from './reducers/ordersSlice';
+import agreementSlice from './reducers/agreementSlice';
 import salesOrdersReducer from './reducers/ordersSlice';
 import instanceSlice from './reducers/instanceSlice';
 import profileSlice from './reducers/profileSlice';
@@ -17,7 +18,8 @@ export const store = configureStore({
     instance: instanceSlice,
     company: companySlice,
     orders: ordersSlice,
-    profile: profileSlice
+    profile: profileSlice,
+    agreements: agreementSlice,
   },
 });
 

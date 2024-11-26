@@ -7,7 +7,7 @@ from rest_framework_nested.routers import NestedSimpleRouter
 from geohosting.api.activity import (
     ActivityViewSet, ActivityTypeViewSet
 )
-from geohosting.api.agreement import AgreementViewSet
+from geohosting.api.agreement import AgreementViewSet, MyAgreementViewSet
 from geohosting.api.checkout import (
     CheckoutStripeSessionAPI, CheckoutPaystackSessionAPI
 )
@@ -37,7 +37,11 @@ from geohosting.views.products import fetch_products
 from geohosting.views.reset_password import ResetPasswordView
 
 router = DefaultRouter()
-router.register(r'agreements', AgreementViewSet, basename='agreements')
+router.register(r'agreements', MyAgreementViewSet, basename='agreements')
+router.register(
+    r'template/agreements', AgreementViewSet,
+    basename='template-agreements'
+)
 router.register(r'activities', ActivityViewSet, basename='activities')
 router.register(r'products', ProductViewSet)
 router.register(r'companies', CompanyViewSet, basename='companies')

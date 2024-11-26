@@ -14,9 +14,9 @@ import { Route, Routes, useLocation } from "react-router-dom";
 import OrdersList from './Orders/OrderList';
 import OrderDetail from "./Orders/OrderDetail";
 import ProfilePage from './Profile/ProfilePage';
-import AgreementPage from './AgreementPage';
 import SupportList from "./Support/SupportList";
 import ServiceList from "./Services/ServiceList";
+import AgreementList from "./Agreements/AgreementList";
 
 const DashboardPage = ({ title = "Dashboard" }) => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -60,7 +60,7 @@ const DashboardPage = ({ title = "Dashboard" }) => {
           <Box p={8} flexGrow={1} position='relative'>
             <Routes>
               <Route path="/" element={<ServiceList/>}/>
-              <Route path='/agreements' element={<AgreementPage/>}/>
+              <Route path='/agreements' element={<AgreementList/>}/>
               <Route path="/support" element={<SupportList/>}/>
               <Route path="/orders/:id" element={<OrderDetail/>}/>
               <Route path="/orders" element={<OrdersList/>}/>

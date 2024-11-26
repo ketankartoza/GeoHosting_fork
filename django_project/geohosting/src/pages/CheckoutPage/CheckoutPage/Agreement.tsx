@@ -29,6 +29,7 @@ interface Agreement {
   id: number,
   name: string;
   template: string;
+  file: string;
   signed?: boolean;
 }
 
@@ -49,7 +50,7 @@ export const AgreementModal = forwardRef(
           async () => {
             try {
               const response = await axios.get(
-                '/api/agreements/',
+                '/api/template/agreements/',
                 {
                   headers: headerWithToken()
                 }
@@ -103,9 +104,19 @@ export const AgreementModal = forwardRef(
                 <Spinner size='xl'/>
               </Box> : unassignAgreement ? <Box padding={8}>
                 <Box className='Markdown'>
-                  <Markdown remarkPlugins={[remarkGfm]}>
-                    {unassignAgreement.template}
-                  </Markdown>
+                  {
+                    unassignAgreement.file ?
+                      <iframe
+                        src={unassignAgreement.file}
+                        width="100%"
+                        height="600px"
+                        style={{ border: "none" }}
+                        title="PDF Viewer"
+                      /> :
+                      <Markdown remarkPlugins={[remarkGfm]}>
+                        {unassignAgreement.template}
+                      </Markdown>
+                  }
                 </Box>
                 <HStack justifyContent='space-between'>
                   <Button

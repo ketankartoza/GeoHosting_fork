@@ -42,3 +42,7 @@ paystackapi==2.1.3
 #django storages
 django-storages==1.14.2
 django-storages[s3]
+
+
+# Convert markdown to pdf
+markdown-pdf==1.3.1

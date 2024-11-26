@@ -4,10 +4,10 @@ GeoHosting.
 
 .. note:: Instance model.
 """
-
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 from geohosting.models.sales_order import SalesOrder
 
@@ -37,6 +37,7 @@ class AgreementDetail(models.Model):
         blank=True, null=True
     )
     file = models.FileField(
+        upload_to='agreements/',
         blank=True, null=True
     )
     version = models.IntegerField(
@@ -67,6 +68,9 @@ class SalesOrderAgreement(models.Model):
     name = models.CharField(
         max_length=256, null=True, blank=True
     )
+    created_at = models.DateTimeField(
+        default=timezone.now
+    )
 
     class Meta:  # noqa
         unique_together = ('sales_order', 'agreement_detail')
@@ -74,6 +78,11 @@ class SalesOrderAgreement(models.Model):
     def __str__(self):
         """Return string representation."""
         return self.name
+
+    @property
+    def content(self):
+        """Return content of sales order agreement."""
+        return self.agreement_detail.template
 
 
 @receiver(post_save, sender=SalesOrderAgreement)
