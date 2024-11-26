@@ -5,6 +5,7 @@ Geohosting.
 .. note:: Factories
 """
 
+from .agreement import *
 from .erp_company import *
 from .package import *
 from .product import *

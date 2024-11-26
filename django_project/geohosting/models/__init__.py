@@ -6,6 +6,7 @@ GeoHosting.
 """
 
 from geohosting.models.activity import *
+from geohosting.models.agreement import *
 from geohosting.models.cluster import *
 from geohosting.models.company import *
 from geohosting.models.country import *

@@ -1,4 +1,5 @@
 from geohosting.admin.activity import *
+from geohosting.admin.agreement import *
 from geohosting.admin.attachment import *
 from geohosting.admin.cluster import *
 from geohosting.admin.company import *
