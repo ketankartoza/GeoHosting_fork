@@ -52,7 +52,7 @@ class AgreementDetail(models.Model):
 
     def __str__(self):
         """Return string representation."""
-        return self.agreement
+        return self.agreement.__str__()
 
 
 class SalesOrderAgreement(models.Model):
@@ -73,7 +73,7 @@ class SalesOrderAgreement(models.Model):
 
     def __str__(self):
         """Return string representation."""
-        return f'{self.sales_order.erpnext_code} - {self.agreement_detail}'
+        return self.name
 
 
 @receiver(post_save, sender=SalesOrderAgreement)

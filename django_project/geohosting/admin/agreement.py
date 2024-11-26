@@ -26,5 +26,5 @@ class AgreementDetailAdmin(admin.ModelAdmin):
 
 @admin.register(SalesOrderAgreement)
 class SalesOrderAgreementAdmin(admin.ModelAdmin):
-    list_display = ('sales_order', 'agreement_detail')
+    list_display = ('name', 'sales_order', 'agreement_detail')
     filter = ('sales_order',)

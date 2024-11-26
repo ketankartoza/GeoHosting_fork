@@ -19,6 +19,7 @@ interface StripePaymentModalProps {
   url: string,
   appName: string;
   companyName?: string | null;
+  agreementIds: number[];
 }
 
 export const PaystackPaymentModal = forwardRef(
@@ -37,6 +38,7 @@ export const PaystackPaymentModal = forwardRef(
                 {
                   app_name: props.appName,
                   company_name: props.companyName ? props.companyName : '',
+                  agreement_ids: JSON.stringify(props.agreementIds)
                 },
                 {
                   headers: { Authorization: `Token ${token}` }

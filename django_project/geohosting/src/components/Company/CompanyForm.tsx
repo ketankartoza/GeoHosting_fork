@@ -129,6 +129,7 @@ export const CompanyForm = forwardRef(
         ).then((result: any) => {
           if (thunkAPIRejected(result)) {
             setErrors(result.payload)
+            dispatch(fetchUserCompanies('/api/companies?page_size=1000'));
             toast.error('Failed to create company.');
           } else if (thunkAPIFulfilled(result)) {
             dispatch(fetchUserCompanies('/api/companies?page_size=1000'));
@@ -175,7 +176,9 @@ export const CompanyForm = forwardRef(
             loading ? <LoadingSpinner/> :
               <ModalBody m={4}>
                 <Box width={{ base: '100%' }}>
-                  <FormControl isInvalid={errors.name && !info.name}>
+                  <FormControl
+                    isInvalid={errors.name && (!info.name || errors.name[0].includes('exists'))}
+                  >
                     <FormLabel>Company Name</FormLabel>
                     <Input
                       isDisabled={loading || createLoading}
@@ -190,7 +193,7 @@ export const CompanyForm = forwardRef(
                       width={'100%'}
                     />
                     {
-                      errors.name && !info.name &&
+                      errors.name && (!info.name || errors.name[0].includes('exists')) &&
                       <FormErrorMessage>{errors.name}</FormErrorMessage>
                     }
                   </FormControl>
