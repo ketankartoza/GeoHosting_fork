@@ -100,9 +100,12 @@ const ProductPricing: React.FC<PackageProps> = ({ product, pkg }) => {
         <Box flexDirection={'row'} display={'flex'} alignItems={'end'}
              justifyContent="center">
           <Text fontSize={{ base: '35', sm: '45', md: '32', xl: '45' }}
-                fontWeight={'bold'} color={'gray.600'}>
+                fontWeight={'bold'} color={'gray.600'} lineHeight={10}>
             {!available ? pkg.currency : formatPrice(pkg.price, pkg.currency)}
           </Text>
+        </Box>
+        <Box fontSize={{ base: '15', sm: '25', md: '12', xl: '25' }}
+             color={'gray.600'}>/ month
         </Box>
       </Box>
 

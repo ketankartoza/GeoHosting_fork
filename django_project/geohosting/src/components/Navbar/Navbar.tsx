@@ -131,7 +131,7 @@ const Navbar: React.FC = () => {
               fontSize="md"
               _hover={STYLES.linkHovered}
             >
-              GeoHosting
+              GeoSpatialHosting
             </ChakraLink>
             <ChakraLink
               as={RouterLink}
