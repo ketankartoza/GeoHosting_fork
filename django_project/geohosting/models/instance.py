@@ -5,6 +5,7 @@ GeoHosting.
 .. note:: Instance model.
 """
 
+import requests
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.mail import EmailMessage
@@ -26,6 +27,7 @@ class InstanceStatus:
     """Instance Status."""
 
     DEPLOYING = 'Deploying'
+    STARTING_UP = 'Starting Up'
     ONLINE = 'Online'
     OFFLINE = 'Offline'
 
@@ -49,6 +51,7 @@ class Instance(models.Model):
         default=InstanceStatus.DEPLOYING,
         choices=(
             (InstanceStatus.DEPLOYING, InstanceStatus.DEPLOYING),
+            (InstanceStatus.STARTING_UP, InstanceStatus.STARTING_UP),
             (InstanceStatus.ONLINE, InstanceStatus.ONLINE),
             (InstanceStatus.OFFLINE, InstanceStatus.OFFLINE),
         )
@@ -81,14 +84,30 @@ class Instance(models.Model):
         """Return url."""
         return f'https://{self.name}.{self.cluster.domain}'
 
+    def starting_up(self):
+        """Make instance online."""
+        if self.status == InstanceStatus.STARTING_UP:
+            return
+
+        self.status = InstanceStatus.STARTING_UP
+        self.save()
+
     def online(self):
         """Make instance online."""
+        if self.status == InstanceStatus.STARTING_UP:
+            self.send_credentials()
+
+        if self.status == InstanceStatus.ONLINE:
+            return
+
         self.status = InstanceStatus.ONLINE
-        self.send_credentials()
         self.save()
 
     def offline(self):
         """Make instance offline."""
+        if self.status == InstanceStatus.OFFLINE:
+            return
+
         self.status = InstanceStatus.OFFLINE
         self.save()
 
@@ -105,6 +124,18 @@ class Instance(models.Model):
             )
         )
         return credentials
+
+    def checking_server(self):
+        """Check server is online or offline."""
+        print(self.url)
+        if self.status == InstanceStatus.DEPLOYING:
+            return
+
+        response = requests.get(self.url)
+        if response.status_code == 200:
+            self.online()
+        else:
+            self.offline()
 
     def send_credentials(self):
         """Send credentials."""

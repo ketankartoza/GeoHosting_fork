@@ -123,6 +123,16 @@ class ControllerTest(TestCase):
                     "inProgress": False
                 }
             )
+            requests_mocker.get(
+                (
+                    'https://server-test.sta.do.kartoza.com'
+                ),
+                status_code=200,
+                json={
+                    "result": "SUCCESS",
+                    "inProgress": False
+                }
+            )
 
             os.environ['PROXY_API_KEY'] = ''
             self.assertEqual(
@@ -229,6 +239,11 @@ class ControllerTest(TestCase):
                         'source': 'ArgoCD'
                     }
                 )
+                self.assertEqual(
+                    activity.instance.status, InstanceStatus.STARTING_UP
+                )
+
+                activity.instance.checking_server()
                 self.assertEqual(
                     activity.instance.status, InstanceStatus.ONLINE
                 )

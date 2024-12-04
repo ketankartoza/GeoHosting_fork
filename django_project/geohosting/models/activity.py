@@ -180,7 +180,7 @@ class Activity(models.Model):
         # Update instance status
         if self.instance:
             if self.status == ActivityStatus.SUCCESS:
-                self.instance.online()
+                self.instance.starting_up()
             if self.status == ActivityStatus.ERROR:
                 self.instance.offline()
 

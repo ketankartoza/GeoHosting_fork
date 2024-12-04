@@ -152,7 +152,7 @@ const Card: React.FC<CardProps> = ({ instanceInput }) => {
           />
           <Text>Online</Text>
         </>
-      case 'Deploying':
+      default:
         return <>
           <Box
             animation={spinAnimation}
@@ -161,10 +161,8 @@ const Card: React.FC<CardProps> = ({ instanceInput }) => {
           >
             <FaGear/>
           </Box>
-          <Text>Deploying</Text>
+          <Text>{instance.status}</Text>
         </>
-      default:
-        return null
     }
   }
 
