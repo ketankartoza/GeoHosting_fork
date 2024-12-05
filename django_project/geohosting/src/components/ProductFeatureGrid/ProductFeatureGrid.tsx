@@ -10,20 +10,15 @@ interface FeatureGridProps {
 const FeatureGrid: React.FC<FeatureGridProps> = ({ product }) => {
   return (
     <Box
-      width="100%"
-      maxWidth="auto"
-      height="100%"
-      maxHeight="auto"
       overflow="auto"
       display="flex"
       justifyContent="center"
       alignItems="center"
-      padding={10}
     >
       <SimpleGrid
         columns={{ base: 1, md: 2 }}
-        spacingX={{ base: 4, md: 0 }}
-        spacingY={{ base: 4, md: 10 }}
+        spacingX={10}
+        spacingY={10}
         width="100%"
         height="100%"
         justifyItems="center"
@@ -52,7 +47,7 @@ const FeatureGrid: React.FC<FeatureGridProps> = ({ product }) => {
         ].map((feature, index) => (
           <Box
             key={index}
-            width={{ base: "100%", md: "95%" }} 
+            width="100%"
             height={{ base: "auto", md: "300px" }}
             position="relative"
             textAlign={{ base: "center", md: "left" }}

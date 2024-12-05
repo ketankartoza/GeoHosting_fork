@@ -37,23 +37,17 @@ const ProductOverview = ({ productMeta, medias, productName }: { productMeta: { 
     <>
       <Box
         width="100%"
-        backgroundColor="blue.400"
-        paddingX={{ base: 4, md: 10, lg: 40 }}
-        paddingY={{ base: 6, md: 10 }}
+        paddingY={10}
       >
         {imagesToDisplay.map((image, index) => (
           <Box
             key={image.id}
-            color="white"
-            padding={4}
-            backgroundColor="blue.400"
             marginBottom={{ base: 6, md: 10 }}
           >
             <Flex
               direction={{ base: "column", md: index === 1 ? "row" : "column" }}
               alignItems={{ base: "center", md: index === 1 ? "flex-start" : "center" }}
               justifyContent={{ base: "center", md: index === 1 ? "center" : "flex-start" }}
-              backgroundColor="blue.400"
               minHeight="200px"
             >
               {index === 1 ? (
@@ -96,32 +90,31 @@ const ProductOverview = ({ productMeta, medias, productName }: { productMeta: { 
                     marginBottom={{ base: 4, md: 0 }}
                   >
                     {index === 0 && (
-                      <Heading as="h3" size="lg" textAlign="center" marginBottom={5} marginTop={5}>
-                        What {productName} Can Do for You
+                      <Heading fontSize={48}  size="lg" textAlign="center" marginBottom={5} marginTop={5}>
+                        What {productName} Can Do?
                       </Heading>
                     )}
-                    <Heading as="h3" size="lg" textAlign="center" marginBottom={5}>
+                    <Heading size="lg" textAlign="center" marginBottom={3} fontSize={32}>
                       {overviewHeader}
                     </Heading>
-                    <ImageWithSkeleton
-                      src={image.image}
-                      alt={image.title}
-                      width="100%"
-                      height="auto"
-                      borderRadius="md"
-                      boxShadow="0px 4px 6px rgba(0, 0, 0, 0.2)"
-                      onClick={() => handleImageHover(image.image)}
-                      marginBottom={5}
-                    />
                   </Box>
                   <Box
                     flex="1"
-                    width={{ base: "100%", md: "60%" }}
+                    width={{ base: "100%", md: "80%", xl: "60%" }}
+                    mb={8}
                   >
-                    <Text marginTop={5} textAlign="center" fontSize={{ base: "md", md: "lg" , xl: 'xl' }}>
-                      {overviewDescription}
-                    </Text>
+                    <Text textAlign="center" fontSize={16} dangerouslySetInnerHTML={{ __html: overviewDescription }}/>
                   </Box>
+                  <ImageWithSkeleton
+                    src={image.image}
+                    alt={image.title}
+                    width="100%"
+                    height="auto"
+                    borderRadius="md"
+                    boxShadow="0px 4px 6px rgba(0, 0, 0, 0.2)"
+                    onClick={() => handleImageHover(image.image)}
+                    marginBottom={5}
+                  />
                 </>
               )}
             </Flex>

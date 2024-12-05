@@ -47,7 +47,7 @@ const NavbarContent: React.FC<NavbarContentProps> = ({ onOpen }) => {
         <ChakraLink
           key={product.name}
           as="button"
-          onClick={() => token ? navigate('/app/' + product.name) : onOpen()}
+          onClick={() => navigate('/app/' + product.name)}
           fontSize="md"
           _hover={STYLES.linkHovered}
         >

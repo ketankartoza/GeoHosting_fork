@@ -52,78 +52,67 @@ const OverviewPage: React.FC = () => {
               <LoadingSpinner/>
             </Box>
           )}
-          <Container maxW='100%' mt="80px" mb="80px" bg="transparent" pl={0} pr={0}>
-            {!detailLoading && productDetail && (
-              <>
-                <Container maxW='container.xl' textAlign="center" mt="80px" >
-                    <Heading as="h1" size="xl" fontSize={{base: 40, sm: 50}} display={'flex'} justifyContent={'center'} alignItems={'center'} color={'gray.600'}>
-                      <Box justifyContent={'center'} display={'flex'}>
-                        <img src={productDetail.image} width={115}/>
-                      </Box>
-                      {productDetail.name}
-                    </Heading>
-                    <Container maxW='container.2lg'>
-                      <Heading as="h2" fontSize={{ base: '20px', md: '2xl', xl: '5xl' }} pt={3} pb={3} fontWeight={'light'}>{productDetail.description}</Heading>
-                    </Container>
-                    <Container maxW='container.xl' mt={5} mb={5}>
-                      <Text color={'gray.700'} fontWeight="bold" fontSize={{ base: 'lg', sm: 'xl', md: '2xl', xl: '4xl' }} >
-                        Tailor Your Experience: Find the Right Plan for You
-                      </Text>
-                    </Container>
-                    <SimpleGrid columns={{ base: 1, md: 3, lg: 3 }}
-                                spacingX={{ base: '40px', md: '10px', xl: '30px' }}
-                                spacingY={{ base: 10, md: 10, lg: 0 }}
-                                mt={5} mb={10}
-                                pl={{ base: '5', sm: '20', md: '0', xl: '10' }}
-                                pr={{ base: '5', sm: '20', md: '0', xl: '10' }}>
-                    {productDetail.packages.map((pkg: Package) => (
-                        <Suspense fallback={<LoadingSpinner/>}>
-                          <ProductPricing key={pkg.id} product={productDetail} pkg={pkg}/>
-                        </Suspense>
-                      ))}
-                    </SimpleGrid>
-                </Container>
-                <Suspense fallback={<LoadingSpinner/>}>
-                  <ProductOverview productMeta={ productDetail.product_meta } medias={productDetail.images} productName={productDetail.name}/>
-                </Suspense>
-                <Box 
-                  width={{ base: '100%', md: '90vw', xl: '100%' }} 
-                  maxW="1500px" 
-                  mt={5} 
-                  mb={10} 
-                  textAlign={"center"} 
-                  mx="auto"
-
-                >
-                  <Text color={'gray.700'} fontWeight="bold" fontSize={{ base: 'xl', md: '2xl', xl: '4xl' }}  mb={15}>
-                    Why Choose {productDetail.name}?
-                  </Text>
+          <Container maxW='100%' my={20} bg="transparent"  alignItems='center' display='flex' flexDirection='column'>
+            <Box width={1240} maxWidth={"100%"}>
+              {!detailLoading && productDetail && (
+                <>
+                  <Container maxW='container.xl' textAlign="center" >
+                      <Heading as="h1" size="xl" fontSize={{base: 40, sm: 50}} display={'flex'} justifyContent={'center'} alignItems={'center'} color={'gray.600'}>
+                        <Box justifyContent={'center'} display={'flex'}>
+                          <img src={productDetail.image} width={115}/>
+                        </Box>
+                        {productDetail.name} Hosting
+                      </Heading>
+                      <Container maxW='container.2lg'>
+                        <Heading fontSize={32} pt={6} pb={3} mb={12} fontWeight={'bold'} color={'gray.500'}>{productDetail.description}</Heading>
+                      </Container>
+                      <SimpleGrid columns={{ base: 1, md: 3, lg: 3 }}
+                                  spacingX={{ base: '40px', md: '10px', xl: '30px' }}
+                                  spacingY={{ base: 10, md: 10, lg: 0 }}
+                                  mt={5} mb={10} px={0}>
+                      {productDetail.packages.map((pkg: Package) => (
+                          <Suspense fallback={<LoadingSpinner/>}>
+                            <ProductPricing key={pkg.id} product={productDetail} pkg={pkg}/>
+                          </Suspense>
+                        ))}
+                      </SimpleGrid>
+                  </Container>
                   <Suspense fallback={<LoadingSpinner/>}>
-                    <ProductFeatureGrid product={productDetail}/>
+                    <ProductOverview productMeta={ productDetail.product_meta } medias={productDetail.images} productName={productDetail.name}/>
                   </Suspense>
-                </Box>
-                <Box 
-                  width={{ base: '100%', md: '90vw', xl: '100%' }} 
-                  maxW="1500px"  
-                  mt={5} 
-                  mb={10} 
-                  textAlign={"center"} 
-                  mx="auto"
-                >
-                  <Text 
-                    color={'gray.700'} 
-                    fontWeight="bold" 
-                    fontSize={{ base: 'xl', md: '2xl', xl: '4xl' }}  
-                    mb={15}
+                  <Box
+                    width={"100%"}
+                    mb={10}
+                    textAlign={"center"}
+                    mx="auto"
                   >
-                    Start Transforming your Data with {productDetail.name} Today
-                  </Text>
-                  <Suspense fallback={<LoadingSpinner/>}>
-                    <ProductSupportGrid product={productDetail}/>
-                  </Suspense>
-                </Box>
-              </>
-            )}
+                    <Text color={'gray.700'} fontWeight="bold" fontSize={48}  mb={12}>
+                      Why Choose {productDetail.name}?
+                    </Text>
+                    <Suspense fallback={<LoadingSpinner/>}>
+                      <ProductFeatureGrid product={productDetail}/>
+                    </Suspense>
+                  </Box>
+                  <Box
+                    width={"100%"}
+                    mt={5}
+                    mb={10}
+                    textAlign={"center"}
+                  >
+                    <Text
+                      color={'gray.700'}
+                      fontWeight="bold"
+                      fontSize={48}
+                    >
+                      Start Transforming your Data with {productDetail.name} Today!
+                    </Text>
+                    <Suspense fallback={<LoadingSpinner/>}>
+                      <ProductSupportGrid product={productDetail}/>
+                    </Suspense>
+                  </Box>
+                </>
+              )}
+            </Box>
           </Container>
         </Box>
         <Footer/>

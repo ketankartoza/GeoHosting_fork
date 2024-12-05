@@ -76,7 +76,6 @@ const ProductPricing: React.FC<PackageProps> = ({ product, pkg }) => {
         textColor={'white'}
         width={'100%'}
         borderTopRadius={15}
-        position="sticky"
         top="0"
         zIndex="1"
         pt={2}

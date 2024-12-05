@@ -5,24 +5,20 @@ import { SupportTicketFormModal ,SupportTicketFormModalHandle } from '../Support
 
 const Card = ({ icon, title, description, buttonText, descriptionMb = "4", definedWidth, onButtonClick }) => (
   <Box
-    width={{ base: '100%', md: '48%' }}
-    borderRadius="8px"
+    width={"100%"}
     p="4"
     bg="white"
     display="flex"
     flexDirection="column"
     justifyContent="space-between"
-    boxShadow="sm"
   >
     <Flex
       direction={{ base: 'column', md: 'row' }}
       alignItems={{ base: 'center', md: 'start' }}
-      gap="26px"
+      gap={12}
       mb="4"
     >
       <Box
-        width="100px"
-        height="100px"
         display="flex"
         alignItems="center"
         justifyContent="center"
@@ -35,7 +31,7 @@ const Card = ({ icon, title, description, buttonText, descriptionMb = "4", defin
           fontFamily="Lato"
           fontStyle="normal"
           fontWeight="700"
-          fontSize={{ base: '20px', md: '24px' }}
+          fontSize={{ base: 24, md: 32 }}
           lineHeight={{ base: '28px', md: '38px' }}
           color="#3E3E3E"
           mb="4"
@@ -50,7 +46,7 @@ const Card = ({ icon, title, description, buttonText, descriptionMb = "4", defin
           lineHeight={{ base: '1.5', md: '1.6' }}
           color="#555555"
           mb={descriptionMb}
-          width={definedWidth}
+          width="100%"
         >
           {description}
         </Text>
@@ -101,7 +97,6 @@ const ProductSupportGrid = ({ product }) => {
       direction={{ base: 'column', md: 'row' }}
       justify="space-between"
       width="100%"
-      maxWidth="1048px"
       p="4"
       m="auto"
       gap={{ base: '16px', md: '10px' }}
@@ -113,7 +108,7 @@ const ProductSupportGrid = ({ product }) => {
         buttonText="GitHub"
         descriptionMb="10"
         onButtonClick={handleGithubClick}
-        definedWidth={{ base: '100%', md: '100%' }}
+        definedWidth="100%"
       />
       <Card
         icon={FaHeadset}
