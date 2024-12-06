@@ -106,7 +106,7 @@ const Navbar: React.FC = () => {
           <HStack spacing="24px">
             <ChakraLink
               as={RouterLink}
-              to="https://kartoza.com/"
+              to="/"
               fontSize="md"
               _hover={STYLES.linkHovered}
               display='flex'
@@ -117,27 +117,27 @@ const Navbar: React.FC = () => {
               }}
             >
               <Image
-                src='/static/images/kartoza-logo-only.png'
+                src='/static/images/logos/geohosting-full-white.svg'
                 alt='Kartoza Logo'
                 style={{ 'cursor': 'pointer' }}
-                width={8}
                 mr={2}
               />
-              Kartoza
             </ChakraLink>
             <ChakraLink
               as={RouterLink}
-              to="/"
+              to="https://kartoza.com"
               fontSize="md"
               _hover={STYLES.linkHovered}
+              target='_blank'
             >
-              GeoSpatialHosting
+              Kartoza
             </ChakraLink>
             <ChakraLink
               as={RouterLink}
               to="https://kartoza.com/about"
               fontSize="md"
               _hover={STYLES.linkHovered}
+              target='_blank'
             >
               About us
             </ChakraLink>
