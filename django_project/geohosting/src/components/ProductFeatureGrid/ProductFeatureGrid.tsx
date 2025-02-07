@@ -1,6 +1,6 @@
 import React from "react";
-import { Box, SimpleGrid, Heading, Text, Icon, Flex } from "@chakra-ui/react";
-import { FaLightbulb, FaSitemap, FaUser, FaCode } from "react-icons/fa";
+import { Box, Flex, Heading, Icon, SimpleGrid, Text } from "@chakra-ui/react";
+import { FaCode, FaLightbulb, FaSitemap, FaUser } from "react-icons/fa";
 import { Product } from "../../redux/reducers/productsSlice";
 
 interface FeatureGridProps {
@@ -27,22 +27,22 @@ const FeatureGrid: React.FC<FeatureGridProps> = ({ product }) => {
           {
             title: "What does it do?",
             icon: FaLightbulb,
-            description: `With ${product.name} you can aggregate, filter, and summarise your data. Establish sales catchment areas and connect sales performance to those areas. Establish demographic zones and connect health, insurance, or other outcomes to those zones.`,
+            description: product.product_meta.find(meta => meta.key === 'what_does_it_do')?.value,
           },
           {
             title: "How does it work?",
             icon: FaSitemap,
-            description: `Start by creating a new project. Add indicators (e.g., sales numbers per district over time) to your project. Add context layers (e.g., roads, shop locations, etc.) to help your readers contextualize the data. Use our time slider to scroll through time. Deep dive into your data with widgets and filters.`,
+            description: product.product_meta.find(meta => meta.key === 'how_does_it_work')?.value,
           },
           {
             title: "Who is it for?",
             icon: FaUser,
-            description: `${product.name} is for organizations and governments that need to track indicators at an administrative unit level (e.g., countries, states, districts, catchments, etc.)`,
+            description: product.product_meta.find(meta => meta.key === 'who_is_it_for')?.value,
           },
           {
             title: "Open Platform",
             icon: FaCode,
-            description: `${product.name} is open source (AGPL) and has an open platform approach. Kartoza has built the platform under contract for our clients who kindly wanted to share the outcome of this work with the world.`,
+            description: product.product_meta.find(meta => meta.key === 'open_platform')?.value,
           },
         ].map((feature, index) => (
           <Box
@@ -68,7 +68,8 @@ const FeatureGrid: React.FC<FeatureGridProps> = ({ product }) => {
                 height="100%"
               >
                 <Box mb={{ base: 4, md: 0 }} mr={{ md: 6 }}>
-                  <Icon as={feature.icon} w={32} h={32} color="customOrange.500" />
+                  <Icon as={feature.icon} w={32} h={32}
+                        color="customOrange.500"/>
                 </Box>
                 <Box>
                   <Heading size="lg" mb={4}>

@@ -44,7 +44,7 @@ const ProductPricing: React.FC<PackageProps> = ({ product, pkg }) => {
   return (
     <Box
       key={pkg.id}
-      height={475}
+      height={"auto"}
       backgroundColor={'gray.200'}
       borderRadius={15}
       display={'flex'}
@@ -111,7 +111,7 @@ const ProductPricing: React.FC<PackageProps> = ({ product, pkg }) => {
       <Box
         mt={5}
         textAlign="center"
-        width={{ base: "50%", md: '80%', xl: "50%" }}
+        width={{ base: "60%", md: '80%', xl: "60%" }}
         alignItems="center"
         filter={!available ? 'blur(4px)' : 'none'}
       >
@@ -129,7 +129,7 @@ const ProductPricing: React.FC<PackageProps> = ({ product, pkg }) => {
         </List>
       </Box>
 
-      <Box mt={10} width="100%" pl={7} pr={7}>
+      <Box mt={10} mb={6} width="100%" pl={7} pr={7}>
         <Tooltip label="Product is not available" isDisabled={available}>
           <Button
             size={'xl'}

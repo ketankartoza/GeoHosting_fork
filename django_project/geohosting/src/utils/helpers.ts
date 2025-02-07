@@ -27,7 +27,7 @@ export const packageName = (pkg: Package) => {
     return 'Basic';
   } else if (pkg.name.toLowerCase().includes('medium')) {
     return 'Advanced';
-  } else {
+  } else if (pkg.name.toLowerCase().includes('large')) {
     return 'Gold';
   }
 };

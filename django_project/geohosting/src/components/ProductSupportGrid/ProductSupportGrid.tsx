@@ -114,7 +114,7 @@ const ProductSupportGrid = ({ product }) => {
         icon={FaHeadset}
         title="Support"
         description={
-          "We provide a full support service with our hosting packages. Need a custom solution? Let's discuss how we can customize the platform to suit your organisation's specific requirements."
+          product.product_meta.find(meta => meta.key === 'support_description')?.value
         }
         buttonText="Support Center"
         descriptionMb="2"
