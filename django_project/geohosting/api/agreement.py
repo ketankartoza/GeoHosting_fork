@@ -56,7 +56,7 @@ class MyAgreementViewSet(
         # File from instance
         if instance.file:
             return FileResponse(
-                open(instance.file.path, 'rb'),
+                instance.file.open('rb'),
                 as_attachment=True,
                 filename=f'{instance.name}.pdf'
             )

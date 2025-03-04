@@ -177,25 +177,25 @@ export const AgreementMarkdown = (
       }
     });
   }
-
   /** Generate pdf blob **/
   const generatePdfBlob = async (element) => {
     const canvas = await html2canvas(element, { scale: 2 }); // Increase scale for better quality
     const imgData = canvas.toDataURL('image/png');
 
     const pdf = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = 210; // A4 width in mm
-    const pageHeight = 297; // A4 height in mm
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    const pageWidth = 210;
+    const pageHeight = 297;
+    const padding = 6;
+    const imgWidth = pageWidth - 2 * padding; // Adjust width with padding
+    const imgHeight = (canvas.height * imgWidth) / canvas.width; // Maintain aspect ratio
 
-    let yPosition = 0;
+    let yPosition = padding; // Start with padding from the top
 
-    while (yPosition < imgHeight) {
-      pdf.addImage(imgData, 'PNG', 0, -yPosition, imgWidth, imgHeight);
-      yPosition += pageHeight;
+    while (yPosition - padding < imgHeight) {
+      pdf.addImage(imgData, 'PNG', padding, -yPosition + padding, imgWidth, imgHeight);
+      yPosition += pageHeight - 2 * padding; // Account for top and bottom padding
 
-      if (yPosition < imgHeight) {
+      if (yPosition - padding < imgHeight) {
         pdf.addPage();
       }
     }
