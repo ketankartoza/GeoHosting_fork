@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   Box,
   IconButton,
+  Spinner,
   Table,
   Tbody,
   Td,
@@ -26,7 +27,9 @@ interface CardProps {
 
 /** Card for support **/
 const Card: React.FC<CardProps> = ({ agreement }) => {
+  const [downloading, setDownloading] = useState(false);
   const downloadFile = async () => {
+    setDownloading(true)
     try {
       const response = await axios.get(agreement.download_url,
         {
@@ -45,8 +48,10 @@ const Card: React.FC<CardProps> = ({ agreement }) => {
       // Clean up
       document.body.removeChild(link);
       URL.revokeObjectURL(link.href);
+      setDownloading(false)
     } catch (error) {
       toast.error("Error downloading the file.");
+      setDownloading(false)
     }
   }
   return <Tr
@@ -82,13 +87,14 @@ const Card: React.FC<CardProps> = ({ agreement }) => {
           as="a"
           download
           aria-label={`Download ${agreement.name}`}
-          icon={<DownloadIcon/>}
+          icon={downloading ? <Spinner/> : <DownloadIcon/>}
+          isDisabled={downloading}
           onClick={downloadFile}
           colorScheme="orange"
-          bg="orange.300"
+          bg="orange.300 !important"
           color="white"
           variant="solid"
-          cursor='pointer'
+          cursor={downloading ? 'progress! important' : 'pointer'}
           _hover={{ bg: 'orange.400' }}
         />
       </Tooltip>
