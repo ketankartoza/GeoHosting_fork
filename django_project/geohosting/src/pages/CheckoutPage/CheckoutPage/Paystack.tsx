@@ -9,17 +9,18 @@ import {
   Spinner,
   useDisclosure
 } from "@chakra-ui/react";
-import axios from "axios";
 import { useSelector } from "react-redux";
 import PaystackPop from '@paystack/inline-js';
 import { toast } from "react-toastify";
 import { RootState } from "../../../redux/store";
+import { Agreement } from "./Agreement";
+import { postData } from "./post";
 
 interface StripePaymentModalProps {
   url: string,
   appName: string;
   companyName?: string | null;
-  agreementIds: number[];
+  agreements: Agreement[];
 }
 
 export const PaystackPaymentModal = forwardRef(
@@ -33,17 +34,10 @@ export const PaystackPaymentModal = forwardRef(
         (
           async () => {
             try {
-              const response = await axios.post(
-                props.url,
-                {
-                  app_name: props.appName,
-                  company_name: props.companyName ? props.companyName : '',
-                  agreement_ids: JSON.stringify(props.agreementIds)
-                },
-                {
-                  headers: { Authorization: `Token ${token}` }
-                }
-              );
+              const response = await postData(
+                token, props.url,
+                props.appName, props.companyName, props.agreements
+              )
               onClose()
               const paystackInstance = new PaystackPop();
               const transaction = paystackInstance.resumeTransaction(response.data.key);

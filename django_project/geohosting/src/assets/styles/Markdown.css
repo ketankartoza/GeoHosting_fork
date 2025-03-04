@@ -94,3 +94,21 @@
   padding: 6px;
   border: 1px solid gray;
 }
+
+.Markdown input {
+  height: 30px;
+}
+
+.Markdown input,
+.Markdown canvas {
+  border: 1px solid #eee;
+  width: 100%;
+  background-color: rgba(200, 200, 200, 0.2);
+  border-bottom: 1px solid #aaa;
+  font-size: 0.8rem;
+}
+
+.Markdown input:focus-visible,
+.Markdown input:focus {
+  outline: none;
+}

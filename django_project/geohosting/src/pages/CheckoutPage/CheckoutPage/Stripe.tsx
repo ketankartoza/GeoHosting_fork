@@ -23,6 +23,8 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { Agreement } from "./Agreement";
+import { postData } from "./post";
 
 interface EmbeddedCheckoutProviderProps {
   clientSecret?: string | null;
@@ -34,7 +36,7 @@ interface StripePaymentModalProps {
   url: string;
   appName: string;
   companyName?: string | null;
-  agreementIds: number[];
+  agreements: Agreement[];
 }
 
 export const StripePaymentModal = forwardRef(
@@ -58,17 +60,10 @@ export const StripePaymentModal = forwardRef(
                 })
                 setStripePromise(loadStripe(setting.data))
               }
-              const response = await axios.post(
-                props.url,
-                {
-                  app_name: props.appName,
-                  company_name: props.companyName ? props.companyName : '',
-                  agreement_ids: JSON.stringify(props.agreementIds),
-                },
-                {
-                  headers: { Authorization: `Token ${token}` }
-                }
-              );
+              const response = await postData(
+                token, props.url,
+                props.appName, props.companyName, props.agreements
+              )
               setStripeOptions(
                 { clientSecret: response.data.key }
               )

@@ -24,7 +24,7 @@ import CheckoutTracker
   from "../../../components/ProgressTracker/CheckoutTracker";
 import { OrderSummary } from "../OrderSummary"
 import { getUserLocation } from "../../../utils/helpers";
-import { AgreementModal } from "./Agreement";
+import { Agreement, AgreementModal } from "./Agreement";
 
 const PaymentMethods = {
   STRIPE: 'STRIPE',
@@ -54,7 +54,7 @@ export const MainCheckoutPageComponent: React.FC<CheckoutPageModalProps> = (
   const paystackPaymentModalRef = useRef(null);
   const agreementModalRef = useRef(null);
   const [currentMethod, setCurrentMethod] = useState<string | null>(null);
-  const [agreementIds, setAgreementIds] = useState<number[]>([]);
+  const [agreements, setAgreements] = useState<Agreement[]>([]);
 
   useEffect(() => {
     (
@@ -71,7 +71,7 @@ export const MainCheckoutPageComponent: React.FC<CheckoutPageModalProps> = (
 
   // Checkout function
   async function agreement(method: string) {
-    setAgreementIds([])
+    setAgreements([])
     setCurrentMethod(method)
     // @ts-ignore
     agreementModalRef?.current.open()
@@ -95,8 +95,6 @@ export const MainCheckoutPageComponent: React.FC<CheckoutPageModalProps> = (
       }
     }
   }
-
-  console.log(agreementIds)
 
   return (
     <>
@@ -166,19 +164,20 @@ export const MainCheckoutPageComponent: React.FC<CheckoutPageModalProps> = (
         url={stripeUrl}
         appName={appName}
         companyName={companyName}
-        agreementIds={agreementIds}
+        agreements={agreements}
       />
       <PaystackPaymentModal
         ref={paystackPaymentModalRef}
         url={paystackUrl}
         appName={appName}
         companyName={companyName}
-        agreementIds={agreementIds}
+        agreements={agreements}
       />
       <AgreementModal
         ref={agreementModalRef}
-        isDone={(agreementIds) => {
-          setAgreementIds(agreementIds)
+        companyName={companyName}
+        isDone={(agreements) => {
+          setAgreements(agreements)
           checkout()
         }}
       />

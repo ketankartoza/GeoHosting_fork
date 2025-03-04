@@ -39,6 +39,8 @@ def create_stripe_price(
 
     try:
         for feature in features:
+            if not feature:
+                continue
             try:
                 feature = stripe.entitlements.Feature.list(
                     lookup_key=feature

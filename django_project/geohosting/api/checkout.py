@@ -45,9 +45,15 @@ class CheckoutAPI(PaymentAPI):
             payment_method=self.payment_method
         )
         for agreement_id in agreement_ids:
+            file = None
+            try:
+                file = request.FILES.getlist(f'agreement-{agreement_id}')[0]
+            except IndexError:
+                pass
             SalesOrderAgreement.objects.create(
                 agreement_detail=AgreementDetail.objects.get(pk=agreement_id),
-                sales_order=order
+                sales_order=order,
+                file=file
             )
         return self.get_post(order=order)
 

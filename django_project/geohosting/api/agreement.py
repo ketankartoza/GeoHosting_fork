@@ -46,11 +46,22 @@ class MyAgreementViewSet(
         """Return instances for the authenticated user."""
         return SalesOrderAgreement.objects.select_related(
             'agreement_detail', 'sales_order'
-        ).filter(sales_order__customer=self.request.user).order_by('name')
+        ).filter(sales_order__customer=self.request.user).order_by(
+            '-created_at'
+        )
 
     @action(detail=True, methods=["get"])
     def download(self, request, pk=None):
         instance = self.get_object()
+        # File from instance
+        if instance.file:
+            return FileResponse(
+                open(instance.file.path, 'rb'),
+                as_attachment=True,
+                filename=f'{instance.name}.pdf'
+            )
+
+        # File from agreement
         agreement = instance.agreement_detail
         if agreement.file:
             return FileResponse(
@@ -63,6 +74,7 @@ class MyAgreementViewSet(
             "table {border-collapse: collapse;}"
             "th, td {border: 1px solid gray; padding: 5px}"
         )
+        agreement = instance.agreement_detail
         pdf = MarkdownPdf(toc_level=2)
         pdf.add_section(Section(agreement.template), user_css=css)
         pdf_buffer = io.BytesIO()

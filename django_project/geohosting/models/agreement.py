@@ -71,6 +71,10 @@ class SalesOrderAgreement(models.Model):
     created_at = models.DateTimeField(
         default=timezone.now
     )
+    file = models.FileField(
+        upload_to='agreements/',
+        blank=True, null=True
+    )
 
     class Meta:  # noqa
         unique_together = ('sales_order', 'agreement_detail')
