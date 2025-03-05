@@ -31,7 +31,6 @@ import jsPDF from 'jspdf';
 import { headerWithToken } from "../../../utils/helpers";
 import { AppDispatch, RootState } from "../../../redux/store";
 import { fetchUserProfile } from "../../../redux/reducers/profileSlice";
-
 import '../../../assets/styles/Markdown.css';
 
 export interface Agreement {
@@ -51,16 +50,28 @@ interface Props {
 }
 
 const MarkdownInput = ({ children, name, onChange }) => {
+  const [value, setValue] = useState('');
+
+  useEffect(() => {
+    onChange(value);
+  }, [value]);
+
   return (
     <td>
       {
         children.split(name).map((part, index) => (
           <React.Fragment key={index}>
-            {index > 0 &&
-              <input
-                type="text" id={name.replace(/[\s\[\]]/g, '')}
-                onChange={(evt) => onChange(evt.target.value)}
-              />}
+            {
+              index > 0 && <>
+                <input
+                  id={name.replace(/[\s\[\]]/g, '')}
+                  type="text"
+                  value={value}
+                  onChange={(evt) => setValue(evt.target.value)}
+                />
+                <span className='Read'>{value}</span>
+              </>
+            }
             {part}
           </React.Fragment>
         ))
@@ -105,6 +116,7 @@ const SignaturePad = ({ onChange }) => {
       }}
     />
     <Box
+      className='Button'
       style={{ fontSize: "0.8rem", cursor: "pointer" }}
       onClick={clearSignature}
     >
@@ -125,24 +137,21 @@ const MarkdownRenderer = memo(
         components={{
           td: ({ children }) => {
             if (typeof children === "string") {
-              if (children.includes("[Representative Name]")) {
-                onChange('Representative Name', '')
-                return <MarkdownInput
-                  children={children}
-                  name={"[Representative Name]"}
-                  onChange={(val) => onChange('Representative Name', val)}
-                />
-              } else if (children.includes("[Title]")) {
-                onChange('Title', '')
-                return <MarkdownInput
-                  children={children} name={"[Title]"}
-                  onChange={(val) => onChange('Title', val)}
-                />
-              } else if (children.includes("[Signature]")) {
+              if (children.includes("[Signature]")) {
                 onChange('Signature', '')
                 return <SignaturePad
                   onChange={(val) => onChange('Signature', val)}
                 />
+              } else {
+                const match = children.match(/\[([^\]]+)\]/);
+                if (match) {
+                  const extractedText = match[1];
+                  return <MarkdownInput
+                    children={children}
+                    name={`[${extractedText}]`}
+                    onChange={(val) => onChange(extractedText, val)}
+                  />;
+                }
               }
             }
             return <td>{children}</td>;
@@ -187,7 +196,7 @@ export const AgreementMarkdown = (
     const pageWidth = 210;
     const pageHeight = 297;
     const marginX = 6;
-    const imgWidth = pageWidth - 2 * marginX; // Adjust width with padding
+    const imgWidth = pageWidth - 2 * marginX;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
     let yPosition = 0;
@@ -204,13 +213,11 @@ export const AgreementMarkdown = (
     return pdf.output('blob');
   };
 
-
-  // @ts-ignore
   return <Box>
-    <Box id="Markdown"
-         className='Markdown'
-         padding={8}
-         paddingTop={0}
+    <Box
+      id="Markdown"
+      padding={8}
+      paddingTop={0}
     >
       <MarkdownRenderer
         content={unassignAgreement.template}
@@ -239,8 +246,13 @@ export const AgreementMarkdown = (
         onClick={
           async () => {
             setGenerating(true)
-            const element = document.getElementById('Markdown'); // Target element
+            const element = document.getElementById('Markdown');
+            if (!element) {
+              return
+            }
+            element.classList.add('Read');
             const blob = await generatePdfBlob(element);
+            element.classList.remove('Read');
             setGenerating(false)
             onAgree(blob)
           }

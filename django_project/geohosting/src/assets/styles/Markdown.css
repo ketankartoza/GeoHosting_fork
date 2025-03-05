@@ -1,4 +1,4 @@
-.Markdown h1 {
+#Markdown h1 {
   display: block;
   font-size: 2em;
   margin-block-start: 0.67em;
@@ -9,7 +9,7 @@
   unicode-bidi: isolate;
 }
 
-.Markdown h2 {
+#Markdown h2 {
   display: block;
   font-size: 1.5em;
   margin-block-start: 0.83em;
@@ -20,7 +20,7 @@
   unicode-bidi: isolate;
 }
 
-.Markdown p {
+#Markdown p {
   display: block;
   margin-block-start: 1em;
   margin-block-end: 1em;
@@ -29,7 +29,7 @@
   unicode-bidi: isolate;
 }
 
-.Markdown ol {
+#Markdown ol {
   display: block;
   list-style-type: decimal;
   margin-block-start: 1em;
@@ -40,7 +40,7 @@
   unicode-bidi: isolate;
 }
 
-.Markdown ul {
+#Markdown ul {
   display: block;
   list-style-type: disc;
   margin-block-start: 1em;
@@ -51,7 +51,7 @@
   unicode-bidi: isolate;
 }
 
-.Markdown table {
+#Markdown table {
   display: table;
   box-sizing: border-box;
   text-indent: initial;
@@ -60,28 +60,28 @@
   border-color: gray;
 }
 
-.Markdown thead {
+#Markdown thead {
   display: table-header-group;
   vertical-align: middle;
   unicode-bidi: isolate;
   border-color: inherit;
 }
 
-.Markdown tbody {
+#Markdown tbody {
   display: table-row-group;
   vertical-align: middle;
   unicode-bidi: isolate;
   border-color: inherit;
 }
 
-.Markdown tr {
+#Markdown tr {
   display: table-row;
   vertical-align: inherit;
   unicode-bidi: isolate;
   border-color: inherit;
 }
 
-.Markdown th {
+#Markdown th {
   display: table-cell;
   vertical-align: inherit;
   font-weight: bold;
@@ -89,18 +89,18 @@
   unicode-bidi: isolate;
 }
 
-.Markdown th,
-.Markdown td {
+#Markdown th,
+#Markdown td {
   padding: 6px;
   border: 1px solid gray;
 }
 
-.Markdown input {
+#Markdown input {
   height: 30px;
 }
 
-.Markdown input,
-.Markdown canvas {
+#Markdown input,
+#Markdown canvas {
   border: 1px solid #eee;
   width: 100%;
   background-color: rgba(200, 200, 200, 0.2);
@@ -108,7 +108,21 @@
   font-size: 0.8rem;
 }
 
-.Markdown input:focus-visible,
-.Markdown input:focus {
+#Markdown input:focus-visible,
+#Markdown input:focus {
   outline: none;
+}
+
+#Markdown .Read {
+  display: none;
+}
+
+/* Read mode */
+#Markdown.Read input,
+#Markdown.Read .Button {
+  display: none;
+}
+
+#Markdown.Read .Read {
+  display: inline-block;
 }
