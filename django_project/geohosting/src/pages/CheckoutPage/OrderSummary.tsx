@@ -61,12 +61,15 @@ export const OrderSummary: React.FC<OrderSummaryProps> = (
             {
               pkg.feature_list &&
               pkg.feature_list['spec'] &&
-              Object.entries(pkg.feature_list['spec']).map(([key, value]: any) => (
-                <ListItem
+              Object.entries(pkg.feature_list['spec']).map(([key, value]: any) => {
+                if (!value) {
+                  return
+                }
+                return <ListItem
                   key={key} display="flex" alignItems="center">
                   <CheckIcon color="green.500" mr={2}/> {value}
                 </ListItem>
-              ))
+              })
             }
           </List>
           <Box mt={4}>

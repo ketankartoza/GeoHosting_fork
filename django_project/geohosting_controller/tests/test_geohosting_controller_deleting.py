@@ -13,11 +13,11 @@ from rest_framework.authtoken.models import Token
 from geohosting.factories.package import (
     PackageFactory, PackageGroupFactory, ProductFactory
 )
-from geohosting.forms.activity.terminate_instance import (
-    TerminatingInstanceForm
+from geohosting.forms.activity.delete_instance import (
+    DeletingInstanceForm
 )
 from geohosting.models import (
-    Activity, Instance, Region, WebhookEvent, ActivityStatus, InstanceStatus
+    Activity, Instance, Region, ActivityStatus, InstanceStatus
 )
 from geohosting_controller.default_data import (
     generate_cluster, generate_regions
@@ -30,7 +30,7 @@ from geohosting_controller.exceptions import (
 User = get_user_model()
 
 
-class ControllerTerminatingTest(TestCase):
+class ControllerDeletingTest(TestCase):
     """Test all activity functions."""
 
     user_email = 'test@example.com'
@@ -73,9 +73,9 @@ class ControllerTerminatingTest(TestCase):
             status=InstanceStatus.ONLINE
         )
 
-    def terminate_function(self, user) -> Activity:
-        """Terminate function."""
-        form = TerminatingInstanceForm(
+    def delete_function(self, user) -> Activity:
+        """Delete function."""
+        form = DeletingInstanceForm(
             {'application': self.instance}
         )
         form.user = user
@@ -85,14 +85,14 @@ class ControllerTerminatingTest(TestCase):
             raise ActivityException(f'{form.errors}')
         return form.instance
 
-    def test_terminating(self):
+    def test_deleting(self):
         """Test create."""
         self.assertEqual(self.instance.name, self.app_name)
         self.assertEqual(self.instance.price, self.package)
         self.assertEqual(self.instance.cluster, self.product_cluster.cluster)
         self.assertEqual(self.instance.owner, self.admin)
         self.assertEqual(self.instance.status, InstanceStatus.ONLINE)
-        """Test terminating."""
+        """Test deleting."""
 
         with requests_mock.Mocker() as requests_mocker:
             requests_mocker.post(
@@ -106,7 +106,7 @@ class ControllerTerminatingTest(TestCase):
 
             os.environ['PROXY_API_KEY'] = ''
             self.assertEqual(
-                self.terminate_function(self.admin).note,
+                self.delete_function(self.admin).note,
                 NoProxyApiKeyException().__str__()
             )
 
@@ -118,11 +118,11 @@ class ControllerTerminatingTest(TestCase):
 
                 # When the user is not owner
                 with self.assertRaises(ActivityException):
-                    self.terminate_function(self.user)
+                    self.delete_function(self.user)
 
                 # Run create function, it will return create function
                 self.instance.refresh_from_db()
-                activity = self.terminate_function(self.admin)
+                activity = self.delete_function(self.admin)
 
                 # This is emulate when pooling build from jenkins
                 activity_obj = Activity.objects.get(id=activity.id)
@@ -136,12 +136,12 @@ class ControllerTerminatingTest(TestCase):
                 self.instance.refresh_from_db()
                 self.assertEqual(activity.status, ActivityStatus.BUILD_ARGO)
                 self.assertEqual(
-                    self.instance.status, InstanceStatus.TERMINATING
+                    self.instance.status, InstanceStatus.DELETING
                 )
 
-                # When it is already being terminated
+                # When it is already being deleted
                 with self.assertRaises(ActivityException):
-                    self.terminate_function(self.admin)
+                    self.delete_function(self.admin)
 
                 # Run webhook, should be run by Argo CD
                 client = Client()
@@ -174,7 +174,7 @@ class ControllerTerminatingTest(TestCase):
 
                 self.instance.refresh_from_db()
                 self.assertEqual(
-                    self.instance.status, InstanceStatus.TERMINATING
+                    self.instance.status, InstanceStatus.DELETING
                 )
 
                 # Success if admin but error
@@ -193,10 +193,10 @@ class ControllerTerminatingTest(TestCase):
                 self.assertEqual(activity.status, ActivityStatus.ERROR)
                 self.assertEqual(activity.note, 'Error')
                 self.assertEqual(
-                    activity.instance.status, InstanceStatus.TERMINATING
+                    activity.instance.status, InstanceStatus.DELETING
                 )
 
-                # Success if admin but success
+                # Success but need deleted status
                 activity.update_status(ActivityStatus.BUILD_ARGO)
                 response = client.post(
                     '/api/webhook/',
@@ -209,16 +209,27 @@ class ControllerTerminatingTest(TestCase):
                 )
                 self.assertEqual(response.status_code, 200)
                 activity.refresh_from_db()
+                self.assertEqual(activity.status, ActivityStatus.BUILD_ARGO)
+                self.assertEqual(
+                    activity.instance.status, InstanceStatus.DELETING
+                )
+
+                # Success but need deleted status
+                activity.update_status(ActivityStatus.BUILD_ARGO)
+                response = client.post(
+                    '/api/webhook/',
+                    data={
+                        'app_name': self.app_name,
+                        'status': 'deleted',
+                        'source': 'ArgoCD'
+                    },
+                    headers={'Authorization': f'Token {self.admin_token}'}
+                )
+                self.assertEqual(response.status_code, 200)
+                activity.refresh_from_db()
                 self.assertEqual(activity.status, ActivityStatus.SUCCESS)
                 self.assertEqual(
-                    WebhookEvent.objects.all().first().data, {
-                        'app_name': self.app_name,
-                        'status': 'succeeded',
-                        'source': 'ArgoCD'
-                    }
-                )
-                self.assertEqual(
-                    activity.instance.status, InstanceStatus.TERMINATED
+                    activity.instance.status, InstanceStatus.DELETED
                 )
             except ConnectionErrorException:
                 self.fail("create() raised ExceptionType unexpectedly!")

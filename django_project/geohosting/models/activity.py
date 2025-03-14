@@ -165,22 +165,22 @@ class Activity(models.Model):
         return activity == ActivityTypeTerm.CREATE_INSTANCE.value
 
     @property
-    def is_termination(self):
+    def is_deletion(self):
         """Is activity creation."""
         activity = self.activity_type.identifier
-        return activity == ActivityTypeTerm.TERMINATE_INSTANCE.value
+        return activity == ActivityTypeTerm.DELETE_INSTANCE.value
 
     def success(self):
         """Success."""
         if self.instance:
             if self.is_creation:
                 self.instance.starting_up()
-            elif self.is_termination:
-                self.instance.terminated()
+            elif self.is_deletion:
+                self.instance.deleted()
 
     def error(self):
         """Error."""
-        if not self.is_termination:
+        if not self.is_deletion:
             if self.instance:
                 self.instance.offline()
 
@@ -211,9 +211,9 @@ class Activity(models.Model):
         if self.is_creation:
             # Create instance when jenkins communication is ok
             self.create_instance()
-        elif self.is_termination:
-            # Terminate instance
-            self.terminate_instance()
+        elif self.is_deletion:
+            # Delete instance
+            self.delete_instance()
 
     def run(self):
         """Run the activity."""
@@ -288,11 +288,11 @@ class Activity(models.Model):
                 self.instance = instance
                 self.save()
 
-    def terminate_instance(self):
-        """Terminate instance."""
+    def delete_instance(self):
+        """Delete instance."""
         if self.jenkins_queue_url:
-            LogTracker.success(self, 'TERMINATING')
-            self.instance.terminating()
+            LogTracker.success(self, 'DELETING')
+            self.instance.deleting()
 
     @staticmethod
     def running_activities(app_name):

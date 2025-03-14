@@ -12,4 +12,4 @@ class ActivityTypeTerm(Enum):
     """Activity type."""
 
     CREATE_INSTANCE = 'INSTANCE.CREATE'
-    TERMINATE_INSTANCE = 'INSTANCE.TERMINATE'
+    DELETE_INSTANCE = 'INSTANCE.DELETE'

@@ -11,7 +11,7 @@ def app_name_validator(app_name):
     if app_name:
         if Instance.objects.filter(
                 name=app_name
-        ).exclude(status=InstanceStatus.TERMINATED).count():
+        ).exclude(status=InstanceStatus.DELETED).count():
             raise ValidationError(app_name_exist_error_message)
 
         if Activity.running_activities(app_name).count():

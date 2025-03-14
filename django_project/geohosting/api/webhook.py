@@ -63,11 +63,13 @@ class WebhookView(APIView):
                 activity.update_status(ActivityStatus.ERROR)
                 return Response()
 
-            if status not in ['success', 'succeeded', 'synced']:
+            if status not in ['success', 'succeeded', 'synced', 'deleted']:
                 raise KeyError('Status does not found')
 
             # This is for deployment
             if source == self.ARGO_CD:
+                if activity.is_deletion and status != 'deleted':
+                    return Response()
                 activity.note = json.dumps(data)
                 activity.update_status(ActivityStatus.SUCCESS)
                 activity.save()

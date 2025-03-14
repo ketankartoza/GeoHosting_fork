@@ -2,7 +2,7 @@
 """
 GeoHosting.
 
-.. note:: Instance terminating form.
+.. note:: Instance deleting form.
 """
 from django import forms
 from django.contrib.auth import get_user_model
@@ -15,13 +15,13 @@ from geohosting_controller.variables import ActivityTypeTerm
 User = get_user_model()
 
 
-class TerminatingInstanceForm(forms.ModelForm):
-    """Instance terminating instance.
+class DeletingInstanceForm(forms.ModelForm):
+    """Instance deleting instance.
 
     Creating instance through activity.
     """
 
-    activity_identifier = ActivityTypeTerm.TERMINATE_INSTANCE.value
+    activity_identifier = ActivityTypeTerm.DELETE_INSTANCE.value
     application = forms.ModelChoiceField(queryset=Instance.objects.all())
 
     class Meta:  # noqa: D106
@@ -54,7 +54,7 @@ class TerminatingInstanceForm(forms.ModelForm):
             application = cleaned_data['application']
             if not self.user.is_superuser and application.owner != self.user:
                 raise forms.ValidationError(
-                    'You are not allowed to terminate this instance.'
+                    'You are not allowed to delete this instance.'
                 )
             if not application.is_ready:
                 raise forms.ValidationError(
@@ -62,7 +62,7 @@ class TerminatingInstanceForm(forms.ModelForm):
                 )
 
             if application.is_lock:
-                raise Exception('Instance is already being terminated.')
+                raise Exception('Instance is already being deleted.')
 
             product = application.price.product
             self.instance.activity_type_id = ActivityType.objects.get(

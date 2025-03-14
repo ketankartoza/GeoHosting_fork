@@ -21,12 +21,12 @@ interface Props {
   instance: Instance;
 }
 
-/** Instance termination */
-export const InstanceTermination = forwardRef(
+/** Instance deletion */
+export const InstanceDeletion = forwardRef(
   ({ instance }: Props, ref
   ) => {
     const [appName, setAppName] = useState('');
-    const [terminating, setTerminating] = useState(false);
+    const [deleting, setDeleting] = useState(false);
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     // Open
@@ -64,7 +64,7 @@ export const InstanceTermination = forwardRef(
           <ModalBody m={4}>
             <Box width={{ base: '100%' }}>
               <Box color="red.600">
-                Are you sure you want to terminate the server
+                Are you sure you want to delete the server
                 instance <b>{instance.name}</b>?
                 <br/>
                 <br/>
@@ -73,13 +73,13 @@ export const InstanceTermination = forwardRef(
                 <br/>
                 Additionally, your subscription will be canceled, and the
                 server
-                cannot be restored once terminated.
+                cannot be restored once deleted.
               </Box>
               <Box marginTop={8}>
                 <FormControl>
-                  <FormLabel>Put the instance name</FormLabel>
+                  <FormLabel>Enter the instance name</FormLabel>
                   <Input
-                    isDisabled={terminating}
+                    isDisabled={deleting}
                     value={appName}
                     onChange={
                       (e) => setAppName(
@@ -100,7 +100,7 @@ export const InstanceTermination = forwardRef(
                   alignSelf="flex-start"
                   onClick={submit}
                 >
-                  Terminate
+                  Delete
                 </Button>
               </Box>
             </Box>
@@ -111,4 +111,4 @@ export const InstanceTermination = forwardRef(
   }
 );
 
-export default InstanceTermination;
+export default InstanceDeletion;

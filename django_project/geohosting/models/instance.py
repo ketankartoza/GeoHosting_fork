@@ -32,9 +32,9 @@ class InstanceStatus:
     ONLINE = 'Online'
     OFFLINE = 'Offline'
 
-    # Termination status
-    TERMINATING = 'Terminating'
-    TERMINATED = 'Terminated'
+    # Deletion status
+    DELETING = 'Deleting'
+    DELETED = 'Deleted'
 
 
 class Instance(models.Model):
@@ -59,8 +59,8 @@ class Instance(models.Model):
             (InstanceStatus.STARTING_UP, InstanceStatus.STARTING_UP),
             (InstanceStatus.ONLINE, InstanceStatus.ONLINE),
             (InstanceStatus.OFFLINE, InstanceStatus.OFFLINE),
-            (InstanceStatus.TERMINATING, InstanceStatus.TERMINATING),
-            (InstanceStatus.TERMINATED, InstanceStatus.TERMINATED)
+            (InstanceStatus.DELETING, InstanceStatus.DELETING),
+            (InstanceStatus.DELETED, InstanceStatus.DELETED)
         )
     )
     company = models.ForeignKey(
@@ -87,8 +87,8 @@ class Instance(models.Model):
     def is_lock(self):
         """Is lock is basically when the instance can't be updated."""
         return self.status in [
-            InstanceStatus.TERMINATING,
-            InstanceStatus.TERMINATED
+            InstanceStatus.DELETING,
+            InstanceStatus.DELETED
         ]
 
     @property
@@ -139,22 +139,22 @@ class Instance(models.Model):
         """Make instance offline."""
         if self.status in [
             InstanceStatus.STARTING_UP,
-            InstanceStatus.TERMINATING
+            InstanceStatus.DELETING
         ]:
             return
         if self.is_lock:
             return
         self._change_status(InstanceStatus.OFFLINE)
 
-    def terminating(self):
-        """Make instance terminating."""
-        if self.status != InstanceStatus.TERMINATED:
-            self._change_status(InstanceStatus.TERMINATING)
+    def deleting(self):
+        """Make instance deleting."""
+        if self.status != InstanceStatus.DELETED:
+            self._change_status(InstanceStatus.DELETING)
 
-    def terminated(self):
-        """Make instance terminated."""
+    def deleted(self):
+        """Make instance deleted."""
         from geohosting.models.activity import Activity, ActivityStatus
-        self._change_status(InstanceStatus.TERMINATED)
+        self._change_status(InstanceStatus.DELETED)
         for activity in Activity.running_activities(self.name):
             activity.status = ActivityStatus.SUCCESS
             activity.save()
@@ -186,11 +186,13 @@ class Instance(models.Model):
         """Check server is online or offline."""
         if self.status in [
             InstanceStatus.DEPLOYING,
-            InstanceStatus.TERMINATED
+            InstanceStatus.DELETED
         ]:
             return
         try:
+            print(self.url)
             response = requests.get(self.url)
+            print(response.status_code)
             if response.status_code == 200:
                 self.online()
             else:
@@ -262,7 +264,7 @@ class Instance(models.Model):
 
     def cancel_subscription(self):
         """Cancel subscription."""
-        if self.status != InstanceStatus.TERMINATED:
+        if self.status != InstanceStatus.DELETED:
             return
 
         from geohosting.models.sales_order import SalesOrder

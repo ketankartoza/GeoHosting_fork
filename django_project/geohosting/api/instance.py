@@ -5,8 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from core.api import FilteredAPI
-from geohosting.forms.activity.terminate_instance import (
-    TerminatingInstanceForm
+from geohosting.forms.activity.delete_instance import (
+    DeletingInstanceForm
 )
 from geohosting.models import (
     Instance, InstanceStatus
@@ -37,7 +37,7 @@ class InstanceViewSet(
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(
-            self.get_queryset().exclude(status=InstanceStatus.TERMINATED),
+            self.get_queryset().exclude(status=InstanceStatus.DELETED),
         )
 
         page = self.paginate_queryset(queryset)
@@ -60,7 +60,7 @@ class InstanceViewSet(
     def destroy(self, request, *args, **kwargs):
         """Destroy an instance."""
         instance = self.get_object()
-        form = TerminatingInstanceForm({'application': instance})
+        form = DeletingInstanceForm({'application': instance})
         form.user = self.request.user
         if form.is_valid():
             form.save()

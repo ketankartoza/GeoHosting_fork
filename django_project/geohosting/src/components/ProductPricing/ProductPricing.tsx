@@ -121,11 +121,14 @@ const ProductPricing: React.FC<PackageProps> = ({ product, pkg }) => {
         <List spacing={2} mt={3} pl={5}>
           {pkg.feature_list &&
             pkg.feature_list['spec'] &&
-            Object.entries(pkg.feature_list['spec']).map(([key, value]: any) => (
-              <ListItem key={key} display="flex" alignItems="center">
+            Object.entries(pkg.feature_list['spec']).map(([key, value]: any) => {
+              if (!value) {
+                return
+              }
+              return <ListItem key={key} display="flex" alignItems="center">
                 <CheckIcon color="blue.500" mr={2}/> {value}
               </ListItem>
-            ))}
+            })}
         </List>
       </Box>
 

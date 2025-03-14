@@ -28,7 +28,7 @@ import {
 import { FaLink } from "react-icons/fa";
 import { headerWithToken } from "../../../utils/helpers";
 import { MdDelete, MdMoreVert } from "react-icons/md";
-import InstanceTermination from "../../../components/Instance/Termination";
+import InstanceDeletion from "../../../components/Instance/Deletion";
 
 const spin = keyframes`
   from {
@@ -49,7 +49,7 @@ interface CardProps {
 const DeleteCard: React.FC<CardProps> = ({ instanceInput }) => {
   const modalRef = useRef(null);
   return <>
-    <InstanceTermination instance={instanceInput} ref={modalRef}/>
+    <InstanceDeletion instance={instanceInput} ref={modalRef}/>
     <MenuItem
       icon={<MdDelete/>}
       color="red.600"
@@ -59,7 +59,7 @@ const DeleteCard: React.FC<CardProps> = ({ instanceInput }) => {
         () => modalRef?.current?.open()
       }
     >
-      Terminate
+      Delete
     </MenuItem>
   </>
 }
@@ -69,7 +69,7 @@ const Card: React.FC<CardProps> = ({ instanceInput }) => {
   const columns = useBreakpointValue({ base: 1, md: 2 });
   const [instance, setInstance] = useState(instanceInput);
   const [fetchingCredentials, setFetchingCredentials] = useState<boolean>(false);
-  if (instanceInput.status === 'Terminated') {
+  if (instanceInput.status === 'Deleted') {
     location.reload()
   }
 
@@ -144,7 +144,7 @@ const Card: React.FC<CardProps> = ({ instanceInput }) => {
     const { instance } = props
     switch (instance.status) {
       case 'Offline':
-      case 'Terminated':
+      case 'Deleted':
         return <>
           <Box
             width='16px'
