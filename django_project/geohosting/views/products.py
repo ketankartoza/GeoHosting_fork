@@ -45,6 +45,7 @@ def save_product_image(
         image_file = download_erp_file(image_path)
         if not image_file:
             raise AttributeError()
+        print(f'Save {image_file}')
         media, _ = ProductMedia.objects.update_or_create(
             product=obj,
             title=title,
@@ -63,6 +64,7 @@ def fetch_products_from_erpnext():
     generate_cluster()
 
     doctype = 'Item'
+    print('Fetching all products from ERPNEXT API...')
     product_list = fetch_erpnext_data(
         doctype,
         {
@@ -74,6 +76,7 @@ def fetch_products_from_erpnext():
 
     for product_detail in product_list:
         name = product_detail.get('item_name', '')
+        print(f'Checking {name}')
 
         # Currently we focus on DO
         if name.endswith('DO'):
@@ -151,6 +154,7 @@ def fetch_products_from_erpnext():
     # Get pricing
     for package_detail in packages:
         name = package_detail.get("name", "")
+        print(f'Getting product detail: {name}')
         package_detail = fetch_erpnext_detail_data(f'{doctype}/{name}')
         product_name = package_detail.get('variant_of', '')
         try:
@@ -182,6 +186,7 @@ def fetch_products_from_erpnext():
                 name=name
             )
             for item_price in pricing_list:
+                print(f'Price: {item_price.get("name")}')
                 currency = item_price.get('currency', 'USD')
                 price = item_price.get('price_list_rate', 0)
                 try:
