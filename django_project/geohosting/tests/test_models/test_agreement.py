@@ -95,7 +95,10 @@ class SalesOrderAgreementCRUDTest(TestCase):
     Model = SalesOrderAgreement
 
     @patch('geohosting.models.sales_order.add_erp_next_comment')
-    @patch('geohosting.models.sales_order.verify_paystack_payment')
+    @patch(
+        'geohosting.utils.payment.'
+        'PaystackPaymentGateway.payment_verification'
+    )
     @patch('geohosting.models.erp_model.put_to_erpnext')
     @patch('geohosting.models.erp_model.post_to_erpnext')
     def test_create_object(
@@ -129,7 +132,10 @@ class SalesOrderAgreementCRUDTest(TestCase):
         )
 
     @patch('geohosting.models.sales_order.add_erp_next_comment')
-    @patch('geohosting.models.sales_order.verify_paystack_payment')
+    @patch(
+        'geohosting.utils.payment.'
+        'PaystackPaymentGateway.payment_verification'
+    )
     @patch('geohosting.models.erp_model.put_to_erpnext')
     @patch('geohosting.models.erp_model.post_to_erpnext')
     def test_read_object(
@@ -154,7 +160,10 @@ class SalesOrderAgreementCRUDTest(TestCase):
         self.assertEqual(obj, fetched_obj)
 
     @patch('geohosting.models.sales_order.add_erp_next_comment')
-    @patch('geohosting.models.sales_order.verify_paystack_payment')
+    @patch(
+        'geohosting.utils.payment.'
+        'PaystackPaymentGateway.payment_verification'
+    )
     @patch('geohosting.models.erp_model.put_to_erpnext')
     @patch('geohosting.models.erp_model.post_to_erpnext')
     def test_update_object(
@@ -182,7 +191,10 @@ class SalesOrderAgreementCRUDTest(TestCase):
         self.assertEqual(updated_obj.agreement_detail, agreement_detail)
 
     @patch('geohosting.models.sales_order.add_erp_next_comment')
-    @patch('geohosting.models.sales_order.verify_paystack_payment')
+    @patch(
+        'geohosting.utils.payment.'
+        'PaystackPaymentGateway.payment_verification'
+    )
     @patch('geohosting.models.erp_model.put_to_erpnext')
     @patch('geohosting.models.erp_model.post_to_erpnext')
     def test_delete_object(

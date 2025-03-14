@@ -11,12 +11,11 @@ from core.api import FilteredAPI
 from geohosting.api.payment import (
     PaymentAPI, PaymentStripeSessionAPI, PaymentPaystackSessionAPI
 )
-from geohosting.models.activity import name_validator
 from geohosting.models.sales_order import SalesOrder
 from geohosting.serializer.sales_order import (
     SalesOrderSerializer, SalesOrderDetailSerializer
 )
-from geohosting.validators import app_name_validator
+from geohosting.validators import app_name_validator, name_validator
 
 
 class SalesOrderSetView(

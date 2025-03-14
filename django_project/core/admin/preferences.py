@@ -17,7 +17,9 @@ except NotRegistered:
     pass
 
 test_fields = (
+    'erp_base_url',
     'erp_next_test',
+    'proxy_base_url',
     'proxy_test',
     'stripe_test',
     'paystack_test',

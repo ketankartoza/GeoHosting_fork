@@ -1,7 +1,8 @@
 from django.contrib import admin, messages
 from django.utils.safestring import mark_safe
 
-from geohosting.models import Instance, SalesOrder
+from geohosting.admin.log import LogTrackerObjectAdmin
+from geohosting.models import SalesOrder
 
 
 @admin.action(description="Publish sales order")
@@ -35,16 +36,16 @@ def auto_deploy(modeladmin, request, queryset):
 
 
 @admin.register(SalesOrder)
-class SalesOrderAdmin(admin.ModelAdmin):
+class SalesOrderAdmin(LogTrackerObjectAdmin):
     list_display = (
         'date', 'package', 'customer', 'order_status', 'payment_method',
-        'erpnext_code', 'activities', 'app_name'
+        'erpnext_code', 'app_name', 'instance', 'activities', 'logs'
     )
-    list_filter = ('order_status', 'payment_method')
-    search_fields = ('erpnext_code',)
+    list_filter = ('order_status', 'payment_method',)
+    search_fields = ('erpnext_code', 'instance__name')
     actions = [publish_sales_order, update_payment_status, auto_deploy]
 
-    def activities(self, obj: Instance):
+    def activities(self, obj: SalesOrder):
         """Return product."""
         return mark_safe(
             f'<a href="/admin/geohosting/activity/?'

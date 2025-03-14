@@ -66,21 +66,25 @@ class Product(models.Model):
 
         # Save jenkins config
         try:
-            config = jenkins_config[self.name.lower()]
-            mapping = config['mapping']
-            del config['mapping']
-            activity_type, _ = ActivityType.objects.update_or_create(
-                product=self,
-                defaults=config
-            )
-            for geohosting_key, jenkins_key in mapping.items():
-                ActivityTypeMapping.objects.update_or_create(
-                    activity_type=activity_type,
-                    geohosting_key=geohosting_key,
-                    defaults={
-                        'jenkins_key': jenkins_key
-                    }
+            configs = jenkins_config[self.name.lower()]
+            for config in configs:
+                mapping = config['mapping']
+                identifier = config['identifier']
+                del config['mapping']
+                del config['identifier']
+                activity_type, _ = ActivityType.objects.update_or_create(
+                    product=self,
+                    identifier=identifier,
+                    defaults=config
                 )
+                for geohosting_key, jenkins_key in mapping.items():
+                    ActivityTypeMapping.objects.update_or_create(
+                        activity_type=activity_type,
+                        geohosting_key=geohosting_key,
+                        defaults={
+                            'jenkins_key': jenkins_key
+                        }
+                    )
         except KeyError:
             pass
 

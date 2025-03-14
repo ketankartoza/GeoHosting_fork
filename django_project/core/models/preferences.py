@@ -48,6 +48,11 @@ class Preferences(SingletonModel):
         return 'Preferences'
 
     @property
+    def erp_base_url(self):
+        """Erp base url."""
+        return settings.ERPNEXT_BASE_URL
+
+    @property
     def erp_next_test(self):
         """Erp next test."""
         if not settings.ERPNEXT_BASE_URL:
@@ -64,6 +69,12 @@ class Preferences(SingletonModel):
                 return response.status_code
             except Exception as e:
                 return f'{e}'
+
+    @property
+    def proxy_base_url(self):
+        """Erp base url."""
+        proxy_base_url = os.environ.get('PROXY_BASE_URL', None)
+        return proxy_base_url
 
     @property
     def proxy_test(self):

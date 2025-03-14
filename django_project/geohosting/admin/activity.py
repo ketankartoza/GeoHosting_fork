@@ -32,6 +32,7 @@ class ActivityTypeAdmin(admin.ModelAdmin):
     """ActivityType admin."""
 
     list_display = ('identifier', 'jenkins_url', 'product')
+    list_filter = ('product',)
     inlines = (ActivityTypeMappingInline,)
 
 

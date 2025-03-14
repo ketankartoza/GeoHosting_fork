@@ -34,6 +34,6 @@ app.conf.beat_scheduler = 'django_celery_beat.schedulers.DatabaseScheduler'
 app.conf.beat_schedule = {
     'check_instance': {
         'task': 'check_instances',
-        'schedule': crontab(minute='*/10'),
+        'schedule': crontab(minute='*'),
     }
 }

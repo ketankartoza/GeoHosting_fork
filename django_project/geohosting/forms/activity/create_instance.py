@@ -7,14 +7,12 @@ GeoHosting.
 from django import forms
 from django.contrib.auth import get_user_model
 
-from geohosting.models.activity import (
-    Activity, ActivityType, name_validator
-)
+from geohosting.models.activity import Activity, ActivityType
 from geohosting.models.package import Package
 from geohosting.models.product import ProductCluster
 from geohosting.models.region import Region
 from geohosting.models.sales_order import SalesOrder
-from geohosting.validators import app_name_validator
+from geohosting.validators import app_name_validator, name_validator
 from geohosting_controller.exceptions import (
     NoClusterException
 )
@@ -29,6 +27,7 @@ class CreateInstanceForm(forms.ModelForm):
     Creating instance through activity.
     """
 
+    activity_identifier = ActivityTypeTerm.CREATE_INSTANCE.value
     app_name = forms.CharField(
         validators=[name_validator, app_name_validator]
     )
@@ -51,8 +50,7 @@ class CreateInstanceForm(forms.ModelForm):
         """Refactor data."""
         activity = self.instance
         if (
-                activity.activity_type.identifier ==
-                ActivityTypeTerm.CREATE_INSTANCE.value
+                activity.activity_type.identifier == self.activity_identifier
         ):
             data = activity.client_data
             try:
@@ -86,10 +84,8 @@ class CreateInstanceForm(forms.ModelForm):
                 raise Exception('No package group code')
 
             # Check activity
-            activity_type_id = ''
-            activity_type_id = ActivityTypeTerm.CREATE_INSTANCE.value
             self.instance.activity_type_id = ActivityType.objects.get(
-                identifier=activity_type_id,
+                identifier=self.activity_identifier,
                 product=package.product
             ).id
             self.instance.triggered_by = self.user
@@ -120,7 +116,7 @@ class CreateInstanceForm(forms.ModelForm):
             )
         except ActivityType.DoesNotExist:
             raise forms.ValidationError(
-                f'Activity type {activity_type_id} does not exist.'
+                f'Activity type {self.activity_identifier} does not exist.'
             )
         except Exception as e:
             raise forms.ValidationError(f'{e}')

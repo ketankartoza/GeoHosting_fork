@@ -16,6 +16,7 @@ from core.models.preferences import Preferences
 from core.settings.base import FRONTEND_URL
 from geohosting.models.cluster import Cluster
 from geohosting.models.company import Company
+from geohosting.models.log import LogTracker
 from geohosting.models.package import Package
 from geohosting.models.product import ProductCluster
 from geohosting.utils.vault import get_credentials
@@ -30,6 +31,10 @@ class InstanceStatus:
     STARTING_UP = 'Starting Up'
     ONLINE = 'Online'
     OFFLINE = 'Offline'
+
+    # Termination status
+    TERMINATING = 'Terminating'
+    TERMINATED = 'Terminated'
 
 
 class Instance(models.Model):
@@ -54,6 +59,8 @@ class Instance(models.Model):
             (InstanceStatus.STARTING_UP, InstanceStatus.STARTING_UP),
             (InstanceStatus.ONLINE, InstanceStatus.ONLINE),
             (InstanceStatus.OFFLINE, InstanceStatus.OFFLINE),
+            (InstanceStatus.TERMINATING, InstanceStatus.TERMINATING),
+            (InstanceStatus.TERMINATED, InstanceStatus.TERMINATED)
         )
     )
     company = models.ForeignKey(
@@ -63,13 +70,33 @@ class Instance(models.Model):
             'Keep blank if instance is for individual capacity..'
         )
     )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        null=True, blank=True
+    )
+    modified_at = models.DateTimeField(
+        auto_now=True,
+        null=True, blank=True
+    )
 
     def __str__(self):
         """Return activity type name."""
         return self.name
 
-    class Meta:  # noqa
-        unique_together = ('name', 'cluster')
+    @property
+    def is_lock(self):
+        """Is lock is basically when the instance can't be updated."""
+        return self.status in [
+            InstanceStatus.TERMINATING,
+            InstanceStatus.TERMINATED
+        ]
+
+    @property
+    def is_ready(self):
+        """When the instance is up."""
+        return self.status in [
+            InstanceStatus.OFFLINE, InstanceStatus.ONLINE
+        ]
 
     @property
     def product_cluster(self):
@@ -84,32 +111,57 @@ class Instance(models.Model):
         """Return url."""
         return f'https://{self.name}.{self.cluster.domain}'
 
-    def starting_up(self):
-        """Make instance online."""
-        if self.status == InstanceStatus.STARTING_UP:
+    def _change_status(self, status):
+        """Change status."""""
+        if self.status == status:
             return
 
-        self.status = InstanceStatus.STARTING_UP
+        LogTracker.error(self, f'Server: {status}')
+        self.status = status
         self.save()
+
+    def starting_up(self):
+        """Make instance online."""
+        if self.is_lock:
+            return
+        self._change_status(InstanceStatus.STARTING_UP)
 
     def online(self):
         """Make instance online."""
+        if self.is_lock:
+            return
         if self.status == InstanceStatus.STARTING_UP:
             self.send_credentials()
 
-        if self.status == InstanceStatus.ONLINE:
-            return
-
-        self.status = InstanceStatus.ONLINE
-        self.save()
+        self._change_status(InstanceStatus.ONLINE)
 
     def offline(self):
         """Make instance offline."""
-        if self.status == InstanceStatus.OFFLINE:
+        if self.status in [
+            InstanceStatus.STARTING_UP,
+            InstanceStatus.TERMINATING
+        ]:
             return
+        if self.is_lock:
+            return
+        self._change_status(InstanceStatus.OFFLINE)
 
-        self.status = InstanceStatus.OFFLINE
-        self.save()
+    def terminating(self):
+        """Make instance terminating."""
+        if self.status != InstanceStatus.TERMINATED:
+            self._change_status(InstanceStatus.TERMINATING)
+
+    def terminated(self):
+        """Make instance terminated."""
+        from geohosting.models.activity import Activity, ActivityStatus
+        self._change_status(InstanceStatus.TERMINATED)
+        for activity in Activity.running_activities(self.name):
+            activity.status = ActivityStatus.SUCCESS
+            activity.save()
+        try:
+            self.cancel_subscription()
+        except Exception as e:
+            LogTracker.error(self, f'Cancel subscription : {e}')
 
     @property
     def credentials(self):
@@ -117,24 +169,39 @@ class Instance(models.Model):
         credentials = {
             'USERNAME': 'admin'
         }
-        credentials.update(
-            get_credentials(
-                self.price.package_group.vault_url,
-                self.name
+        try:
+            credentials.update(
+                get_credentials(
+                    self.price.package_group.vault_url,
+                    self.name
+                )
             )
-        )
-        return credentials
+            LogTracker.success(self, 'Get credential')
+            return credentials
+        except Exception as e:
+            LogTracker.error(self, 'Get credential : {e}')
+            raise e
 
     def checking_server(self):
         """Check server is online or offline."""
-        print(self.url)
-        if self.status == InstanceStatus.DEPLOYING:
+        if self.status in [
+            InstanceStatus.DEPLOYING,
+            InstanceStatus.TERMINATED
+        ]:
             return
-
-        response = requests.get(self.url)
-        if response.status_code == 200:
-            self.online()
-        else:
+        try:
+            response = requests.get(self.url)
+            if response.status_code == 200:
+                self.online()
+            else:
+                LogTracker.error(
+                    self, f'Server: {response.status_code} - {response.text}'
+                )
+                self.offline()
+        except requests.exceptions.ConnectionError as e:
+            LogTracker.error(
+                self, f'Server: {e}'
+            )
             self.offline()
 
     def send_credentials(self):
@@ -170,7 +237,9 @@ class Instance(models.Model):
                         'support_email': pref.support_email,
                     }
                 )
-            except Exception:
+                LogTracker.success(self, 'Get credential')
+            except Exception as e:
+                LogTracker.error(self, f'Get credential : {e}')
                 html_content = render_to_string(
                     template_name='emails/GeoHosting_Product is Error.html',
                     context={
@@ -190,3 +259,16 @@ class Instance(models.Model):
         )
         email.content_subtype = 'html'
         email.send()
+
+    def cancel_subscription(self):
+        """Cancel subscription."""
+        if self.status != InstanceStatus.TERMINATED:
+            return
+
+        from geohosting.models.sales_order import SalesOrder
+        sales_orders = SalesOrder.objects.filter(
+            payment_id__isnull=False,
+            instance=self
+        )
+        for sales_order in sales_orders:
+            sales_order.cancel_subscription()

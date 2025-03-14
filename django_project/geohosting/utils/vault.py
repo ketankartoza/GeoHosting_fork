@@ -41,7 +41,7 @@ def get_credentials(url, appname: str, params=None):
         verify=False
     )
     if response.status_code != 200:
-        raise Exception(response.text)
+        raise Exception(f'{response.status_code} - {response.text}')
     return {
         key: value for key, value in response.json()['data']['data'].items()
         if 'password' in key.lower()

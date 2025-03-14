@@ -10,11 +10,10 @@ from geohosting.api.payment import (
     PaymentAPI, PaymentStripeSessionAPI, PaymentPaystackSessionAPI
 )
 from geohosting.models import Package
-from geohosting.models.activity import name_validator
 from geohosting.models.agreement import AgreementDetail, SalesOrderAgreement
 from geohosting.models.company import Company
 from geohosting.models.sales_order import SalesOrder
-from geohosting.validators import app_name_validator
+from geohosting.validators import name_validator, app_name_validator
 
 
 class CheckoutAPI(PaymentAPI):

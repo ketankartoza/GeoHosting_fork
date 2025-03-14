@@ -13,7 +13,9 @@ from rest_framework.authtoken.models import Token
 from geohosting.factories.package import (
     PackageFactory, PackageGroupFactory, ProductFactory
 )
-from geohosting.forms.activity import CreateInstanceForm
+from geohosting.forms.activity.terminate_instance import (
+    TerminatingInstanceForm
+)
 from geohosting.models import (
     Activity, Instance, Region, WebhookEvent, ActivityStatus, InstanceStatus
 )
@@ -24,12 +26,11 @@ from geohosting_controller.exceptions import (
     ConnectionErrorException, NoProxyApiKeyException,
     ActivityException
 )
-from geohosting_controller.variables import ActivityTypeTerm
 
 User = get_user_model()
 
 
-class ControllerTest(TestCase):
+class ControllerTerminatingTest(TestCase):
     """Test all activity functions."""
 
     user_email = 'test@example.com'
@@ -62,81 +63,50 @@ class ControllerTest(TestCase):
             )
         )
         self.region = Region.objects.get(code='global')
-
-    def create_function(self, app_name) -> Activity:
-        """Create function."""
-        form = CreateInstanceForm(
-            {
-                'app_name': app_name,
-                'package': self.package,
-                'region': self.region
-            }
+        self.product_cluster = self.package.product.get_product_cluster(
+            self.region)
+        self.instance = Instance.objects.create(
+            name=self.app_name,
+            price=self.package,
+            cluster=self.product_cluster.cluster,
+            owner=self.admin,
+            status=InstanceStatus.ONLINE
         )
-        form.user = self.admin
+
+    def terminate_function(self, user) -> Activity:
+        """Terminate function."""
+        form = TerminatingInstanceForm(
+            {'application': self.instance}
+        )
+        form.user = user
         if form.is_valid():
             form.save()
         else:
             raise ActivityException(f'{form.errors}')
         return form.instance
 
-    def test_create(self):
+    def test_terminating(self):
         """Test create."""
+        self.assertEqual(self.instance.name, self.app_name)
+        self.assertEqual(self.instance.price, self.package)
+        self.assertEqual(self.instance.cluster, self.product_cluster.cluster)
+        self.assertEqual(self.instance.owner, self.admin)
+        self.assertEqual(self.instance.status, InstanceStatus.ONLINE)
+        """Test terminating."""
+
         with requests_mock.Mocker() as requests_mocker:
-            # Mock requests
-            requests_mocker.get(
-                ' https://api.do.kartoza.com/jenkins/crumbIssuer/api/json',
-                status_code=200,
-                json={
-                    "crumb": "crumb"
-                }
-            )
             requests_mocker.post(
                 'https://api.do.kartoza.com/jenkins/job/kartoza/job/devops/'
-                'job/geohosting/job/geonode_create/buildWithParameters',
+                'job/geohosting/job/geonode_delete/buildWithParameters',
                 status_code=201,
                 headers={
                     'Location': ' https://api.do.kartoza.com/queue/item/1/'
                 },
             )
-            requests_mocker.get(
-                ' https://api.do.kartoza.com/queue/item/1/api/json',
-                status_code=200,
-                json={
-                    "id": 1,
-                    "url": "queue/item/1/",
-                    "executable": {
-                        "url": (
-                            " https://api.do.kartoza.com/job/kartoza/job/"
-                            "devops/job/geohosting/job/geonode_create/1/"
-                        )
-                    }
-                }
-            )
-            requests_mocker.get(
-                (
-                    ' https://api.do.kartoza.com/job/kartoza/job/'
-                    'devops/job/geohosting/job/geonode_create/1/api/json'
-                ),
-                status_code=200,
-                json={
-                    "result": "SUCCESS",
-                    "inProgress": False
-                }
-            )
-            requests_mocker.get(
-                (
-                    'https://server-test.sta.do.kartoza.com'
-                ),
-                status_code=200,
-                json={
-                    "result": "SUCCESS",
-                    "inProgress": False
-                }
-            )
 
             os.environ['PROXY_API_KEY'] = ''
             self.assertEqual(
-                self.create_function('error-app').note,
+                self.terminate_function(self.admin).note,
                 NoProxyApiKeyException().__str__()
             )
 
@@ -146,14 +116,13 @@ class ControllerTest(TestCase):
             try:
                 os.environ['PROXY_API_KEY'] = 'Token'
 
-                # If the name is not correct
+                # When the user is not owner
                 with self.assertRaises(ActivityException):
-                    self.create_function('server.com')
+                    self.terminate_function(self.user)
 
                 # Run create function, it will return create function
-                activity = self.create_function(self.app_name)
-                activity.refresh_from_db()
-                self.assertEqual(activity.status, ActivityStatus.BUILD_ARGO)
+                self.instance.refresh_from_db()
+                activity = self.terminate_function(self.admin)
 
                 # This is emulate when pooling build from jenkins
                 activity_obj = Activity.objects.get(id=activity.id)
@@ -163,17 +132,20 @@ class ControllerTest(TestCase):
                     activity_obj.jenkins_queue_url,
                     ' https://api.do.kartoza.com/queue/item/1/'
                 )
-
-                # Create another activity
-                # Should be error because another one is already running
-                with self.assertRaises(ActivityException):
-                    self.create_function(self.app_name)
-
                 activity.refresh_from_db()
+                self.instance.refresh_from_db()
                 self.assertEqual(activity.status, ActivityStatus.BUILD_ARGO)
+                self.assertEqual(
+                    self.instance.status, InstanceStatus.TERMINATING
+                )
+
+                # When it is already being terminated
+                with self.assertRaises(ActivityException):
+                    self.terminate_function(self.admin)
 
                 # Run webhook, should be run by Argo CD
                 client = Client()
+
                 # If not admin
                 response = client.post(
                     '/api/webhook/',
@@ -199,9 +171,10 @@ class ControllerTest(TestCase):
                 self.assertEqual(response.status_code, 200)
                 activity.refresh_from_db()
                 self.assertEqual(activity.status, ActivityStatus.BUILD_ARGO)
-                self.assertIsNotNone(activity.instance)
+
+                self.instance.refresh_from_db()
                 self.assertEqual(
-                    activity.instance.status, InstanceStatus.DEPLOYING
+                    self.instance.status, InstanceStatus.TERMINATING
                 )
 
                 # Success if admin but error
@@ -220,7 +193,7 @@ class ControllerTest(TestCase):
                 self.assertEqual(activity.status, ActivityStatus.ERROR)
                 self.assertEqual(activity.note, 'Error')
                 self.assertEqual(
-                    activity.instance.status, InstanceStatus.OFFLINE
+                    activity.instance.status, InstanceStatus.TERMINATING
                 )
 
                 # Success if admin but success
@@ -245,61 +218,7 @@ class ControllerTest(TestCase):
                     }
                 )
                 self.assertEqual(
-                    activity.instance.status, InstanceStatus.STARTING_UP
-                )
-
-                activity.instance.checking_server()
-                self.assertEqual(
-                    activity.instance.status, InstanceStatus.ONLINE
-                )
-
-                # Get the activity status from server
-                activity.refresh_from_db()
-                self.assertEqual(
-                    activity.status, ActivityStatus.SUCCESS
-                )
-                self.assertEqual(
-                    activity.activity_type.identifier,
-                    ActivityTypeTerm.CREATE_INSTANCE.value
-                )
-                self.assertEqual(
-                    activity.client_data['app_name'], self.app_name
-                )
-                self.assertEqual(
-                    activity.client_data['package_code'], 'dev-1'
-                )
-                self.assertEqual(activity.triggered_by, self.admin)
-
-                # For data to jenkins
-                self.assertEqual(
-                    activity.post_data['k8s_cluster'], 'ktz-sta-ks-gn-01'
-                )
-                self.assertEqual(
-                    activity.post_data['geonode_env'], 'sta'
-                )
-                self.assertEqual(
-                    activity.post_data['geonode_name'], self.app_name
-                )
-                self.assertEqual(
-                    activity.post_data['geonode_size'], 'dev-1'
-                )
-
-                # Create another activity
-                # Should be error because the instance is already created
-                with self.assertRaises(ActivityException):
-                    self.create_function(self.app_name)
-                instance = Instance.objects.first()
-                self.assertEqual(
-                    instance.cluster.code, 'ktz-sta-ks-gn-01'
-                )
-                self.assertEqual(
-                    instance.name, self.app_name
-                )
-                self.assertEqual(
-                    instance.price.package_group.package_code, 'dev-1'
-                )
-                self.assertEqual(
-                    instance.owner, self.admin
+                    activity.instance.status, InstanceStatus.TERMINATED
                 )
             except ConnectionErrorException:
                 self.fail("create() raised ExceptionType unexpectedly!")

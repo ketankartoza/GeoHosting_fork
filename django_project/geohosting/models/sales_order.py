@@ -6,17 +6,19 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.timezone import now
 
-from geohosting.models.activity import name_validator
 from geohosting.models.company import Company
 from geohosting.models.erp_model import ErpModel
+from geohosting.models.instance import Instance
+from geohosting.models.log import LogTracker
 from geohosting.models.region import Region
 from geohosting.models.user_profile import UserProfile
 from geohosting.utils.erpnext import (
     add_erp_next_comment, download_erp_file
 )
-from geohosting.utils.paystack import verify_paystack_payment
-from geohosting.utils.stripe import get_checkout_detail
-from geohosting.validators import app_name_validator
+from geohosting.utils.payment import (
+    PaymentGateway, StripePaymentGateway, PaystackPaymentGateway
+)
+from geohosting.validators import name_validator, app_name_validator
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 User = get_user_model()
@@ -180,10 +182,22 @@ class SalesOrder(ErpModel):
             'Keep blank if purchase for individual capacity..'
         )
     )
+    instance = models.ForeignKey(
+        Instance, on_delete=models.SET_NULL,
+        null=True, blank=True, editable=False
+    )
 
     class Meta:
         verbose_name = 'Sales Order'
         verbose_name_plural = 'Sales Orders'
+
+    @property
+    def payment_gateway(self) -> PaymentGateway:
+        """Return payment gateway."""
+        if self.payment_method == SalesOrderPaymentMethod.STRIPE:
+            return StripePaymentGateway(self.payment_id)
+        if self.payment_method == SalesOrderPaymentMethod.PAYSTACK:
+            return PaystackPaymentGateway(self.payment_id)
 
     def save(self, *args, **kwargs):
         """Save model."""
@@ -198,8 +212,13 @@ class SalesOrder(ErpModel):
         if order_status_obj == SalesOrderStatus.WAITING_CONFIGURATION:
             self.auto_deploy()
 
-    def add_comment(self, comment):
+    def add_comment(self, comment, is_error=False):
         """Add comment."""
+        if is_error:
+            LogTracker.error(self, comment)
+        else:
+            LogTracker.success(self, comment)
+
         if self.erpnext_code:
             add_erp_next_comment(
                 self.customer, self.doc_type, self.erpnext_code, comment
@@ -288,30 +307,14 @@ class SalesOrder(ErpModel):
 
     def update_payment_status(self):
         """Update payment status based on the checkout detail from payment."""
-        order_status_obj = self.sales_order_status_obj
         if (
-                order_status_obj == SalesOrderStatus.WAITING_PAYMENT
+                self.sales_order_status_obj == SalesOrderStatus.WAITING_PAYMENT
                 and self.payment_id
         ):
-            if self.payment_method == SalesOrderPaymentMethod.STRIPE:
-                detail = get_checkout_detail(self.payment_id)
-                if not detail:
-                    return
-                if detail.invoice:
-                    self.set_order_status(
-                        SalesOrderStatus.WAITING_CONFIGURATION
-                    )
-            elif self.payment_method == SalesOrderPaymentMethod.PAYSTACK:
-                response = verify_paystack_payment(self.payment_id)
-                if not response:
-                    return
-                try:
-                    if response['data']['status'] == 'success':
-                        self.set_order_status(
-                            SalesOrderStatus.WAITING_CONFIGURATION
-                        )
-                except KeyError:
-                    pass
+            if self.payment_gateway.payment_verification():
+                self.set_order_status(
+                    SalesOrderStatus.WAITING_CONFIGURATION
+                )
 
     @property
     def invoice_url(self):
@@ -346,7 +349,6 @@ class SalesOrder(ErpModel):
             # TODO:
             #  When we have multi region, we will change below
             #  Link region to sales order
-
             form = CreateInstanceForm(
                 {
                     'region': Region.default_region(),
@@ -360,6 +362,15 @@ class SalesOrder(ErpModel):
                 errors = []
                 for key, val in form.errors.items():
                     errors += val
-                self.add_comment(', '.join(errors))
+                self.add_comment(
+                    f'AUTO DEPLOY ERROR: {", ".join(errors)}',
+                    is_error=True
+                )
             else:
                 form.save()
+
+    def cancel_subscription(self):
+        """Cancel subscription."""
+        if not self.payment_id:
+            return
+        self.payment_gateway.cancel_subscription()

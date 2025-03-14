@@ -1,12 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Flex,
   Grid,
   GridItem,
+  IconButton,
   Image,
   keyframes,
   Link,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Select,
   Spinner,
   Text,
@@ -21,9 +26,9 @@ import {
   Instance
 } from "../../../redux/reducers/instanceSlice";
 import { FaLink } from "react-icons/fa";
-import Geoserver from "../../../assets/images/GeoServer.svg";
-import Geonode from "../../../assets/images/GeoNode.svg";
 import { headerWithToken } from "../../../utils/helpers";
+import { MdDelete, MdMoreVert } from "react-icons/md";
+import InstanceTermination from "../../../components/Instance/Termination";
 
 const spin = keyframes`
   from {
@@ -41,24 +46,32 @@ interface CardProps {
   instanceInput: Instance;
 }
 
+const DeleteCard: React.FC<CardProps> = ({ instanceInput }) => {
+  const modalRef = useRef(null);
+  return <>
+    <InstanceTermination instance={instanceInput} ref={modalRef}/>
+    <MenuItem
+      icon={<MdDelete/>}
+      color="red.600"
+      _hover={{ bg: "red.100" }}
+      onClick={
+        // @ts-ignore
+        () => modalRef?.current?.open()
+      }
+    >
+      Terminate
+    </MenuItem>
+  </>
+}
+
 /** Card for support **/
 const Card: React.FC<CardProps> = ({ instanceInput }) => {
   const columns = useBreakpointValue({ base: 1, md: 2 });
-  const Placeholder = 'https://via.placeholder.com/60';
-
   const [instance, setInstance] = useState(instanceInput);
   const [fetchingCredentials, setFetchingCredentials] = useState<boolean>(false);
-
-  // Function to determine the correct image based on package name
-  const getImageForPackage = (packageName: string) => {
-    if (packageName.toLowerCase().includes('geoserver')) {
-      return Geoserver;
-    } else if (packageName.toLowerCase().includes('geonode')) {
-      return Geonode;
-    } else {
-      return Placeholder;
-    }
-  };
+  if (instanceInput.status === 'Terminated') {
+    location.reload()
+  }
 
   const request = (_instance) => {
     let instance = _instance
@@ -131,6 +144,7 @@ const Card: React.FC<CardProps> = ({ instanceInput }) => {
     const { instance } = props
     switch (instance.status) {
       case 'Offline':
+      case 'Terminated':
         return <>
           <Box
             width='16px'
@@ -139,7 +153,7 @@ const Card: React.FC<CardProps> = ({ instanceInput }) => {
             borderRadius='50'
             border='1px solid var(--chakra-colors-gray-600)'
           />
-          <Text>Offline</Text>
+          <Text>{instance.status}</Text>
         </>
       case 'Online':
         return <>
@@ -170,15 +184,39 @@ const Card: React.FC<CardProps> = ({ instanceInput }) => {
     key={instance.id}
     borderWidth="1px"
     borderRadius="lg"
+    position="relative"
     p={6}
     width={{ base: "100%", md: "320px" }}
     bg="white"
     boxShadow="lg"
   >
+    {
+      ['Online', 'Offline'].includes(instance.status) &&
+      <Box
+        position='absolute'
+        top={0}
+        left={0}
+      >
+        <Menu>
+          <MenuButton
+            as={IconButton}
+            icon={<MdMoreVert/>}
+            variant="ghost"
+            _hover={{ bg: "transparent" }}
+            _active={{ bg: "transparent" }}
+            _focus={{ boxShadow: "none" }}
+            padding={0}
+          />
+          <MenuList>
+            <DeleteCard instanceInput={instance}/>
+          </MenuList>
+        </Menu>
+      </Box>
+    }
     {/* Logo and Switch */}
     <Flex justify="space-between" mb={4}>
       <Image
-        src={getImageForPackage(instance.product.name)}
+        src={instance.product.image}
         alt={`${instance.product.name} logo`}
         boxSize="80px"
         borderRadius="full"
@@ -230,23 +268,17 @@ const Card: React.FC<CardProps> = ({ instanceInput }) => {
 
     {/* Package details */}
     {
-      instance.package.feature_list && (
+      instance.package.feature_list?.spec && (
         <Grid templateColumns={`repeat(${columns}, 1fr)`}>
-          <GridItem>
-            <Text fontSize="sm">
-              Storage: {instance.package.feature_list.spec[0]?.split(' ')[0]}
-            </Text>
-          </GridItem>
-          <GridItem>
-            <Text fontSize="sm" textAlign="right">
-              Memory: {instance.package.feature_list.spec[2]?.split(' ')[1]}
-            </Text>
-          </GridItem>
-          <GridItem>
-            <Text fontSize="sm">
-              CPUs: {instance.package.feature_list.spec[1]?.split(' ')[2]}
-            </Text>
-          </GridItem>
+          {
+            instance.package.feature_list.spec.map(
+              (feature: string, idx: number) => <GridItem>
+                <Text fontSize="sm" textAlign={idx % 2 != 0 ? 'right' : 'left'}>
+                  {feature}
+                </Text>
+              </GridItem>
+            )
+          }
         </Grid>
       )
     }

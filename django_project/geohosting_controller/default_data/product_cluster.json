@@ -3,5 +3,10 @@
     "cluster": "ktz-sta-ks-gn-01",
     "region": "global",
     "environment": "sta"
+  },
+  "g3w": {
+    "cluster": "ktz-sta-ks-gn-01",
+    "region": "global",
+    "environment": "sta"
   }
 }

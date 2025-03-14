@@ -68,3 +68,11 @@ def get_checkout_detail(checkout_id):
         return stripe.checkout.Session.retrieve(checkout_id)
     except Exception:
         return None
+
+
+def cancel_subscription(checkout_id):
+    """Cancel subscription."""
+    checkout = get_checkout_detail(checkout_id)
+    stripe.Subscription.modify(
+        checkout['subscription'], cancel_at_period_end=True
+    )

@@ -74,7 +74,9 @@ class SalesOrderDetailSerializer(serializers.ModelSerializer):
         """Return package."""
         try:
             return InstanceSerializer(
-                Instance.objects.get(name=obj.app_name)
+                Instance.objects.filter(
+                    name=obj.app_name
+                ).order_by('id').last()
             ).data
         except Instance.DoesNotExist:
             return None

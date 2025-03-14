@@ -17,11 +17,12 @@ class DefaultDataTest(TestCase):
     def test_get_jenkin_activity_types(self):
         """Test get_jenkin_activity_types."""
         all_config = get_jenkin_activity_types()
-        for key, config in all_config.items():
-            self.assertIsNotNone(config['identifier'])
-            self.assertIsNotNone(config['jenkins_url'])
-            self.assertIsNotNone(config['mapping'])
-            self.assertTrue(len(config.keys()) == 3)
+        for key, configs in all_config.items():
+            for config in configs:
+                self.assertIsNotNone(config['identifier'])
+                self.assertIsNotNone(config['jenkins_url'])
+                self.assertIsNotNone(config['mapping'])
+                self.assertTrue(len(config.keys()) == 3)
 
     def test_get_regions(self):
         """Test get_regions."""

@@ -1,12 +1,44 @@
 {
-  "geonode": {
-    "identifier": "INSTANCE.CREATE",
-    "jenkins_url": "https://api.do.kartoza.com/jenkins/job/kartoza/job/devops/job/geohosting/job/geonode_create/buildWithParameters",
-    "mapping": {
-      "cluster": "k8s_cluster",
-      "environment": "geonode_env",
-      "package": "geonode_size",
-      "app_name": "geonode_name"
+  "geonode": [
+    {
+      "identifier": "INSTANCE.CREATE",
+      "jenkins_url": "https://api.do.kartoza.com/jenkins/job/kartoza/job/devops/job/geohosting/job/geonode_create/buildWithParameters",
+      "mapping": {
+        "cluster": "k8s_cluster",
+        "environment": "geonode_env",
+        "package": "geonode_size",
+        "app_name": "geonode_name"
+      }
+    },
+    {
+      "identifier": "INSTANCE.TERMINATE",
+      "jenkins_url": "https://api.do.kartoza.com/jenkins/job/kartoza/job/devops/job/geohosting/job/geonode_delete/buildWithParameters",
+      "mapping": {
+        "cluster": "k8s_cluster",
+        "environment": "geonode_env",
+        "app_name": "geonode_name"
+      }
     }
-  }
+  ],
+  "g3w": [
+    {
+      "identifier": "INSTANCE.CREATE",
+      "jenkins_url": "https://api.do.kartoza.com/jenkins/job/kartoza/job/devops/job/geohosting/job/g3wsuite_create/buildWithParameters",
+      "mapping": {
+        "cluster": "k8s_cluster",
+        "environment": "g3wsuite_env",
+        "package": "g3wsuite_size",
+        "app_name": "g3wsuite_name"
+      }
+    },
+    {
+      "identifier": "INSTANCE.TERMINATE",
+      "jenkins_url": "https://api.do.kartoza.com/jenkins/job/kartoza/job/devops/job/geohosting/job/g3wsuite_delete/buildWithParameters",
+      "mapping": {
+        "cluster": "k8s_cluster",
+        "environment": "g3wsuite_env",
+        "app_name": "g3wsuite_name"
+      }
+    }
+  ]
 }

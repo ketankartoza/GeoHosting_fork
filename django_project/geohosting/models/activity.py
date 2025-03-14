@@ -8,13 +8,17 @@ GeoHosting.
 import re
 
 from django.contrib.auth import get_user_model
-from django.core.validators import RegexValidator
 from django.db import models
+from django.db.models import Q
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils import timezone
 
 from geohosting.models.instance import Instance
+from geohosting.models.log import LogTracker
 from geohosting.models.package import Package
 from geohosting.models.product import Product, ProductCluster
+from geohosting.validators import regex_name, regex_name_error
 from geohosting_controller.connection import request_post
 from geohosting_controller.exceptions import (
     ConnectionErrorException, ActivityException
@@ -92,13 +96,6 @@ class ActivityStatus:
     ERROR = 'ERROR'
 
 
-regex_name = r'^[a-z0-9-]*$'
-regex_name_error = (
-    'Name may only contain lowercase letters, numbers or dashes.'
-)
-name_validator = RegexValidator(regex_name, regex_name_error)
-
-
 class Activity(models.Model):
     """Activity of instance."""
 
@@ -161,6 +158,32 @@ class Activity(models.Model):
         verbose_name_plural = 'Activities'
         ordering = ('-triggered_at',)
 
+    @property
+    def is_creation(self):
+        """Is activity creation."""
+        activity = self.activity_type.identifier
+        return activity == ActivityTypeTerm.CREATE_INSTANCE.value
+
+    @property
+    def is_termination(self):
+        """Is activity creation."""
+        activity = self.activity_type.identifier
+        return activity == ActivityTypeTerm.TERMINATE_INSTANCE.value
+
+    def success(self):
+        """Success."""
+        if self.instance:
+            if self.is_creation:
+                self.instance.starting_up()
+            elif self.is_termination:
+                self.instance.terminated()
+
+    def error(self):
+        """Error."""
+        if not self.is_termination:
+            if self.instance:
+                self.instance.offline()
+
     def update_status(self, status, note=None):
         """Update activity status."""
         from geohosting.models.sales_order import SalesOrderStatus
@@ -177,12 +200,20 @@ class Activity(models.Model):
                 self.sales_order.order_status = SalesOrderStatus.DEPLOYED.key
                 self.sales_order.save()
 
-        # Update instance status
-        if self.instance:
-            if self.status == ActivityStatus.SUCCESS:
-                self.instance.starting_up()
-            if self.status == ActivityStatus.ERROR:
-                self.instance.offline()
+        # Do some function when success
+        if self.status == ActivityStatus.SUCCESS:
+            self.success()
+        if self.status == ActivityStatus.ERROR:
+            self.error()
+
+    def execute(self):
+        """Execute script."""
+        if self.is_creation:
+            # Create instance when jenkins communication is ok
+            self.create_instance()
+        elif self.is_termination:
+            # Terminate instance
+            self.terminate_instance()
 
     def run(self):
         """Run the activity."""
@@ -200,9 +231,7 @@ class Activity(models.Model):
                 )
             self.jenkins_queue_url = response.headers['Location']
             self.update_status(ActivityStatus.BUILD_ARGO)
-
-            # Create instance when jenkins communication is ok
-            self.create_instance()
+            self.execute()
         except Exception as e:
             self.update_status(
                 ActivityStatus.ERROR, f'{e}'
@@ -216,8 +245,7 @@ class Activity(models.Model):
             self.update_status(ActivityStatus.RUNNING)
             self.run()
         else:
-            # Create instance when activity is not created
-            self.create_instance()
+            self.execute()
 
     @staticmethod
     def test_name(name):
@@ -259,3 +287,30 @@ class Activity(models.Model):
                 )
                 self.instance = instance
                 self.save()
+
+    def terminate_instance(self):
+        """Terminate instance."""
+        if self.jenkins_queue_url:
+            LogTracker.success(self, 'TERMINATING')
+            self.instance.terminating()
+
+    @staticmethod
+    def running_activities(app_name):
+        """Return running activities."""
+        return Activity.objects.filter(client_data__app_name=app_name).exclude(
+            Q(status=ActivityStatus.ERROR) |
+            Q(status=ActivityStatus.SUCCESS)
+        )
+
+
+@receiver(post_save, sender=Activity)
+def save_instance_to_sales_order(sender, instance, created, **kwargs):
+    """Save instance to sales order on post save."""
+    if instance.instance and not instance.instance.created_at:
+        instance.instance.created_at = instance.triggered_at
+        instance.instance.modified_at = instance.triggered_at
+        instance.instance.save()
+
+    if instance.instance and instance.sales_order:
+        instance.sales_order.instance = instance.instance
+        instance.sales_order.save()
