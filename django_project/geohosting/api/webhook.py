@@ -41,7 +41,9 @@ class WebhookView(APIView):
                 return Response()
 
             # Get the activities
-            app_name = data['app_name'].replace('devops-', '')
+            app_name = data['app_name'].replace(
+                'devops-', ''
+            ).replace('gsh-', '')
             activities = Activity.objects.filter(
                 client_data__app_name=app_name
             )
