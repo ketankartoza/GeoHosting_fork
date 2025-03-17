@@ -191,7 +191,7 @@ class Instance(models.Model):
             return
         try:
             print(self.url)
-            response = requests.get(self.url)
+            response = requests.head(self.url)
             print(response.status_code)
             if response.status_code == 200:
                 self.online()
@@ -208,7 +208,10 @@ class Instance(models.Model):
 
     def send_credentials(self):
         """Send credentials."""
-        if self.status != InstanceStatus.ONLINE:
+        if self.status not in [
+            InstanceStatus.STARTING_UP, InstanceStatus.ONLINE,
+            InstanceStatus.OFFLINE
+        ]:
             return
         pref = Preferences.load()
         name = f'{self.owner.first_name} {self.owner.last_name}'
