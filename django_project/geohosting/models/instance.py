@@ -193,17 +193,19 @@ class Instance(models.Model):
             print(self.url)
             response = requests.head(self.url)
             print(response.status_code)
-            if response.status_code == 200:
+            if response.status_code in [200, 302]:
                 self.online()
             else:
                 LogTracker.error(
-                    self, f'Server: {response.status_code} - {response.text}'
+                    self,
+                    (
+                        f'Server - {self.url}: '
+                        f'{response.status_code} - {response.text}'
+                    )
                 )
                 self.offline()
         except requests.exceptions.ConnectionError as e:
-            LogTracker.error(
-                self, f'Server: {e}'
-            )
+            LogTracker.error(self, f'Server - {self.url}: {e}')
             self.offline()
 
     def send_credentials(self):
