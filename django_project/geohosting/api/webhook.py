@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from geohosting.models import Activity, ActivityStatus, Instance, Package
+from geohosting.models.instance import InstanceStatus
 from geohosting.models.webhook import WebhookStatus, WebhookEvent
 
 
@@ -51,7 +52,9 @@ class WebhookView(APIView):
             )
             webhook.app_name = app_name
             webhook.save()
-            instance = Instance.objects.get(name=app_name)
+            instance = Instance.objects.exclude(
+                status=InstanceStatus.DELETED
+            ).get(name=app_name)
 
             # Get the activity
             activity = Activity.objects.filter(
