@@ -191,7 +191,7 @@ class ControllerDeletingTest(TestCase):
                 self.assertEqual(response.status_code, 200)
                 activity.refresh_from_db()
                 self.assertEqual(activity.status, ActivityStatus.ERROR)
-                self.assertEqual(activity.note, 'Error')
+                self.assertEqual(activity.note, 'Error on Argo CD')
                 self.assertEqual(
                     activity.instance.status, InstanceStatus.DELETING
                 )

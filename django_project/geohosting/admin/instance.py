@@ -52,7 +52,7 @@ class InstanceAdmin(LogTrackerObjectAdmin):
         """Return logs."""
         return mark_safe(
             '<a href="/admin/geohosting/webhookevent/?'
-            f'data__app_name__exact={instance.name}"'
+            f'activity__instance__exact={instance.id}"'
             'target="_blank">webhooks</a>'
         )
 

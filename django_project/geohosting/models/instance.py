@@ -61,7 +61,8 @@ class Instance(models.Model):
             (InstanceStatus.OFFLINE, InstanceStatus.OFFLINE),
             (InstanceStatus.DELETING, InstanceStatus.DELETING),
             (InstanceStatus.DELETED, InstanceStatus.DELETED)
-        )
+        ),
+        db_index=True
     )
     company = models.ForeignKey(
         Company, on_delete=models.SET_NULL,
@@ -130,6 +131,12 @@ class Instance(models.Model):
         """Make instance online."""
         if self.is_lock:
             return
+
+        # For deploying, change to starting up
+        if self.status == InstanceStatus.DEPLOYING:
+            self.status = InstanceStatus.STARTING_UP
+
+        # When starting up, send credential
         if self.status == InstanceStatus.STARTING_UP:
             self.send_credentials()
 
@@ -138,8 +145,10 @@ class Instance(models.Model):
     def offline(self):
         """Make instance offline."""
         if self.status in [
+            InstanceStatus.DEPLOYING,
             InstanceStatus.STARTING_UP,
-            InstanceStatus.DELETING
+            InstanceStatus.DELETING,
+            InstanceStatus.DELETED
         ]:
             return
         if self.is_lock:
@@ -184,11 +193,20 @@ class Instance(models.Model):
 
     def checking_server(self):
         """Check server is online or offline."""
-        if self.status in [
-            InstanceStatus.DEPLOYING,
-            InstanceStatus.DELETED
-        ]:
+        from geohosting.models.webhook import WebhookEvent, WebhookStatus
+        # If deleted, no need to check
+        if self.status in [InstanceStatus.DELETED]:
             return
+
+        # If deleting, we can check the webhook
+        if self.status in [InstanceStatus.DELETING]:
+            if WebhookEvent.objects.filter(
+                    activity__instance=self,
+                    data__Status=WebhookStatus.DELETED
+            ).exists():
+                self.deleted()
+            return
+
         try:
             print(self.url)
             response = requests.head(self.url)

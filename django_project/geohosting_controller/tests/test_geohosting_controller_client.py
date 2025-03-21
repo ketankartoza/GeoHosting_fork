@@ -181,20 +181,45 @@ class ControllerTest(TestCase):
                     '/api/webhook/',
                     data={
                         'app_name': self.app_name,
-                        'status': 'running',
-                        'source': 'ArgoCD'
+                        'Status': 'running',
+                        'Source': 'ArgoCD'
                     },
                     headers={'Authorization': f'Token {self.user_token}'}
                 )
                 self.assertEqual(response.status_code, 403)
+
+                # If not admin but no app name
+                response = client.post(
+                    '/api/webhook/',
+                    data={
+                        'app_name': 'devops-test',
+                        'Status': 'synced',
+                        'Source': 'ArgoCD'
+                    },
+                    headers={'Authorization': f'Token {self.admin_token}'}
+                )
+                self.assertEqual(response.status_code, 400)
+                self.assertEqual(
+                    WebhookEvent.objects.first().app_name, 'test'
+                )
+                self.assertEqual(
+                    WebhookEvent.objects.first().activity, None
+                )
+                self.assertEqual(
+                    WebhookEvent.objects.first().data, {
+                        'app_name': 'devops-test',
+                        'Status': 'synced',
+                        'Source': 'ArgoCD'
+                    }
+                )
 
                 # Success if admin but running
                 response = client.post(
                     '/api/webhook/',
                     data={
                         'app_name': self.app_name,
-                        'status': 'running',
-                        'source': 'ArgoCD'
+                        'Status': 'running',
+                        'Source': 'ArgoCD'
                     },
                     headers={'Authorization': f'Token {self.admin_token}'}
                 )
@@ -211,18 +236,32 @@ class ControllerTest(TestCase):
                     '/api/webhook/',
                     data={
                         'app_name': self.app_name,
-                        'status': 'failed',
-                        'message': 'Error',
-                        'source': 'ArgoCD'
+                        'Status': 'failed',
+                        'Message': 'Error',
+                        'Source': 'ArgoCD'
                     },
                     headers={'Authorization': f'Token {self.admin_token}'}
                 )
                 self.assertEqual(response.status_code, 200)
                 activity.refresh_from_db()
+                self.assertEqual(
+                    WebhookEvent.objects.first().app_name, self.app_name
+                )
+                self.assertEqual(
+                    WebhookEvent.objects.first().activity, activity
+                )
+                self.assertEqual(
+                    WebhookEvent.objects.first().data, {
+                        'app_name': self.app_name,
+                        'Status': 'failed',
+                        'Message': 'Error',
+                        'Source': 'ArgoCD'
+                    }
+                )
                 self.assertEqual(activity.status, ActivityStatus.ERROR)
                 self.assertEqual(activity.note, 'Error')
                 self.assertEqual(
-                    activity.instance.status, InstanceStatus.OFFLINE
+                    activity.instance.status, InstanceStatus.DEPLOYING
                 )
                 self.assertEqual(send_email.call_count, 0)
 
@@ -232,21 +271,27 @@ class ControllerTest(TestCase):
                     '/api/webhook/',
                     data={
                         'app_name': self.app_name,
-                        'status': 'succeeded',
-                        'source': 'ArgoCD'
+                        'Status': 'synced',
+                        'Source': 'ArgoCD'
                     },
                     headers={'Authorization': f'Token {self.admin_token}'}
                 )
                 self.assertEqual(response.status_code, 200)
                 activity.refresh_from_db()
-                self.assertEqual(activity.status, ActivityStatus.SUCCESS)
                 self.assertEqual(
-                    WebhookEvent.objects.all().first().data, {
+                    WebhookEvent.objects.first().app_name, self.app_name
+                )
+                self.assertEqual(
+                    WebhookEvent.objects.first().activity, activity
+                )
+                self.assertEqual(
+                    WebhookEvent.objects.first().data, {
                         'app_name': self.app_name,
-                        'status': 'succeeded',
-                        'source': 'ArgoCD'
+                        'Status': 'synced',
+                        'Source': 'ArgoCD'
                     }
                 )
+                self.assertEqual(activity.status, ActivityStatus.SUCCESS)
                 self.assertEqual(
                     activity.instance.status, InstanceStatus.STARTING_UP
                 )

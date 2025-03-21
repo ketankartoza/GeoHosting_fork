@@ -4,15 +4,15 @@ GeoHosting Controller.
 .. note:: Webhooks.
 """
 import json
+import re
 
 from django.http import HttpResponseBadRequest, HttpResponseServerError
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from geohosting.models import (
-    Activity, ActivityStatus, Package, WebhookEvent
-)
+from geohosting.models import Activity, ActivityStatus, Instance, Package
+from geohosting.models.webhook import WebhookStatus, WebhookEvent
 
 
 class WebhookView(APIView):
@@ -26,55 +26,73 @@ class WebhookView(APIView):
         data = request.data
         webhook = WebhookEvent.objects.create(data=data)
         try:
-            # Check the data
-            try:
-                status = data['Status'].lower()
-            except KeyError:
-                status = data['status'].lower()
-            try:
-                source = data['Source'].lower()
-            except KeyError:
-                source = data['source'].lower()
+            status = data.get('Status', data.get('status'))
+            if status is None:
+                raise KeyError(
+                    "Neither 'Status' nor 'status' key found in data"
+                )
+            status = status.lower()
+
+            source = data.get('Source', data.get('source'))
+            if source is None:
+                raise KeyError(
+                    "Neither 'Source' nor 'source' key found in data"
+                )
+            source = source.lower()
 
             # Don't do anything if it is still running
-            if status in ['running']:
+            if status in [WebhookStatus.RUNNING]:
+                return Response()
+            if source != self.ARGO_CD:
                 return Response()
 
-            # Get the activities
-            app_name = data['app_name'].replace(
-                'devops-', ''
-            ).replace('gsh-', '')
-            activities = Activity.objects.filter(
-                client_data__app_name=app_name
+            app_name = re.sub(
+                r'^(devops-|gsh-)', '', data['app_name']
             )
-            # If source is argocd
-            if source == self.ARGO_CD:
-                activity = activities.filter(
-                    status=ActivityStatus.BUILD_ARGO
-                ).first()
-            else:
-                return Response()
+            webhook.app_name = app_name
+            webhook.save()
+            instance = Instance.objects.get(name=app_name)
 
+            # Get the activity
+            activity = Activity.objects.filter(
+                instance=instance, status=ActivityStatus.BUILD_ARGO
+            ).first()
             if not activity:
-                raise Activity.DoesNotExist('Activity does not exist')
+                activity = Activity.objects.filter(
+                    instance=instance, status=ActivityStatus.ERROR
+                ).last()
+            if not activity:
+                raise Activity.DoesNotExist()
+            webhook.activity = activity
+            webhook.save()
 
-            if status in ['error', 'failed', 'outofsync', 'unknown']:
-                activity.note = data.get('message', 'Error on Argo CD')
+            # If error
+            if status in [
+                WebhookStatus.ERROR, WebhookStatus.FAILED,
+                WebhookStatus.OUT_OF_SYNC, WebhookStatus.UNKNOWN
+            ]:
+                activity.note = data.get('Message', 'Error on Argo CD')
                 activity.update_status(ActivityStatus.ERROR)
                 return Response()
 
-            if status not in ['success', 'succeeded', 'synced', 'deleted']:
+            # If it is synced
+            if status not in [
+                WebhookStatus.SUCCESS, WebhookStatus.SUCCEEDED,
+                WebhookStatus.SYNCED, WebhookStatus.DELETED
+            ]:
                 raise KeyError('Status does not found')
 
             # This is for deployment
-            if source == self.ARGO_CD:
-                if activity.is_deletion and status != 'deleted':
-                    return Response()
-                activity.note = json.dumps(data)
-                activity.update_status(ActivityStatus.SUCCESS)
-                activity.save()
+            if activity.is_deletion and status != WebhookStatus.DELETED:
+                return Response()
+            activity.note = json.dumps(data)
+            activity.update_status(ActivityStatus.SUCCESS)
+            activity.save()
 
-        except (KeyError, Activity.DoesNotExist, Package.DoesNotExist) as e:
+        except (
+                KeyError, Instance.DoesNotExist, Activity.DoesNotExist,
+                Package.DoesNotExist
+        ) as e:
             webhook.note = f'{e}'
             webhook.save()
             return HttpResponseBadRequest(f'{e}')
