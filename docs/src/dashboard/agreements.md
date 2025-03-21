@@ -11,4 +11,8 @@ license: This program is free software; you can redistribute it and/or modify it
 context_id: nDU6LLGiXPTLADXY
 ---
 
-# Index
+# Agreement
+
+[![Agreements](./img/agreement-img-1.png)](./img/agreement-img-1.png)
+
+1. **Agreements:** Users can click on this `agreements` from the left navigation bar to access the agreements section.

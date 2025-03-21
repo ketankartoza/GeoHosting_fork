@@ -14,7 +14,7 @@ Welcome to the GeoHosting! This guide will help you:
 3. [Making a Purchase](#making-a-purchase)
 4. [Viewing Purchased Instances](#viewing-purchased-instances)
 5. [Cancelling Agreements](#cancelling-agreements)
-6. [Troubleshooting & Support](#troubleshooting--support)
+6. [Troubleshooting & Support](#troubleshooting-support)
 
 ---
 
