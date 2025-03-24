@@ -37,9 +37,48 @@ markdown_extensions:
       emoji_index: !!python/name:materialx.emoji.twemoji
 
 nav:
-  - Home:
-      - index.md
-      - quick_installation.md
-  - Developers:
-      - index.md
-      - "Diagrams": developer/diagrams.md
+  - Introduction: index.md
+  - Subscription process: subscription.md
+  - Dashboard:
+      - dashboard/index.md  
+      - Hosted Services: dashboard/hosted_services.md
+      - Agreements: dashboard/agreements.md
+      - Orders: dashboard/orders.md
+      - Supports:
+          - dashboard/supports/index.md 
+          - List: dashboard/supports/list.md
+          - Create: dashboard/supports/create.md
+      - Profile:
+          - dashboard/profile/index.md  
+          - View: dashboard/profile/view.md
+          - Edit: dashboard/profile/edit.md
+  - Products:
+      - products/index.md 
+      - GeoNode:
+          - products/geonode/index.md
+          - Introduction: products/geonode/introduction.md
+          - Guide: products/geonode/guide.md
+      - G3W:
+          - products/g3w/index.md
+          - Introduction: products/g3w/introduction.md
+          - Guide: products/g3w/guide.md
+      - BIMS:
+          - products/bims/index.md
+          - Introduction: products/bims/introduction.md
+          - Guide: products/bims/guide.md
+      - GeoServer:
+          - products/geoserver/index.md
+          - Introduction: products/geoserver/introduction.md
+          - Guide: products/geoserver/guide.md
+      - GeoSight:
+          - products/geosight/index.md
+          - Introduction: products/geosight/introduction.md
+          - Guide: products/geosight/guide.md
+  - Developer Guide:
+      - developer/index.md
+      - GeoHosting: developer/geo_hosting.md
+      - GeoNode: developer/geonode.md
+      - G3W: developer/g3w.md
+      - BIMS: developer/bims.md
+      - GeoServer: developer/geoserver.md
+      - GeoSight: developer/geosight.md

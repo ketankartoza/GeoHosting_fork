@@ -11,4 +11,8 @@ license: This program is free software; you can redistribute it and/or modify it
 context_id: nDU6LLGiXPTLADXY
 ---
 
-# Index
+# Orders
+
+[![Order](./img/orders-img-1.png)](./img/orders-img-1.png)
+
+1. **Orders:** Users can click on this `Orders` tab from the left navigation bar to view all their orders.

@@ -11,4 +11,8 @@ license: This program is free software; you can redistribute it and/or modify it
 context_id: nDU6LLGiXPTLADXY
 ---
 
-# Index
+# Hosted Services
+
+[![Hosted Services](./img/hosted-services-img-1.png)](./img/hosted-services-img-1.png)
+
+1. **Hosted Services:** Users can access this section by clicking on the `Hosted Services` tab in the left navigation bar.

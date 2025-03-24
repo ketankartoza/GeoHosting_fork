@@ -11,4 +11,10 @@ license: This program is free software; you can redistribute it and/or modify it
 context_id: nDU6LLGiXPTLADXY
 ---
 
-# Index
+# Support 
+
+[![Support](./img/support-img-1.png)](./img/support-img-1.png)
+
+* **[List](./list.md):** Users can use this as a walkthrough on how to access the support page data list.
+
+* **[Create](./create.md):** Users can use this as a walkthrough on how to create issue.
